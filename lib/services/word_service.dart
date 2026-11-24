@@ -180,42 +180,75 @@ class WordService {
     return WordValidationResult.valid;
   }
 
-  String findLongestWord(List<String> availableLetters) {
-    int jokerCount = availableLetters.where((l) => l == 'JOKER').length;
-    List<String> baseLetters = availableLetters
-        .where((l) => l != 'JOKER')
-        .map((e) => _toTrUpperCase(e))
-        .toList();
+  String findLongestWord(List<String> availableLetters) =>
+      _findLongestWordIn(_wordsByLength, availableLetters);
 
-    int maxLen = availableLetters.length;
+  /// [findLongestWord] ile aynı algoritma; arama ana thread'i bloklamasın diye
+  /// isolate'te çalışır.
+  Future<String> findLongestWordAsync(List<String> availableLetters) {
+    return compute(
+      _findLongestWordIsolate,
+      _LongestWordRequest(_wordsByLength, List<String>.from(availableLetters)),
+    );
+  }
+}
 
-    for (int len = maxLen; len >= 2; len--) {
-      final List<String>? bucket = _wordsByLength[len];
-      if (bucket == null || bucket.isEmpty) continue;
+class _LongestWordRequest {
+  const _LongestWordRequest(this.wordsByLength, this.letters);
+  final Map<int, List<String>> wordsByLength;
+  final List<String> letters;
+}
 
-      for (final String word in bucket) {
-        List<String> temp = List.from(baseLetters);
-        int jCount = jokerCount;
-        bool possible = true;
+String _findLongestWordIsolate(_LongestWordRequest request) =>
+    _findLongestWordIn(request.wordsByLength, request.letters);
 
-        for (int i = 0; i < word.length; i++) {
-          String char = word[i];
-          if (temp.contains(char)) {
-            temp.remove(char);
-          } else if (jCount > 0) {
-            jCount--;
-          } else {
-            possible = false;
-            break;
-          }
-        }
+String _trUpper(String text) {
+  return text
+      .replaceAll('i', 'İ')
+      .replaceAll('ı', 'I')
+      .replaceAll('ç', 'Ç')
+      .replaceAll('ğ', 'Ğ')
+      .replaceAll('ö', 'Ö')
+      .replaceAll('ş', 'Ş')
+      .replaceAll('ü', 'Ü')
+      .toUpperCase();
+}
 
-        if (possible) {
-          return word;
+String _findLongestWordIn(Map<int, List<String>> wordsByLength, List<String> availableLetters) {
+  int jokerCount = availableLetters.where((l) => l == 'JOKER').length;
+  List<String> baseLetters = availableLetters
+      .where((l) => l != 'JOKER')
+      .map((e) => _trUpper(e))
+      .toList();
+
+  int maxLen = availableLetters.length;
+
+  for (int len = maxLen; len >= 2; len--) {
+    final List<String>? bucket = wordsByLength[len];
+    if (bucket == null || bucket.isEmpty) continue;
+
+    for (final String word in bucket) {
+      List<String> temp = List.from(baseLetters);
+      int jCount = jokerCount;
+      bool possible = true;
+
+      for (int i = 0; i < word.length; i++) {
+        String char = word[i];
+        if (temp.contains(char)) {
+          temp.remove(char);
+        } else if (jCount > 0) {
+          jCount--;
+        } else {
+          possible = false;
+          break;
         }
       }
-    }
 
-    return '';
+      if (possible) {
+        return word;
+      }
+    }
   }
+
+  return '';
 }

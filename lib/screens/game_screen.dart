@@ -90,6 +90,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   bool _isJokerDialogOpen = false;
   bool _isGameOver = false;
   bool _isSubmittingAnswer = false;
+  bool _isResolvingSolution = false;
+  Future<List<String>>? _mathStepsFuture;
 
   @override
   void initState() {
@@ -254,6 +256,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         originalNumbers = List<int>.from(puzzle.numbers);
         currentNumbers = List<int>.from(puzzle.numbers);
         targetNumber = puzzle.target;
+        // Çözüm adımları arka planda (isolate) önceden hesaplanır.
+        _mathStepsFuture = NumberSolverService.instance.solveStepsAsync(originalNumbers, targetNumber);
       }
     });
   }
@@ -466,39 +470,48 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     }
   }
 
-  List<String> _calculateRealMathSteps() {
-    return NumberSolverService.instance.solveSteps(originalNumbers, targetNumber);
+  Future<List<String>> _calculateRealMathSteps() {
+    return _mathStepsFuture ??=
+        NumberSolverService.instance.solveStepsAsync(originalNumbers, targetNumber);
   }
 
-  String _calculateRealLongestWord() {
-    String best = WordService.instance.findLongestWord(availableLetters);
+  Future<String> _calculateRealLongestWord() async {
+    String best = await WordService.instance.findLongestWordAsync(availableLetters);
     return best.isEmpty ? "SÖZLÜKTE KELİME BULUNAMADI" : best;
   }
 
-  void _recordCurrentSolution() {
+  Future<void> _recordCurrentSolution() async {
     if (currentRoundType == 'word') {
+      final letters = availableLetters.where((l) => l != 'JOKER').join(', ');
       missedSolutions.add({
         'type': 'word',
-        'letters': availableLetters.where((l) => l != 'JOKER').join(', '),
-        'bestWord': _calculateRealLongestWord(),
+        'letters': letters,
+        'bestWord': await _calculateRealLongestWord(),
       });
     } else {
+      final target = targetNumber;
       missedSolutions.add({
         'type': 'math',
-        'target': targetNumber,
-        'mathSteps': _calculateRealMathSteps(),
+        'target': target,
+        'mathSteps': await _calculateRealMathSteps(),
       });
     }
   }
 
-  void _passQuestion() {
-    if (_isSubmittingAnswer || _isPausedForAnimation || _isPausedForDialog || _isGameOver) return;
+  Future<void> _passQuestion() async {
+    if (_isSubmittingAnswer || _isResolvingSolution || _isPausedForAnimation || _isPausedForDialog || _isGameOver) return;
     if (widget.isTimed && remainingSeconds <= 0) return;
 
     AudioService.instance.playClick();
 
     int penalty = widget.subMode == 'mix' ? 10 : 5;
-    _recordCurrentSolution();
+    _isResolvingSolution = true;
+    try {
+      await _recordCurrentSolution();
+    } finally {
+      _isResolvingSolution = false;
+    }
+    if (!mounted || _isGameOver) return;
 
     if (currentRoundType == 'word') {
       wordPasses++;
@@ -522,14 +535,22 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     _nextTurn();
   }
 
-  void _showTimelessSolution() {
-    if (_isSubmittingAnswer || _isPausedForAnimation || _isPausedForDialog || _isGameOver) return;
+  Future<void> _showTimelessSolution() async {
+    if (_isSubmittingAnswer || _isResolvingSolution || _isPausedForAnimation || _isPausedForDialog || _isGameOver) return;
     AudioService.instance.playClick();
 
     bool isWord = currentRoundType == 'word';
     String title = isWord ? 'Olası En Uzun Kelime' : 'Adım Adım Tam Çözüm';
-    final String bestWord = isWord ? _calculateRealLongestWord() : '';
-    final List<String> mathSteps = isWord ? const [] : _calculateRealMathSteps();
+    _isResolvingSolution = true;
+    final String bestWord;
+    final List<String> mathSteps;
+    try {
+      bestWord = isWord ? await _calculateRealLongestWord() : '';
+      mathSteps = isWord ? const [] : await _calculateRealMathSteps();
+    } finally {
+      _isResolvingSolution = false;
+    }
+    if (!mounted || _isGameOver) return;
 
     showDialog(
       context: context,
@@ -625,7 +646,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     _pulseController.reset();
 
     if (!alreadyRecordedCurrentSolution) {
-      _recordCurrentSolution();
+      await _recordCurrentSolution();
     }
 
     if (_isJokerDialogOpen && mounted) {

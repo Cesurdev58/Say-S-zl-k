@@ -119,6 +119,12 @@ void main() {
     test('çözüm yoksa boş string döner', () {
       expect(service.findLongestWord(['X']), '');
     });
+
+    test('findLongestWordAsync (isolate) senkron sonuçla birebir aynıdır', () async {
+      final letters = ['K', 'A', 'L', 'E', 'M', 'T', 'R', 'JOKER'];
+      expect(await service.findLongestWordAsync(letters), service.findLongestWord(letters));
+      expect(await service.findLongestWordAsync(['X']), '');
+    });
   });
 
   group('WordValidationResult', () {

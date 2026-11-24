@@ -51,6 +51,12 @@ void main() {
     expect(solver.solveSteps([100, 5], 105), ['100 + 5 = 105']);
   });
 
+  test('solveStepsAsync (isolate) senkron sonuçla birebir aynıdır', () async {
+    expect(await solver.solveStepsAsync([75, 6, 4, 3, 2, 8], 487),
+        solver.solveSteps([75, 6, 4, 3, 2, 8], 487));
+    expect(await solver.solveStepsAsync([100, 5], 100), ['Çözüm bulunamadı']);
+  });
+
   test('havuz bulmacalarının hepsi çözülebilir', () {
     const pool = [
       (487, [75, 6, 4, 3, 2, 8]),

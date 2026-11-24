@@ -34,6 +34,8 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
   bool isPrivate = false;
   bool isGameOver = false;
   bool _isSubmittingAnswer = false;
+  bool _isResolvingSolution = false;
+  Future<List<String>>? _mathStepsFuture;
   int searchEndTime = 0;
   String? currentRoomCode;
 
@@ -355,14 +357,14 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
     });
   }
 
-  void _triggerLocalGameOver() {
+  Future<void> _triggerLocalGameOver() async {
     if (isGameOver) return;
     isGameOver = true;
     gameTimer?.cancel();
     _pulseController.stop();
 
     if (currentRoundType != 'done') {
-      _recordCurrentSolution();
+      await _recordCurrentSolution();
     }
 
     if (_isDialogShowing && mounted) {
@@ -460,6 +462,8 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
         targetNumber = q['target'];
         originalNumbers = List<int>.from(q['numbers']);
         currentNumbers = List<int>.from(originalNumbers);
+        // Çözüm adımları arka planda (isolate) önceden hesaplanır.
+        _mathStepsFuture = NumberSolverService.instance.solveStepsAsync(originalNumbers, targetNumber);
       }
     });
   }
@@ -470,35 +474,44 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
     _loadCurrentQuestion();
   }
 
-  List<String> _calculateRealMathSteps() {
-    return NumberSolverService.instance.solveSteps(originalNumbers, targetNumber);
+  Future<List<String>> _calculateRealMathSteps() {
+    return _mathStepsFuture ??=
+        NumberSolverService.instance.solveStepsAsync(originalNumbers, targetNumber);
   }
 
-  String _calculateRealLongestWord() {
-    String b = WordService.instance.findLongestWord(availableLetters);
+  Future<String> _calculateRealLongestWord() async {
+    String b = await WordService.instance.findLongestWordAsync(availableLetters);
     return b.isEmpty ? "BULUNAMADI" : b;
   }
 
-  void _recordCurrentSolution() {
+  Future<void> _recordCurrentSolution() async {
     if (currentRoundType == 'word') {
+      final letters = availableLetters.where((l) => l != 'JOKER').join(', ');
       missedSolutions.add({
         'type': 'word',
-        'letters': availableLetters.where((l) => l != 'JOKER').join(', '),
-        'bestWord': _calculateRealLongestWord(),
+        'letters': letters,
+        'bestWord': await _calculateRealLongestWord(),
       });
     } else if (currentRoundType == 'math') {
+      final target = targetNumber;
       missedSolutions.add({
         'type': 'math',
-        'target': targetNumber,
-        'mathSteps': _calculateRealMathSteps(),
+        'target': target,
+        'mathSteps': await _calculateRealMathSteps(),
       });
     }
   }
 
-  void _passQuestion() {
-    if (_isSubmittingAnswer || isGameOver || remainingSeconds <= 0 || remainingPasses <= 0) return;
+  Future<void> _passQuestion() async {
+    if (_isSubmittingAnswer || _isResolvingSolution || isGameOver || remainingSeconds <= 0 || remainingPasses <= 0) return;
     AudioService.instance.playClick();
-    _recordCurrentSolution();
+    _isResolvingSolution = true;
+    try {
+      await _recordCurrentSolution();
+    } finally {
+      _isResolvingSolution = false;
+    }
+    if (!mounted || isGameOver) return;
     setState(() => remainingPasses--);
     _nextQuestion();
   }
