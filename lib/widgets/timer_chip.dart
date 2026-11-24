@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
+import '../theme/app_theme.dart';
 import '../theme/app_colors.dart';
 
 /// Kalan süreyi gösteren rozet. Yalnızca kendisi yeniden çizilir; ekranın
@@ -40,11 +42,7 @@ class TimerChip extends StatelessWidget {
           ),
           child: Text(
             '${value}s',
-            style: TextStyle(
-              color: warn ? Colors.redAccent : Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: fontSize,
-            ),
+            style: AppText.counter(color: warn ? Colors.redAccent : Colors.white, fontSize: fontSize),
           ),
         );
       },

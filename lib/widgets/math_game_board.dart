@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
+import 'ui/game_tile.dart';
 
 class MathGameBoard extends StatelessWidget {
   final int targetNumber;
@@ -27,15 +29,21 @@ class MathGameBoard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          width: double.infinity, padding: const EdgeInsets.symmetric(vertical: 14),
-          decoration: BoxDecoration(color: AppColors.primaryDeep, borderRadius: BorderRadius.circular(18)),
-          child: Column(
-            children: [
-              Text('HEDEF SAYI', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
-              const SizedBox(height: 2),
-              Text('$targetNumber', style: const TextStyle(color: Colors.white, fontSize: 34, fontWeight: FontWeight.w900)),
-            ],
+        SizedBox(
+          width: double.infinity,
+          child: GameTile(
+            color: context.gameColors.target,
+            radius: AppRadius.lg,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              child: Column(
+                children: [
+                  Text('HEDEF SAYI', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                  const SizedBox(height: 2),
+                  Text('$targetNumber', style: AppText.counter(fontSize: 34, fontWeight: FontWeight.w900)),
+                ],
+              ),
+            ),
           ),
         ),
         const SizedBox(height: 14),
@@ -62,15 +70,11 @@ class MathGameBoard extends StatelessWidget {
             bool isSelected = firstNumIndex == index;
             return GestureDetector(
               onTap: isPaused ? null : () => onNumberTap(index, num),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
+              child: GameTile(
                 width: 52, height: 52,
-                decoration: BoxDecoration(
-                  color: isSelected ? AppColors.joker : AppColors.surfaceHigh,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: isSelected ? AppColors.joker : Colors.white12),
-                ),
-                child: Center(child: Text('$num', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold))),
+                color: isSelected ? context.gameColors.joker : context.gameColors.surfaceRaised,
+                borderColor: isSelected ? context.gameColors.joker : Colors.white12,
+                child: Text('$num', style: AppText.counter(fontSize: 18)),
               ),
             );
           }),
@@ -87,10 +91,11 @@ class MathGameBoard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 child: Opacity(
                   opacity: firstNumIndex == null ? 0.4 : 1.0,
-                  child: Container(
+                  child: GameTile(
                     width: 46, height: 46,
-                    decoration: BoxDecoration(color: isSelected ? AppColors.joker : AppColors.primaryDeep, borderRadius: BorderRadius.circular(12)),
-                    child: Center(child: Text(op == '*' ? '×' : (op == '/' ? '÷' : op), style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold))),
+                    radius: AppRadius.md - 2,
+                    color: isSelected ? context.gameColors.joker : context.gameColors.primaryDeep,
+                    child: Text(op == '*' ? '×' : (op == '/' ? '÷' : op), style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
                   ),
                 ),
               ),

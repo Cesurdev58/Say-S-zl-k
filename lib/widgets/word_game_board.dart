@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
+import 'ui/game_card.dart';
+import 'ui/game_tile.dart';
 
 class WordGameBoard extends StatelessWidget {
   final List<String> availableLetters;
@@ -23,28 +26,26 @@ class WordGameBoard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          constraints: const BoxConstraints(minHeight: 58),
+        GameCard(
+          borderColor: AppColors.primaryDeep.withValues(alpha: 0.4),
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: AppColors.primaryDeep.withValues(alpha: 0.4)),
-          ),
-          child: Row(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 42, minWidth: double.infinity),
+            child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: selectedLetters.isEmpty
                 ? [Text('Harflere Dokunarak Kelime Oluştur', style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 12))]
-                : selectedLetters.map((char) => Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 3),
-                      width: 36, height: 42,
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryDeep, 
-                        borderRadius: BorderRadius.circular(10), 
-                        border: Border.all(color: AppColors.primaryBright)
+                : selectedLetters.map((char) => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 3),
+                      child: GameTile(
+                        width: 36, height: 42,
+                        radius: AppRadius.sm,
+                        color: AppColors.primaryDeep,
+                        borderColor: AppColors.primaryBright,
+                        child: Text(char, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                       ),
-                      child: Center(child: Text(char, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold))),
                     )).toList(),
+            ),
           ),
         ),
         const SizedBox(height: 24),
@@ -68,13 +69,11 @@ class WordGameBoard extends StatelessWidget {
                 }
               },
               borderRadius: BorderRadius.circular(16),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                decoration: BoxDecoration(
-                  color: isUsed ? AppColors.surface.withValues(alpha: 0.4) : (char == 'JOKER' ? AppColors.joker : AppColors.primaryDeep),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Center(child: Text(char, style: TextStyle(color: isUsed ? Colors.white24 : Colors.white, fontSize: char == 'JOKER' ? 11 : 20, fontWeight: FontWeight.bold))),
+              child: GameTile(
+                radius: AppRadius.md + 2,
+                flat: isUsed,
+                color: isUsed ? AppColors.surface.withValues(alpha: 0.4) : (char == 'JOKER' ? AppColors.joker : AppColors.primaryDeep),
+                child: Text(char, style: TextStyle(color: isUsed ? Colors.white24 : Colors.white, fontSize: char == 'JOKER' ? 11 : 20, fontWeight: FontWeight.bold)),
               ),
             );
           },

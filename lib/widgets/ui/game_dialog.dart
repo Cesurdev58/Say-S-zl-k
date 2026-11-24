@@ -96,7 +96,6 @@ Future<bool?> showGameConfirmDialog(
     barrierDismissible: barrierDismissible,
     builder: (dialogContext) => GameDialog(
       title: title,
-      child: Text(message, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70)),
       actions: [
         GameButton(
           label: cancelLabel,
@@ -115,6 +114,7 @@ Future<bool?> showGameConfirmDialog(
           },
         ),
       ],
+      child: Text(message, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70)),
     ),
   );
 }
