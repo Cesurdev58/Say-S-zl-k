@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
+import 'page_transitions.dart';
 
 /// Oyuna özgü anlamsal renkler ve yüzey katmanları.
 @immutable
@@ -199,6 +201,16 @@ abstract final class AppTheme {
       snackBarTheme: const SnackBarThemeData(
         backgroundColor: Color(0xFF323232),
         contentTextStyle: TextStyle(color: Colors.white),
+      ),
+      // iOS'ta geri kaydırma hareketi korunur; diğer platformlarda fade + hafif kayma.
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: FadeSlidePageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.macOS: FadeSlidePageTransitionsBuilder(),
+          TargetPlatform.windows: FadeSlidePageTransitionsBuilder(),
+          TargetPlatform.linux: FadeSlidePageTransitionsBuilder(),
+        },
       ),
       extensions: const [GameColors.dark],
     );

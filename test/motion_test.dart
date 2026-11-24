@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoPageTransition;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -18,6 +19,7 @@ Widget _host(Widget child, {bool reduce = false}) => MaterialApp(
 double _scale(WidgetTester t) => t.widget<AnimatedScale>(find.byType(AnimatedScale)).scale;
 
 void main() {
+  pageTransitionTests();
   group('GameTile basma animasyonu', () {
     testWidgets('basılıyken 0.92, bırakılınca 1.0 ve onTap çalışır', (tester) async {
       int taps = 0;
@@ -151,6 +153,52 @@ void main() {
       await tester.pumpWidget(_host(reduce: true, const CountUpText(value: 487, fromZero: true, style: TextStyle())));
       await tester.pump();
       expect(find.text('487'), findsOneWidget);
+    });
+  });
+}
+
+void pageTransitionTests() {
+  Widget app({required bool reduce, required TargetPlatform platform}) => MaterialApp(
+        theme: AppTheme.dark().copyWith(platform: platform),
+        builder: (context, w) => MediaQuery(data: MediaQuery.of(context).copyWith(disableAnimations: reduce), child: w!),
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: TextButton(
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const Scaffold(body: Text('ikinci')))),
+              child: const Text('git'),
+            ),
+          ),
+        ),
+      );
+
+  group('Sayfa geçişleri', () {
+    testWidgets('Android: fade + kayma uygulanır', (tester) async {
+      await tester.pumpWidget(app(reduce: false, platform: TargetPlatform.android));
+      await tester.tap(find.text('git'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      final fade = tester.widgetList<FadeTransition>(find.descendant(of: find.byType(MaterialApp), matching: find.byType(FadeTransition)));
+      expect(fade.any((f) => f.opacity.value > 0 && f.opacity.value < 1), isTrue);
+      expect(find.byType(SlideTransition), findsWidgets);
+      await tester.pumpAndSettle();
+      expect(find.text('ikinci'), findsOneWidget);
+    });
+
+    testWidgets('hareket azaltma açıkken geçiş efekti yoktur', (tester) async {
+      await tester.pumpWidget(app(reduce: true, platform: TargetPlatform.android));
+      await tester.tap(find.text('git'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+      final fades = tester.widgetList<FadeTransition>(find.descendant(of: find.byType(Navigator), matching: find.byType(FadeTransition)));
+      expect(fades.where((f) => f.opacity.value > 0 && f.opacity.value < 1), isEmpty);
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('iOS: Cupertino geçişi (geri kaydırma) korunur', (tester) async {
+      await tester.pumpWidget(app(reduce: false, platform: TargetPlatform.iOS));
+      await tester.tap(find.text('git'));
+      await tester.pumpAndSettle();
+      expect(find.byType(CupertinoPageTransition), findsOneWidget);
     });
   });
 }

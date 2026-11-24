@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
+import 'ui/motion.dart';
 import '../theme/app_colors.dart';
 
 /// Kalan süreyi gösteren rozet. Yalnızca kendisi yeniden çizilir; ekranın
@@ -33,7 +34,7 @@ class TimerChip extends StatelessWidget {
       builder: (context, value, _) {
         final bool warn = value <= warnAt;
         return AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
+          duration: Motion.of(context, const Duration(milliseconds: 300)),
           padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: verticalPadding),
           decoration: BoxDecoration(
             color: warn ? Colors.redAccent.withValues(alpha: 0.3) : AppColors.surfaceHigh,
