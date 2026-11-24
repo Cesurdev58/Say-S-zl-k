@@ -12,6 +12,7 @@ import '../services/audio_service.dart';
 import '../services/user_service.dart';
 import '../services/ad_service.dart';
 import '../services/match_service.dart';
+import '../widgets/timer_chip.dart';
 import 'private_room_screen.dart';
 import 'matchmaking_screen.dart';
 
@@ -46,7 +47,10 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
 
   bool _settingsLoaded = false;
   String matchMode = 'mix';
-  int remainingSeconds = 120;
+  // Kalan süre ValueNotifier'da tutulur; saniyelik tikler tüm ekranı rebuild etmez.
+  final ValueNotifier<int> _remainingNotifier = ValueNotifier<int>(120);
+  int get remainingSeconds => _remainingNotifier.value;
+  set remainingSeconds(int v) => _remainingNotifier.value = v;
   int remainingPasses = 3;
 
   Timer? gameTimer;
@@ -421,12 +425,10 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
       }
 
       if (mounted && !isGameOver) {
-        setState(() {
-          remainingSeconds = rem;
-          if (remainingSeconds <= 10 && !_pulseController.isAnimating) {
-            _pulseController.repeat(reverse: true);
-          }
-        });
+        remainingSeconds = rem;
+        if (remainingSeconds <= 10 && !_pulseController.isAnimating) {
+          _pulseController.repeat(reverse: true);
+        }
       }
     });
   }
@@ -994,6 +996,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
     _emojiTimer?.cancel();
     _confettiController.dispose();
     _pulseController.dispose();
+    _remainingNotifier.dispose();
     super.dispose();
   }
 
@@ -1165,15 +1168,14 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
             icon: const Icon(Icons.chat_bubble_rounded, color: Color(0xFF00CEC9)),
             onPressed: _showChatPanel,
           ),
-          AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              decoration: BoxDecoration(
-                  color: remainingSeconds <= 10 ? Colors.redAccent.withValues(alpha: 0.3) : const Color(0xFF232042),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: remainingSeconds <= 10 ? Colors.redAccent : const Color(0xFF7C5CFC))),
-              child: Text('${remainingSeconds}s',
-                  style: TextStyle(color: remainingSeconds <= 10 ? Colors.redAccent : Colors.white, fontWeight: FontWeight.bold, fontSize: 16))),
+          TimerChip(
+            seconds: _remainingNotifier,
+            warnAt: 10,
+            horizontalPadding: 16,
+            verticalPadding: 6,
+            borderRadius: 14,
+            fontSize: 16,
+          ),
         ],
       ),
     );

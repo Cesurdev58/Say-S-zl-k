@@ -10,6 +10,7 @@ import '../services/number_solver_service.dart';
 import '../services/user_service.dart';
 import '../services/audio_service.dart';
 import '../widgets/game_over_dialog.dart';
+import '../widgets/timer_chip.dart';
 import '../widgets/word_game_board.dart';
 import '../widgets/math_game_board.dart';
 
@@ -32,7 +33,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   int score = 0;
   int wordScore = 0;
   int mathScore = 0;
-  late int remainingSeconds;
+  // Kalan süre ValueNotifier'da tutulur; saniyelik tikler tüm ekranı rebuild etmez.
+  final ValueNotifier<int> _remainingNotifier = ValueNotifier<int>(0);
+  int get remainingSeconds => _remainingNotifier.value;
+  set remainingSeconds(int v) => _remainingNotifier.value = v;
   Timer? gameTimer;
 
   String? scoreDeltaText;
@@ -129,6 +133,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     gameTimer?.cancel();
     _confettiController.dispose();
     _pulseController.dispose();
+    _remainingNotifier.dispose();
     super.dispose();
   }
 
@@ -214,14 +219,13 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       if (_isPausedForDialog || _isGameOver) return;
 
       if (remainingSeconds > 1) {
-        setState(() {
-          remainingSeconds--;
-          if (remainingSeconds <= 5 && !_pulseController.isAnimating) {
-            _pulseController.repeat(reverse: true);
-          } else if (remainingSeconds > 5 && _pulseController.isAnimating) {
-            _pulseController.reset();
-          }
-        });
+        // Yalnızca ValueNotifier güncellenir; setState yok (tüm ekran yeniden çizilmez).
+        remainingSeconds--;
+        if (remainingSeconds <= 5 && !_pulseController.isAnimating) {
+          _pulseController.repeat(reverse: true);
+        } else if (remainingSeconds > 5 && _pulseController.isAnimating) {
+          _pulseController.reset();
+        }
       } else {
         setState(() {
           remainingSeconds = 0;
@@ -949,23 +953,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               if (widget.isTimed)
                 Padding(
                   padding: const EdgeInsets.only(left: 4),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: remainingSeconds <= 5 ? Colors.redAccent.withValues(alpha: 0.3) : const Color(0xFF232042),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: remainingSeconds <= 5 ? Colors.redAccent : const Color(0xFF7C5CFC)),
-                    ),
-                    child: Text(
-                      '${remainingSeconds}s',
-                      style: TextStyle(
-                        color: remainingSeconds <= 5 ? Colors.redAccent : Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
+                  child: TimerChip(seconds: _remainingNotifier, warnAt: 5),
                 ),
             ],
           ),
