@@ -106,9 +106,9 @@ class _HomeScreenState extends State<HomeScreen> {
               Expanded(
                 child: Container(
                   padding: const EdgeInsets.all(16),
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: const Text(
+                  child: const SingleChildScrollView(
+                    physics: BouncingScrollPhysics(),
+                    child: Text(
                       'SayıSözlük oyununa hoş geldiniz!\n\n'
                       'Bu uygulama, Türkiye Cumhuriyeti Kişisel Verilerin Korunması Kanunu (KVKK) '
                       've uluslararası standartlara uygun olarak tasarlanmıştır.\n\n'
@@ -158,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         onPressed: () async {
                           AudioService.instance.playClick();
                           await SecureStorageService.instance.writeData('privacyAccepted', 'true');
-                          if (mounted) Navigator.pop(context);
+                          if (context.mounted) Navigator.pop(context);
                         },
                         child: const Text('Kabul Ediyorum', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                       ),

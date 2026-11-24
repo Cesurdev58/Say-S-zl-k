@@ -162,8 +162,8 @@ class _GameOverDialogState extends State<GameOverDialog> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: const [
+          const Row(
+            children: [
               Icon(Icons.spellcheck_rounded, color: AppColors.accent, size: 16),
               SizedBox(width: 6),
               Text('Olası En Uzun Kelime:', style: TextStyle(color: AppColors.joker, fontWeight: FontWeight.bold, fontSize: 13)),

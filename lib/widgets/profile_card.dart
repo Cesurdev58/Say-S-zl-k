@@ -71,7 +71,7 @@ class _ProfileCardState extends State<ProfileCard> {
                           onTap: () async {
                             await UserService.instance.updateAvatar(avatarId);
                             if (widget.onProfileUpdated != null) widget.onProfileUpdated!(); 
-                            Navigator.pop(context);
+                            if (context.mounted) Navigator.pop(context);
                           },
                           child: Container(
                             decoration: BoxDecoration(
@@ -115,7 +115,7 @@ class _ProfileCardState extends State<ProfileCard> {
                               onTap: () async {
                                 await UserService.instance.setBorder('none');
                                 if (widget.onProfileUpdated != null) widget.onProfileUpdated!(); 
-                                Navigator.pop(context);
+                                if (context.mounted) Navigator.pop(context);
                               },
                               child: Container(
                                 decoration: BoxDecoration(
@@ -135,7 +135,7 @@ class _ProfileCardState extends State<ProfileCard> {
                             onTap: () async {
                               await UserService.instance.setBorder(borderId);
                               if (widget.onProfileUpdated != null) widget.onProfileUpdated!(); 
-                              Navigator.pop(context);
+                              if (context.mounted) Navigator.pop(context);
                             },
                             child: Container(
                               decoration: BoxDecoration(

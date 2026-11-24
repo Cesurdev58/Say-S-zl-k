@@ -70,7 +70,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
   Map<String, dynamic> _players = {};
 
   Set<String> _friendUids = {};
-  Set<String> _pendingRequestUids = {};
+  final Set<String> _pendingRequestUids = {};
 
   bool _settingsLoaded = false;
   String matchMode = 'mix';
@@ -626,7 +626,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                               matchMode,
                               _players,
                             );
-                            if (mounted) {
+                            if (mounted && context.mounted) {
                               Navigator.pop(context);
                               Navigator.pop(context);
                               Navigator.push(

@@ -83,7 +83,9 @@ class _AuthScreenState extends State<AuthScreen> {
             widget.onProfileUpdated();
           }
         }
-      } catch (e) {}
+      } catch (e) {
+        // Yoklama hatası yok sayılır; bir sonraki turda tekrar denenir.
+      }
     });
   }
 
@@ -157,7 +159,9 @@ class _AuthScreenState extends State<AuthScreen> {
                     setState(() => _isLoading = true);
                     try {
                       await FirebaseAuth.instance.currentUser?.reload();
-                    } catch (e) {}
+                    } catch (e) {
+                      // reload başarısız olsa da mevcut kullanıcı bilgisiyle devam edilir.
+                    }
                     final user = FirebaseAuth.instance.currentUser;
 
                     if (user != null && user.emailVerified) {

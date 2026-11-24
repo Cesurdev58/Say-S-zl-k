@@ -510,7 +510,7 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
             icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
             onPressed: () async {
               if (await _onWillPop()) {
-                if (mounted) Navigator.pop(context);
+                if (context.mounted) Navigator.pop(context);
               }
             },
           ),

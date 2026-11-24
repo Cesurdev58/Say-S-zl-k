@@ -551,9 +551,9 @@ class _StoreScreenState extends State<StoreScreen> {
             Text(title, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             if (isEquipped)
-              const Text('Kuşanıldı', style: const TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold))
+              const Text('Kuşanıldı', style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold))
             else if (isOwned)
-              const Text('Sahipsin', style: const TextStyle(color: Colors.white54, fontWeight: FontWeight.bold))
+              const Text('Sahipsin', style: TextStyle(color: Colors.white54, fontWeight: FontWeight.bold))
             else
               Row(
                 mainAxisAlignment: isHorizontal ? MainAxisAlignment.start : MainAxisAlignment.center,

@@ -21,14 +21,14 @@ class AudioService {
     if (_isInitialized) return;
 
     // ARKA PLANDAKİ MÜZİĞİ (Spotify, YouTube vb.) KESMEMESİ İÇİN SES ODAĞI (AUDIO CONTEXT) AYARI
-    final AudioContext audioContext = AudioContext(
+    const AudioContext audioContext = AudioContext(
       iOS: AudioContextIOS(
         category: AVAudioSessionCategory.ambient,
-        options: const [
+        options: [
           AVAudioSessionOptions.mixWithOthers,
         ],
       ),
-      android: const AudioContextAndroid(
+      android: AudioContextAndroid(
         isSpeakerphoneOn: false,
         stayAwake: false,
         contentType: AndroidContentType.sonification,
@@ -71,7 +71,9 @@ class AudioService {
       try {
         if (_clickPlayer.state == PlayerState.playing) await _clickPlayer.stop();
         await _clickPlayer.resume();
-      } catch (e) {}
+      } catch (e) {
+        // Ses çalınamasa da oyun akışı etkilenmez.
+      }
     }
   }
 
@@ -81,7 +83,9 @@ class AudioService {
       try {
         if (_successPlayer.state == PlayerState.playing) await _successPlayer.stop();
         await _successPlayer.resume();
-      } catch (e) {}
+      } catch (e) {
+        // Ses çalınamasa da oyun akışı etkilenmez.
+      }
     }
   }
 
@@ -91,7 +95,9 @@ class AudioService {
       try {
         if (_errorPlayer.state == PlayerState.playing) await _errorPlayer.stop();
         await _errorPlayer.resume();
-      } catch (e) {}
+      } catch (e) {
+        // Ses çalınamasa da oyun akışı etkilenmez.
+      }
     }
   }
 }

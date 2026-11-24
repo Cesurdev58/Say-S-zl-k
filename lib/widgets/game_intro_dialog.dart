@@ -218,8 +218,8 @@ class _GameIntroDialogState extends State<GameIntroDialog> {
           color: AppColors.background,
           borderRadius: BorderRadius.circular(14),
         ),
-        child: Column(
-          children: const [
+        child: const Column(
+          children: [
             _TableRow(left: '1 Harf', right: 'Süre Vermez'),
             SizedBox(height: 6),
             _TableRow(left: '2 - 6 Harf', right: '+Harf Sayısı Süre & Puan'),
@@ -239,8 +239,8 @@ class _GameIntroDialogState extends State<GameIntroDialog> {
           color: AppColors.background,
           borderRadius: BorderRadius.circular(14),
         ),
-        child: Column(
-          children: const [
+        child: const Column(
+          children: [
             _TableRow(left: 'Tam Hedef (Δ=0)', right: '+5s Süre Bonusu'),
             SizedBox(height: 6),
             _TableRow(left: 'Yaklaşım (±1..±10)', right: 'Sadece Puan Kazandırır'),
@@ -260,8 +260,8 @@ class _GameIntroDialogState extends State<GameIntroDialog> {
           color: AppColors.background,
           borderRadius: BorderRadius.circular(14),
         ),
-        child: Column(
-          children: const [
+        child: const Column(
+          children: [
             _TableRow(left: 'Kelime Turu', right: 'Uzun kelimelere 2x Süre Ödülü'),
             SizedBox(height: 6),
             _TableRow(left: 'İşlem Turu', right: 'Tam isabet ve Artan Sayı Bonusu'),

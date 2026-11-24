@@ -227,14 +227,14 @@ class _SettingsSheetState extends State<_SettingsSheet> {
                     try {
                       await UserService.instance.deleteAccount(password: passwordController.text.trim());
                       
-                      if (mounted) {
+                      if (mounted && context.mounted) {
                         Navigator.pop(context); 
                         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Hesabın silindi. Uygulama yeniden başlatılıyor...'), backgroundColor: Colors.green));
                         Navigator.of(context).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
                       }
                     } catch (e) {
                       setDialogState(() => isLoading = false);
-                      if (mounted) {
+                      if (mounted && context.mounted) {
                         String errorMsg = 'Bir hata oluştu.';
                         if (e.toString().contains('wrong-password') || e.toString().contains('invalid-credential')) {
                           errorMsg = 'Hatalı şifre girdiniz.';
@@ -278,9 +278,9 @@ class _SettingsSheetState extends State<_SettingsSheet> {
             Expanded(
               child: Container(
                 padding: const EdgeInsets.all(16),
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  child: const Text(
+                child: const SingleChildScrollView(
+                  physics: BouncingScrollPhysics(),
+                  child: Text(
                     'SayıSözlük oyununa hoş geldiniz!\n\n'
                     'Bu uygulama, Türkiye Cumhuriyeti Kişisel Verilerin Korunması Kanunu (KVKK) '
                     've uluslararası standartlara uygun olarak tasarlanmıştır.\n\n'
@@ -374,9 +374,9 @@ class _SettingsSheetState extends State<_SettingsSheet> {
                         if (!_isEmailVerified) {
                           try {
                             await FirebaseAuth.instance.currentUser?.sendEmailVerification();
-                            if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Doğrulama e-postası gönderildi. Lütfen e-postanızı kontrol edin.'), backgroundColor: Colors.green));
+                            if (mounted && context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Doğrulama e-postası gönderildi. Lütfen e-postanızı kontrol edin.'), backgroundColor: Colors.green));
                           } catch (e) {
-                            if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('E-posta gönderilirken bir hata oluştu.'), backgroundColor: Colors.orange));
+                            if (mounted && context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('E-posta gönderilirken bir hata oluştu.'), backgroundColor: Colors.orange));
                           }
                         } else {
                            if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Hesabınız başarıyla güvence altına alınmış durumda!'), backgroundColor: Colors.green));

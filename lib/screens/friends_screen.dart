@@ -227,8 +227,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
                                   'timestamp': FieldValue.serverTimestamp(),
                                 }, SetOptions(merge: true));
 
+                                if (dialogContext.mounted) Navigator.pop(dialogContext);
                                 if (mounted) {
-                                  Navigator.pop(dialogContext);
                                   ScaffoldMessenger.of(this.context).showSnackBar(
                                     const SnackBar(content: Text('Arkadaşlık isteği gönderildi!'), backgroundColor: Colors.green),
                                   );
