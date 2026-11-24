@@ -48,6 +48,20 @@ flutter:
     - assets/borders/
     - .env
 
+  # Nunito (SIL OFL 1.1; lisans: assets/fonts/OFL.txt) yerel olarak paketlenir,
+  # internet bağlantısı gerekmez.
+  fonts:
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/Nunito-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Nunito-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Nunito-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Nunito-ExtraBold.ttf
+          weight: 800
+
 flutter_launcher_icons:
   android: true
   ios: true
