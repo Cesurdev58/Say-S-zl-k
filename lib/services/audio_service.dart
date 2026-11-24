@@ -55,14 +55,18 @@ class AudioService {
     _isInitialized = true;
   }
 
+  /// Titreşim ayarı (Ayarlar > Titreşim). `Haptics` bu değeri okur.
+  bool get vibrationEnabled => _vibrationEnabled;
+
   // AYAR DEĞİŞİNCE RAM'İ GÜNCELLE
   void updateSettings(bool sound, bool vibration) {
     _soundEnabled = sound;
     _vibrationEnabled = vibration;
   }
 
-  Future<void> playClick() async {
-    if (_vibrationEnabled) HapticFeedback.lightImpact();
+  /// [haptic] false ise yalnızca ses çalar (titreşimi çağıran taraf `Haptics` ile verir).
+  Future<void> playClick({bool haptic = true}) async {
+    if (haptic && _vibrationEnabled) HapticFeedback.lightImpact();
     if (_soundEnabled) {
       try {
         if (_clickPlayer.state == PlayerState.playing) await _clickPlayer.stop();
@@ -71,8 +75,8 @@ class AudioService {
     }
   }
 
-  Future<void> playSuccess() async {
-    if (_vibrationEnabled) HapticFeedback.mediumImpact();
+  Future<void> playSuccess({bool haptic = true}) async {
+    if (haptic && _vibrationEnabled) HapticFeedback.mediumImpact();
     if (_soundEnabled) {
       try {
         if (_successPlayer.state == PlayerState.playing) await _successPlayer.stop();
@@ -81,8 +85,8 @@ class AudioService {
     }
   }
 
-  Future<void> playError() async {
-    if (_vibrationEnabled) HapticFeedback.heavyImpact();
+  Future<void> playError({bool haptic = true}) async {
+    if (haptic && _vibrationEnabled) HapticFeedback.heavyImpact();
     if (_soundEnabled) {
       try {
         if (_errorPlayer.state == PlayerState.playing) await _errorPlayer.stop();
