@@ -1,0 +1,245 @@
+import 'package:flutter/material.dart';
+
+import '../widgets/game_intro_dialog.dart'; // Bilgilendirme ve Geri Sayım Pop-up'ı
+import 'game_screen.dart'; // Oyun Ekranı
+
+class SoloModeSelectScreen extends StatefulWidget {
+  const SoloModeSelectScreen({super.key});
+
+  @override
+  State<SoloModeSelectScreen> createState() => _SoloModeSelectScreenState();
+}
+
+class _SoloModeSelectScreenState extends State<SoloModeSelectScreen> {
+  // Seçilen Ana Mod: true -> Zamana Karşı, false -> Sonsuz Macera
+  bool isTimedMode = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF131127),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Solo Mod Seçimi',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
+        ),
+        centerTitle: true,
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Oyun Tarzını Seç',
+                style: TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildMainModeCard(
+                      title: 'Zamana Karşı',
+                      subtitle: 'Arcade & Hızlı',
+                      icon: Icons.timer_outlined,
+                      isSelected: isTimedMode,
+                      onTap: () => setState(() => isTimedMode = true),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildMainModeCard(
+                      title: 'Sonsuz Macera',
+                      subtitle: 'Stressiz & Serbest',
+                      icon: Icons.all_inclusive_rounded,
+                      isSelected: !isTimedMode,
+                      onTap: () => setState(() => isTimedMode = false),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 28),
+
+              Text(
+                isTimedMode ? '⏳ Zamana Karşı Kategorini Seç' : '♾️ Sonsuz Macera Kategorini Seç',
+                style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    bool isTablet = constraints.maxWidth > 600;
+
+                    if (isTablet) {
+                      return GridView.count(
+                        crossAxisCount: 2,
+                        childAspectRatio: 2.2,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        physics: const BouncingScrollPhysics(),
+                        children: [
+                          _buildSubModeCard(
+                            title: 'Bir Kelime',
+                            description: isTimedMode
+                                ? 'Harflerle kelime türet, doğru kelimelerle ek saniye kazan ve serini sürdür!'
+                                : 'Süre kısıtı olmadan en uzun Türkçe kelimeleri türet.',
+                            icon: Icons.text_fields_rounded,
+                            iconBgColor: const Color(0xFF6C5CE7),
+                            onTap: () => _navigateToGame(context, subMode: 'word'),
+                          ),
+                          _buildSubModeCard(
+                            title: 'Bir İşlem',
+                            description: isTimedMode
+                                ? 'Hedefi tam bul (+5s) ve artan sayılarla dev süre bonusu kap!'
+                                : 'Rastgele sayılarla işlem yap, pratik matematik zekanı geliştir.',
+                            icon: Icons.calculate_outlined,
+                            iconBgColor: const Color(0xFF00CEC9),
+                            onTap: () => _navigateToGame(context, subMode: 'math'),
+                          ),
+                          _buildSubModeCard(
+                            title: 'Bir Kelime Bir İşlem',
+                            description: isTimedMode
+                                ? 'Klasik Karma! Doğru cevaplarla süreni uzat ve 40 saniyeyle sınırları zorla.'
+                                : 'Hem sözel hem sayısal turlarla kesintisiz antrenman yap.',
+                            icon: Icons.sports_esports_outlined,
+                            iconBgColor: const Color(0xFFFD79A8),
+                            onTap: () => _navigateToGame(context, subMode: 'mix'),
+                          ),
+                        ],
+                      );
+                    } else {
+                      return ListView(
+                        physics: const BouncingScrollPhysics(),
+                        children: [
+                          _buildSubModeCard(
+                            title: 'Bir Kelime',
+                            description: isTimedMode
+                                ? 'Harflerle kelime türet, doğru kelimelerle ek saniye kazan ve serini sürdür!'
+                                : 'Süre kısıtı olmadan en uzun Türkçe kelimeleri türet.',
+                            icon: Icons.text_fields_rounded,
+                            iconBgColor: const Color(0xFF6C5CE7),
+                            onTap: () => _navigateToGame(context, subMode: 'word'),
+                          ),
+                          const SizedBox(height: 12),
+                          _buildSubModeCard(
+                            title: 'Bir İşlem',
+                            description: isTimedMode
+                                ? 'Hedefi tam bul (+5s) ve artan sayılarla dev süre bonusu kap!'
+                                : 'Rastgele sayılarla işlem yap, pratik matematik zekanı geliştir.',
+                            icon: Icons.calculate_outlined,
+                            iconBgColor: const Color(0xFF00CEC9),
+                            onTap: () => _navigateToGame(context, subMode: 'math'),
+                          ),
+                          const SizedBox(height: 12),
+                          _buildSubModeCard(
+                            title: 'Bir Kelime Bir İşlem',
+                            description: isTimedMode
+                                ? 'Klasik Karma! Doğru cevaplarla süreni uzat ve 40 saniyeyle sınırları zorla.'
+                                : 'Hem sözel hem sayısal turlarla kesintisiz antrenman yap.',
+                            icon: Icons.sports_esports_outlined,
+                            iconBgColor: const Color(0xFFFD79A8),
+                            onTap: () => _navigateToGame(context, subMode: 'mix'),
+                          ),
+                        ],
+                      );
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMainModeCard({required String title, required String subtitle, required IconData icon, required bool isSelected, required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF5A4FCF) : const Color(0xFF232042),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: isSelected ? const Color(0xFF8C7CFF) : Colors.transparent, width: 2),
+          boxShadow: isSelected ? [BoxShadow(color: const Color(0xFF5A4FCF).withOpacity(0.4), blurRadius: 12, offset: const Offset(0, 4))] : [],
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: Colors.white, size: 28),
+            const SizedBox(height: 8),
+            Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+            const SizedBox(height: 4),
+            Text(subtitle, style: TextStyle(color: isSelected ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.38), fontSize: 11)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSubModeCard({required String title, required String description, required IconData icon, required Color iconBgColor, required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF232042),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withOpacity(0.05), width: 1),
+        ),
+        child: Row(
+          children: [
+            Container(width: 52, height: 52, decoration: BoxDecoration(color: iconBgColor.withOpacity(0.2), borderRadius: BorderRadius.circular(14)), child: Icon(icon, color: iconBgColor, size: 26)),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(title, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Text(description, style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 11, height: 1.3), maxLines: 2, overflow: TextOverflow.ellipsis),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(Icons.arrow_forward_ios_rounded, color: Colors.white.withOpacity(0.3), size: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _navigateToGame(BuildContext context, {required String subMode}) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => GameIntroDialog(
+        isTimed: isTimedMode,
+        subMode: subMode,
+        onStartGame: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => GameScreen(
+                isTimed: isTimedMode,
+                subMode: subMode,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
