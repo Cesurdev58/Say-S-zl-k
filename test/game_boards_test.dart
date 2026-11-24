@@ -54,6 +54,7 @@ void main() {
       onNumberTap: (_, __) {},
       onOperatorTap: ops.add,
     )));
+    await tester.pumpAndSettle();
     expect(find.text('487'), findsOneWidget);
     expect(find.text('75'), findsOneWidget);
     await tester.tap(find.text('×'));
