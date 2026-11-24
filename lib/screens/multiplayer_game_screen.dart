@@ -11,6 +11,7 @@ import '../services/number_solver_service.dart';
 import '../services/audio_service.dart';
 import '../services/user_service.dart';
 import '../services/ad_service.dart';
+import '../services/haptics.dart';
 import '../services/match_service.dart';
 import '../widgets/joker_picker_dialog.dart';
 import '../widgets/match_ranking_list.dart';
@@ -19,10 +20,16 @@ import '../widgets/timer_chip.dart';
 import 'private_room_screen.dart';
 import 'matchmaking_screen.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
 import '../widgets/ui/game_button.dart';
 import '../widgets/ui/game_control_bar.dart';
 import '../widgets/ui/game_dialog.dart';
+import '../widgets/ui/animated_slot.dart';
+import '../widgets/ui/count_up_text.dart';
+import '../widgets/ui/error_shake.dart';
 import '../widgets/ui/game_hud.dart';
+import '../widgets/ui/game_tile.dart';
+import '../widgets/ui/motion.dart';
 
 class MultiplayerGameScreen extends StatefulWidget {
   final String matchId;
@@ -44,6 +51,18 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
   bool isGameOver = false;
   bool _isSubmittingAnswer = false;
   bool _isResolvingSolution = false;
+  // Yanlış kelime / geçersiz işlemde cevap alanını sallamak için artırılır.
+  final ValueNotifier<int> _errorSignal = ValueNotifier<int>(0);
+  int _lastTickSecond = -1;
+
+  void _signalError() {
+    Haptics.error();
+    _errorSignal.value++;
+  }
+
+  void _playConfetti() {
+    if (!Motion.reduced(context)) _confettiController.play();
+  }
   Future<List<String>>? _mathStepsFuture;
   int searchEndTime = 0;
   String? currentRoomCode;
@@ -415,6 +434,10 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
 
       if (mounted && !isGameOver) {
         remainingSeconds = rem;
+        if (rem <= 5 && rem != _lastTickSecond) {
+          _lastTickSecond = rem;
+          Haptics.tick();
+        }
         if (remainingSeconds <= 10 && !_pulseController.isAnimating) {
           _pulseController.repeat(reverse: true);
         }
@@ -720,7 +743,8 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
     if (word.isEmpty) return;
 
     if (word.length == 1) {
-      AudioService.instance.playError();
+      AudioService.instance.playError(haptic: false);
+      _signalError();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('En az 2 harfli bir kelime girmelisiniz!'), backgroundColor: Colors.orange, duration: Duration(seconds: 1)),
       );
@@ -730,15 +754,17 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
     _isSubmittingAnswer = true;
     var result = WordService.instance.validateWord(word, availableLetters);
     if (result == WordValidationResult.valid) {
-      AudioService.instance.playSuccess();
-      _confettiController.play();
+      AudioService.instance.playSuccess(haptic: false);
+      Haptics.success();
+      _playConfetti();
       _showPraiseAnimation();
       int earned = ScoreCalculator.multiWordScore(word.length);
       _updateMyScore(earned);
       _nextQuestion();
     } else {
       _isSubmittingAnswer = false;
-      AudioService.instance.playError();
+      AudioService.instance.playError(haptic: false);
+      _signalError();
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(result.message), backgroundColor: Colors.redAccent, duration: const Duration(seconds: 1)));
     }
@@ -758,14 +784,16 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
     }
     if (minDiff <= 10) {
       _isSubmittingAnswer = true;
-      AudioService.instance.playSuccess();
-      _confettiController.play();
+      AudioService.instance.playSuccess(haptic: false);
+      Haptics.success(exact: minDiff == 0);
+      _playConfetti();
       _showPraiseAnimation();
       int earned = ScoreCalculator.mathScore(minDiff, currentNumbers.length);
       _updateMyScore(earned);
       _nextQuestion();
     } else {
-      AudioService.instance.playError();
+      AudioService.instance.playError(haptic: false);
+      _signalError();
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Hedefe en fazla 10 yaklaşmalısınız!'), backgroundColor: Colors.orange, duration: Duration(seconds: 1)));
     }
@@ -773,7 +801,8 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
 
   void _undoLastAction() {
     if (_isSubmittingAnswer || isGameOver || remainingSeconds <= 0) return;
-    AudioService.instance.playClick();
+    AudioService.instance.playClick(haptic: false);
+    Haptics.selection();
     setState(() {
       if (currentRoundType == 'word') {
         if (selectedLetters.isNotEmpty) {
@@ -804,6 +833,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
       _isDialogShowing = false;
       if (char == null || !mounted) return;
       if (!isGameOver && remainingSeconds > 0) {
+        Haptics.selection();
         setState(() {
           selectedIndices.add(index);
           selectedLetters.add(char);
@@ -814,7 +844,8 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
 
   void _onNumberTap(int index, int num) {
     if (_isSubmittingAnswer || isGameOver || remainingSeconds <= 0) return;
-    AudioService.instance.playClick();
+    AudioService.instance.playClick(haptic: false);
+    Haptics.selection();
     if (firstNumIndex == null) {
       setState(() {
         firstNumIndex = index;
@@ -829,6 +860,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
         if (firstNumValue! - secondNum > 0) {
           result = firstNumValue! - secondNum;
         } else {
+          _signalError();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Çıkarma sonucu pozitif bir tam sayı olmalıdır!'),
@@ -843,6 +875,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
         if (secondNum > 0 && firstNumValue! % secondNum == 0) {
           result = firstNumValue! ~/ secondNum;
         } else {
+          _signalError();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Bölme işlemi kalansız olmalıdır!'),
@@ -889,6 +922,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
     _confettiController.dispose();
     _pulseController.dispose();
     _remainingNotifier.dispose();
+    _errorSignal.dispose();
     super.dispose();
   }
 
@@ -971,22 +1005,24 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
             bottom: _praiseBottom,
             left: 0,
             right: 0,
-            child: IgnorePointer(
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 400),
-                opacity: _praiseOpacity,
-                child: Text(
-                  _praiseText,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      color: Colors.amber,
-                      fontSize: 48,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 2,
-                      shadows: [
-                        Shadow(color: AppColors.primary, blurRadius: 20, offset: Offset(0, 0)),
-                        Shadow(color: Colors.black, blurRadius: 10, offset: Offset(2, 2))
-                      ]),
+            child: RepaintBoundary(
+              child: IgnorePointer(
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 400),
+                  opacity: _praiseOpacity,
+                  child: Text(
+                    _praiseText,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        color: Colors.amber,
+                        fontSize: 48,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 2,
+                        shadows: [
+                          Shadow(color: AppColors.primary, blurRadius: 20, offset: Offset(0, 0)),
+                          Shadow(color: Colors.black, blurRadius: 10, offset: Offset(2, 2))
+                        ]),
+                  ),
                 ),
               ),
             ),
@@ -1025,7 +1061,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
               ),
             ),
           ),
-          IgnorePointer(
+          RepaintBoundary(child: IgnorePointer(
             child: Align(
               alignment: Alignment.topCenter,
               child: ConfettiWidget(
@@ -1034,7 +1070,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                   shouldLoop: false,
                   colors: const [Colors.green, Colors.blue, Colors.pink, Colors.orange, Colors.purple]),
             ),
-          ),
+          )),
         ],
       ),
     );
@@ -1086,6 +1122,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
           Color rankColor = rank == 1 ? Colors.amber : (rank == 2 ? Colors.grey[400]! : (rank == 3 ? Colors.brown[300]! : Colors.white54));
 
           return Container(
+            key: ValueKey('score-${p.key}'),
             margin: const EdgeInsets.only(right: 8),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(16), border: Border.all(color: borderColor)),
@@ -1099,7 +1136,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                   children: [
                     Text(p.value['name'].toString(),
                         style: TextStyle(color: isMe ? AppColors.accent : Colors.white70, fontSize: 10, fontWeight: FontWeight.bold)),
-                    Text('${p.value['score']} P', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                    CountUpText(value: (p.value['score'] as int?) ?? 0, suffix: ' P', style: AppText.counter(fontSize: 16)),
                   ],
                 ),
               ],
@@ -1112,23 +1149,41 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
 
   Widget _buildWordArea() {
     final bool isLocked = _isSubmittingAnswer || isGameOver || remainingSeconds <= 0;
+    final int slotCount = availableLetters.length > selectedLetters.length ? availableLetters.length : selectedLetters.length;
     return Column(children: [
-      Container(
+      ErrorShake(
+        trigger: _errorSignal,
+        borderRadius: 18,
+        child: Container(
           height: 60,
           decoration: BoxDecoration(
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(18),
               border: Border.all(color: AppColors.primaryDeep.withValues(alpha: 0.4))),
           child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: selectedLetters
-                  .map((char) => Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 3),
-                      width: 36,
-                      height: 42,
-                      decoration: BoxDecoration(color: AppColors.primaryDeep, borderRadius: BorderRadius.circular(10)),
-                      child: Center(child: Text(char, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)))))
-                  .toList())),
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(slotCount, (i) {
+              final bool filled = i < selectedLetters.length;
+              final String char = filled ? selectedLetters[i] : '';
+              return AnimatedSlot(
+                child: filled
+                    ? Padding(
+                        key: ValueKey('slot-$i-$char'),
+                        padding: const EdgeInsets.symmetric(horizontal: 3),
+                        child: GameTile(
+                          width: 36,
+                          height: 42,
+                          radius: AppRadius.sm,
+                          color: AppColors.primaryDeep,
+                          child: Text(char, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                        ),
+                      )
+                    : null,
+              );
+            }),
+          ),
+        ),
+      ),
       const SizedBox(height: 24),
       GridView.builder(
           shrinkWrap: true,
@@ -1139,71 +1194,115 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
           itemBuilder: (context, index) {
             String char = availableLetters[index];
             bool isUsed = selectedIndices.contains(index);
-            return InkWell(
-                onTap: (isUsed || isLocked)
-                    ? null
-                    : () {
-                        if (char == 'JOKER') {
-                          _openJokerPicker(index);
-                        } else {
-                          AudioService.instance.playClick();
-                          setState(() {
-                            selectedIndices.add(index);
-                            selectedLetters.add(char);
-                          });
-                        }
-                      },
-                child: Container(
-                    decoration: BoxDecoration(
-                        color: isUsed ? AppColors.surface.withValues(alpha: 0.4) : (char == 'JOKER' ? AppColors.joker : AppColors.primaryDeep),
-                        borderRadius: BorderRadius.circular(16)),
-                    child: Center(
-                        child: Text(char,
-                            style: TextStyle(
-                                color: isUsed ? Colors.white24 : Colors.white, fontSize: char == 'JOKER' ? 14 : 20, fontWeight: FontWeight.bold)))));
+            return GameTile(
+              radius: AppRadius.md + 2,
+              flat: isUsed,
+              color: isUsed ? AppColors.surface.withValues(alpha: 0.4) : (char == 'JOKER' ? AppColors.joker : AppColors.primaryDeep),
+              onTap: (isUsed || isLocked)
+                  ? null
+                  : () {
+                      if (char == 'JOKER') {
+                        _openJokerPicker(index);
+                      } else {
+                        AudioService.instance.playClick(haptic: false);
+                        Haptics.selection();
+                        setState(() {
+                          selectedIndices.add(index);
+                          selectedLetters.add(char);
+                        });
+                      }
+                    },
+              child: Text(char,
+                  style: TextStyle(
+                      color: isUsed ? Colors.white24 : Colors.white, fontSize: char == 'JOKER' ? 14 : 20, fontWeight: FontWeight.bold)),
+            );
           })
     ]);
   }
 
   Widget _buildMathArea() {
     final bool isLocked = _isSubmittingAnswer || isGameOver || remainingSeconds <= 0;
+    // 6 sayıyla en fazla 5 işlem adımı yapılabilir.
+    final int stepSlots = historySteps.length > 5 ? historySteps.length : 5;
     return Column(children: [
       Text('HEDEF SAYI', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12, fontWeight: FontWeight.bold)),
-      Text('$targetNumber', style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w900)),
-      const SizedBox(height: 20),
-      Wrap(
+      // Yeni tur: hedef sayı 0'dan hedefe sayarak belirir.
+      CountUpText(
+        key: ValueKey('target-$targetNumber'),
+        value: targetNumber,
+        fromZero: true,
+        style: AppText.counter(fontSize: 40, fontWeight: FontWeight.w900),
+      ),
+      const SizedBox(height: 12),
+      ErrorShake(
+        trigger: _errorSignal,
+        borderRadius: 12,
+        child: Container(
+          width: double.infinity,
+          height: 36,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(12)),
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: List.generate(stepSlots, (i) {
+              final bool filled = i < historySteps.length;
+              final String step = filled ? historySteps[i] : '';
+              return AnimatedSlot(
+                child: filled
+                    ? Container(
+                        key: ValueKey('step-$i-$step'),
+                        margin: const EdgeInsets.only(right: 6, top: 5, bottom: 5),
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(color: AppColors.surfaceHigh, borderRadius: BorderRadius.circular(8)),
+                        child: Center(child: Text(step, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11))),
+                      )
+                    : null,
+              );
+            }),
+          ),
+        ),
+      ),
+      const SizedBox(height: 12),
+      AnimatedSwitcher(
+        duration: Motion.of(context, const Duration(milliseconds: 200)),
+        transitionBuilder: AnimatedSlot.transition,
+        child: Wrap(
+          key: ValueKey('numbers-${currentNumbers.join(',')}'),
           spacing: 10,
           runSpacing: 10,
           alignment: WrapAlignment.center,
           children: List.generate(currentNumbers.length, (index) {
             bool isSelected = firstNumIndex == index;
-            return GestureDetector(
-                onTap: isLocked ? null : () => _onNumberTap(index, currentNumbers[index]),
-                child: Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                        color: isSelected ? AppColors.joker : AppColors.surfaceHigh,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: isSelected ? AppColors.joker : Colors.white12)),
-                    child: Center(
-                        child: Text('${currentNumbers[index]}',
-                            style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)))));
-          })),
+            return GameTile(
+              width: 52,
+              height: 52,
+              color: isSelected ? AppColors.joker : AppColors.surfaceHigh,
+              borderColor: isSelected ? AppColors.joker : Colors.white12,
+              onTap: isLocked ? null : () => _onNumberTap(index, currentNumbers[index]),
+              child: Text('${currentNumbers[index]}', style: AppText.counter(fontSize: 18)),
+            );
+          }),
+        ),
+      ),
       const SizedBox(height: 20),
       Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: ['+', '-', '*', '/']
               .map((op) => Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: InkWell(
-                      onTap: isLocked ? null : () => setState(() => selectedOp = op),
-                      child: Container(
-                          width: 46,
-                          height: 46,
-                          decoration: BoxDecoration(
-                              color: selectedOp == op ? AppColors.joker : AppColors.primaryDeep, borderRadius: BorderRadius.circular(12)),
-                          child: Center(child: Text(op, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)))))))
+                  child: GameTile(
+                      width: 46,
+                      height: 46,
+                      radius: AppRadius.md - 2,
+                      color: selectedOp == op ? AppColors.joker : AppColors.primaryDeep,
+                      onTap: isLocked
+                          ? null
+                          : () {
+                              AudioService.instance.playClick(haptic: false);
+                              Haptics.selection();
+                              setState(() => selectedOp = op);
+                            },
+                      child: Text(op, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)))))
               .toList())
     ]);
   }
@@ -1229,7 +1328,9 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
             fontSize: 12,
             onPressed: isLocked
                       ? null
-                      : () => setState(() {
+                      : () {
+                          Haptics.selection();
+                          setState(() {
                             if (currentRoundType == 'word') {
                               selectedLetters.clear();
                               selectedIndices.clear();
@@ -1240,7 +1341,8 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                               firstNumIndex = null;
                               selectedOp = null;
                             }
-                          }),
+                          });
+                        },
           ),
         ),
         GameBarItem(
