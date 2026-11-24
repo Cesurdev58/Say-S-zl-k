@@ -19,7 +19,7 @@ double _faceTop(WidgetTester t) {
 
 void main() {
   test('dudak rengi taş renginden koyudur', () {
-    final base = const Color(0xFF5A4FCF);
+    const base = Color(0xFF5A4FCF);
     final lip = GameTile.lipColor(base);
     expect(HSLColor.fromColor(lip).lightness, lessThan(HSLColor.fromColor(base).lightness));
     expect(GameTile.lipHeight, 4);
