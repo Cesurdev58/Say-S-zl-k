@@ -19,6 +19,9 @@ import '../widgets/timer_chip.dart';
 import 'private_room_screen.dart';
 import 'matchmaking_screen.dart';
 import '../theme/app_colors.dart';
+import '../widgets/ui/game_button.dart';
+import '../widgets/ui/game_control_bar.dart';
+import '../widgets/ui/game_hud.dart';
 
 class MultiplayerGameScreen extends StatefulWidget {
   final String matchId;
@@ -1051,35 +1054,29 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
   }
 
   Widget _buildAppBar() {
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
-            onPressed: () async {
-              if (await _onWillPop()) {
-                if (mounted) Navigator.pop(context);
-              }
-            },
-          ),
-          Text('Soru: ${myQuestionIndex + 1}/${matchQuestions.length}',
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-          const Spacer(),
-          IconButton(
-            icon: const Icon(Icons.chat_bubble_rounded, color: AppColors.accent),
-            onPressed: _showChatPanel,
-          ),
-          TimerChip(
-            seconds: _remainingNotifier,
-            warnAt: 10,
-            horizontalPadding: 16,
-            verticalPadding: 6,
-            borderRadius: 14,
-            fontSize: 16,
-          ),
-        ],
-      ),
+    return GameHud(
+      title: 'Soru: ${myQuestionIndex + 1}/${matchQuestions.length}',
+      onBack: () async {
+        if (await _onWillPop()) {
+          if (mounted) Navigator.pop(context);
+        }
+      },
+      trailing: [
+        IconButton(
+          tooltip: 'Sohbet',
+          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+          icon: const Icon(Icons.chat_bubble_rounded, color: AppColors.accent),
+          onPressed: _showChatPanel,
+        ),
+        TimerChip(
+          seconds: _remainingNotifier,
+          warnAt: 10,
+          horizontalPadding: 16,
+          verticalPadding: 6,
+          borderRadius: 14,
+          fontSize: 16,
+        ),
+      ],
     );
   }
 
@@ -1226,29 +1223,24 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
 
   Widget _buildBottomControls() {
     final bool isLocked = _isSubmittingAnswer || isGameOver || remainingSeconds <= 0;
-    return Row(children: [
-      Expanded(
+    return GameControlBar(
+      items: [
+        GameBarItem(
           flex: 2,
-          child: SizedBox(
-              height: 46,
-              child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      side: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-                  onPressed: isLocked ? null : _undoLastAction,
-                  child: const Text('Sil', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12))))),
-      const SizedBox(width: 6),
-      Expanded(
+          child: GameButton(
+            label: 'Sil',
+            variant: GameButtonVariant.secondary,
+            fontSize: 12,
+            onPressed: isLocked ? null : _undoLastAction,
+          ),
+        ),
+        GameBarItem(
           flex: 2,
-          child: SizedBox(
-              height: 46,
-              child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      side: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-                  onPressed: isLocked
+          child: GameButton(
+            label: 'Temizle',
+            variant: GameButtonVariant.secondary,
+            fontSize: 12,
+            onPressed: isLocked
                       ? null
                       : () => setState(() {
                             if (currentRoundType == 'word') {
@@ -1262,32 +1254,25 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                               selectedOp = null;
                             }
                           }),
-                  child: const Text('Temizle', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12))))),
-      const SizedBox(width: 6),
-      Expanded(
+          ),
+        ),
+        GameBarItem(
           flex: 2,
-          child: SizedBox(
-              height: 46,
-              child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      backgroundColor: (remainingPasses > 0 && !isLocked) ? Colors.orangeAccent : Colors.grey.withValues(alpha: 0.5),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-                  onPressed: (remainingPasses > 0 && !isLocked) ? _passQuestion : null,
-                  child: Text('Pas ($remainingPasses)',
-                      style: TextStyle(color: remainingPasses > 0 ? Colors.white : Colors.white54, fontWeight: FontWeight.bold, fontSize: 13))))),
-      const SizedBox(width: 6),
-      Expanded(
+          child: GameButton(
+            label: 'Pas ($remainingPasses)',
+            variant: GameButtonVariant.warning,
+            onPressed: (remainingPasses > 0 && !isLocked) ? _passQuestion : null,
+          ),
+        ),
+        GameBarItem(
           flex: 3,
-          child: SizedBox(
-              height: 46,
-              child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      backgroundColor: AppColors.accent,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-                  onPressed: isLocked ? null : (currentRoundType == 'word' ? _submitWord : _submitMath),
-                  child: const Text('Gönder', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)))))
-    ]);
+          child: GameButton(
+            label: 'Gönder',
+            variant: GameButtonVariant.accent,
+            onPressed: isLocked ? null : (currentRoundType == 'word' ? _submitWord : _submitMath),
+          ),
+        ),
+      ],
+    );
   }
 }

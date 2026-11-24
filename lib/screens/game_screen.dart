@@ -16,6 +16,11 @@ import '../widgets/timer_chip.dart';
 import '../widgets/word_game_board.dart';
 import '../widgets/math_game_board.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
+import '../widgets/ui/game_button.dart';
+import '../widgets/ui/game_card.dart';
+import '../widgets/ui/game_control_bar.dart';
+import '../widgets/ui/game_hud.dart';
 
 class GameScreen extends StatefulWidget {
   final bool isTimed;
@@ -803,79 +808,65 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildAppBar() {
-    return Padding(
+    return GameHud(
+      centerTitle: true,
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-            onPressed: () async {
-              if (await _onWillPop()) {
-                if (mounted) Navigator.pop(context);
-              }
-            },
+      titleFontSize: 16,
+      backIconSize: 24,
+      title: widget.subMode == 'mix'
+          ? 'Karışık Mod'
+          : (currentRoundType == 'word' ? 'Aşama: Kelime' : 'Aşama: İşlem'),
+      onBack: () async {
+        if (await _onWillPop()) {
+          if (mounted) Navigator.pop(context);
+        }
+      },
+      trailing: [
+        if (widget.isTimed)
+          InkWell(
+            onTap: (_isGameOver || remainingSeconds <= 0) ? null : _passQuestion,
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 14),
+              child: Text(
+                'Pas (${widget.subMode == 'mix' ? '-10s' : '-5s'})',
+                style: const TextStyle(color: AppColors.rose, fontWeight: FontWeight.bold, fontSize: 12),
+              ),
+            ),
           ),
-          Text(
-            widget.subMode == 'mix'
-                ? 'Karışık Mod'
-                : (currentRoundType == 'word' ? 'Aşama: Kelime' : 'Aşama: İşlem'),
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+        if (widget.isTimed)
+          Padding(
+            padding: const EdgeInsets.only(left: 4),
+            child: TimerChip(seconds: _remainingNotifier, warnAt: 5),
           ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (widget.isTimed)
-                InkWell(
-                  onTap: (_isGameOver || remainingSeconds <= 0) ? null : _passQuestion,
-                  borderRadius: BorderRadius.circular(12),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                    child: Text(
-                      'Pas (${widget.subMode == 'mix' ? '-10s' : '-5s'})',
-                      style: const TextStyle(color: AppColors.rose, fontWeight: FontWeight.bold, fontSize: 12),
-                    ),
-                  ),
-                ),
-              if (widget.isTimed)
-                Padding(
-                  padding: const EdgeInsets.only(left: 4),
-                  child: TimerChip(seconds: _remainingNotifier, warnAt: 5),
-                ),
-            ],
-          ),
-        ],
-      ),
+      ],
     );
   }
 
   Widget _buildScoreCard() {
-    return Container(
+    return SizedBox(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                currentRoundType == 'word' ? 'Kelime Puanı' : 'Toplanan Puan',
-                style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13, fontWeight: FontWeight.w500),
-              ),
-              Text('$score', style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900)),
-            ],
-          ),
-          if (showDelta && scoreDeltaText != null)
-            Align(
-              alignment: Alignment.centerRight,
-              child: Text(scoreDeltaText!, style: const TextStyle(color: AppColors.rose, fontSize: 11, fontWeight: FontWeight.bold)),
+      child: GameCard(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  currentRoundType == 'word' ? 'Kelime Puanı' : 'Toplanan Puan',
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13, fontWeight: FontWeight.w500),
+                ),
+                Text('$score', style: AppText.counter(fontSize: 22, fontWeight: FontWeight.w900)),
+              ],
             ),
-        ],
+            if (showDelta && scoreDeltaText != null)
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(scoreDeltaText!, style: AppText.counter(color: AppColors.rose, fontSize: 11)),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -887,19 +878,15 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         _isGameOver ||
         (widget.isTimed && remainingSeconds <= 0);
 
-    return Row(
-      children: [
-        Expanded(
+    return GameControlBar(
+      items: [
+        GameBarItem(
           flex: 2,
-          child: SizedBox(
-            height: 46,
-            child: OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                padding: EdgeInsets.zero,
-                side: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              ),
-              onPressed: isLocked
+          child: GameButton(
+            label: 'Sil',
+            variant: GameButtonVariant.secondary,
+            fontSize: 12,
+            onPressed: isLocked
                   ? null
                   : () {
                       AudioService.instance.playClick();
@@ -923,22 +910,15 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                         }
                       });
                     },
-              child: const Text('Sil', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
-            ),
           ),
         ),
-        const SizedBox(width: 6),
-        Expanded(
+        GameBarItem(
           flex: 2,
-          child: SizedBox(
-            height: 46,
-            child: OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                padding: EdgeInsets.zero,
-                side: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              ),
-              onPressed: isLocked
+          child: GameButton(
+            label: currentRoundType == 'word' ? 'Temizle' : 'Sıfırla',
+            variant: GameButtonVariant.secondary,
+            fontSize: 12,
+            onPressed: isLocked
                   ? null
                   : () {
                       AudioService.instance.playClick();
@@ -953,52 +933,27 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                         selectedOp = null;
                       });
                     },
-              child: Text(
-                currentRoundType == 'word' ? 'Temizle' : 'Sıfırla',
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
-              ),
-            ),
           ),
         ),
-        if (!widget.isTimed) ...[
-          const SizedBox(width: 6),
-          Expanded(
+        if (!widget.isTimed)
+          GameBarItem(
             flex: 3,
-            child: SizedBox(
-              height: 46,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  backgroundColor: AppColors.accent,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                ),
-                onPressed: isLocked ? null : _showTimelessSolution,
-                child: const Text('Cevabı Göster', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11)),
-              ),
+            child: GameButton(
+              label: 'Cevabı Göster',
+              variant: GameButtonVariant.accent,
+              fontSize: 11,
+              onPressed: isLocked ? null : _showTimelessSolution,
             ),
           ),
-        ],
-        const SizedBox(width: 6),
-        Expanded(
+        GameBarItem(
           flex: 3,
-          child: SizedBox(
-            height: 46,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.zero,
-                backgroundColor: AppColors.primaryDeep,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              ),
-              onPressed: isLocked
-                  ? null
-                  : () {
-                      currentRoundType == 'word' ? _submitWord() : _submitMath();
-                    },
-              child: Text(
-                currentRoundType == 'word' ? 'Onayla' : 'Tamamla',
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
-              ),
-            ),
+          child: GameButton(
+            label: currentRoundType == 'word' ? 'Onayla' : 'Tamamla',
+            onPressed: isLocked
+                ? null
+                : () {
+                    currentRoundType == 'word' ? _submitWord() : _submitMath();
+                  },
           ),
         ),
       ],
