@@ -7,6 +7,7 @@ import 'ui/count_up_text.dart';
 import 'ui/error_shake.dart';
 import 'ui/game_tile.dart';
 import 'ui/motion.dart';
+import 'ui/recessed_slot.dart';
 
 class MathGameBoard extends StatelessWidget {
   final int targetNumber;
@@ -39,11 +40,11 @@ class MathGameBoard extends StatelessWidget {
     // 6 sayıyla en fazla 5 işlem adımı yapılabilir.
     final int stepSlots = historySteps.length > 5 ? historySteps.length : 5;
 
-    Widget history = Container(
-      width: double.infinity,
-      height: 40,
+    Widget history = RecessedSlot(
+      height: 44,
+      radius: 12,
+      dashed: false,
       padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(12)),
       child: Stack(
         alignment: Alignment.center,
         children: [

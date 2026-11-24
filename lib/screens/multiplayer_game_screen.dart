@@ -25,11 +25,14 @@ import '../widgets/ui/game_button.dart';
 import '../widgets/ui/game_control_bar.dart';
 import '../widgets/ui/game_dialog.dart';
 import '../widgets/ui/animated_slot.dart';
+import '../widgets/ui/answer_slots.dart';
+import '../widgets/ui/game_card.dart';
 import '../widgets/ui/count_up_text.dart';
 import '../widgets/ui/error_shake.dart';
 import '../widgets/ui/game_hud.dart';
 import '../widgets/ui/game_tile.dart';
 import '../widgets/ui/motion.dart';
+import '../widgets/ui/recessed_slot.dart';
 
 class MultiplayerGameScreen extends StatefulWidget {
   final String matchId;
@@ -1149,39 +1152,13 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
 
   Widget _buildWordArea() {
     final bool isLocked = _isSubmittingAnswer || isGameOver || remainingSeconds <= 0;
-    final int slotCount = availableLetters.length > selectedLetters.length ? availableLetters.length : selectedLetters.length;
     return Column(children: [
       ErrorShake(
         trigger: _errorSignal,
         borderRadius: 18,
-        child: Container(
-          height: 60,
-          decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: AppColors.primaryDeep.withValues(alpha: 0.4))),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(slotCount, (i) {
-              final bool filled = i < selectedLetters.length;
-              final String char = filled ? selectedLetters[i] : '';
-              return AnimatedSlot(
-                child: filled
-                    ? Padding(
-                        key: ValueKey('slot-$i-$char'),
-                        padding: const EdgeInsets.symmetric(horizontal: 3),
-                        child: GameTile(
-                          width: 36,
-                          height: 42,
-                          radius: AppRadius.sm,
-                          color: AppColors.primaryDeep,
-                          child: Text(char, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                        ),
-                      )
-                    : null,
-              );
-            }),
-          ),
+        child: GameCard(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          child: AnswerSlots(letters: selectedLetters, slotCount: availableLetters.length),
         ),
       ),
       const SizedBox(height: 24),
@@ -1237,11 +1214,11 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
       ErrorShake(
         trigger: _errorSignal,
         borderRadius: 12,
-        child: Container(
-          width: double.infinity,
-          height: 36,
+        child: RecessedSlot(
+          height: 40,
+          radius: 12,
+          dashed: false,
           padding: const EdgeInsets.symmetric(horizontal: 10),
-          decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(12)),
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: List.generate(stepSlots, (i) {
