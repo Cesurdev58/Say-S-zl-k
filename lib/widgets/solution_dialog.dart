@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import 'ui/game_button.dart';
+import 'ui/game_dialog.dart';
 import '../theme/app_colors.dart';
 
 /// Süresiz solo modda "Çözümü Göster" diyaloğu: en uzun kelime veya adım adım işlem çözümü.
@@ -18,24 +21,14 @@ class SolutionDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Container(
-          padding: const EdgeInsets.all(22),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.primary.withValues(alpha: 0.5), width: 1.5),
-            boxShadow: [
-              BoxShadow(color: AppColors.background.withValues(alpha: 0.8), blurRadius: 20, spreadRadius: 5)
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(isWord ? 'Olası En Uzun Kelime' : 'Adım Adım Tam Çözüm', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
+    return GameDialog(
+      title: isWord ? 'Olası En Uzun Kelime' : 'Adım Adım Tam Çözüm',
+      actions: [
+        GameButton(label: 'Sonraki Soruya Geç', onPressed: onNext, fontSize: 14),
+      ],
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
               if (isWord) ...[
                 Container(
                   width: double.infinity,
@@ -71,22 +64,8 @@ class SolutionDialog extends StatelessWidget {
                   ),
                 ),
               ],
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryAlt,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  ),
-                  onPressed: onNext,
-                  child: const Text('Sonraki Soruya Geç', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
+        ],
+      ),
+    );
   }
 }

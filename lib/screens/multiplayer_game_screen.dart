@@ -21,6 +21,7 @@ import 'matchmaking_screen.dart';
 import '../theme/app_colors.dart';
 import '../widgets/ui/game_button.dart';
 import '../widgets/ui/game_control_bar.dart';
+import '../widgets/ui/game_dialog.dart';
 import '../widgets/ui/game_hud.dart';
 
 class MultiplayerGameScreen extends StatefulWidget {
@@ -126,27 +127,13 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
   Future<bool> _onWillPop() async {
     if (isGameOver) return true;
 
-    bool? exit = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: const Text('Pes mi Ediyorsun?', style: TextStyle(color: Colors.white)),
-        content: const Text('Oyundan çıkarsanız yenilmiş sayılacaksınız. Emin misiniz?', style: TextStyle(color: Colors.white70)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Hayır, Devam Et', style: TextStyle(color: Colors.white54)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-            onPressed: () {
-              MatchService.instance.cancelMatchmaking(widget.matchId);
-              Navigator.of(context).pop(true);
-            },
-            child: const Text('Çık', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
+    bool? exit = await showGameConfirmDialog(
+      context,
+      title: 'Pes mi Ediyorsun?',
+      message: 'Oyundan çıkarsanız yenilmiş sayılacaksınız. Emin misiniz?',
+      cancelLabel: 'Hayır, Devam Et',
+      confirmLabel: 'Çık',
+      onConfirm: () => MatchService.instance.cancelMatchmaking(widget.matchId),
     );
     return exit ?? false;
   }

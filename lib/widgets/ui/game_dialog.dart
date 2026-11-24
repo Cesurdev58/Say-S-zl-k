@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
+import 'game_button.dart';
 import 'game_card.dart';
 
 /// Tutarlı diyalog çerçevesi: başlık (+ikon), içerik ve eylemler.
@@ -75,4 +76,45 @@ class GameDialog extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Onay diyaloğu (Evet/Hayır). `true`: onaylandı, `false`/`null`: vazgeçildi.
+///
+/// [onCancel] ve [onConfirm], diyalog kapanmadan hemen önce çalışır.
+Future<bool?> showGameConfirmDialog(
+  BuildContext context, {
+  required String title,
+  required String message,
+  required String cancelLabel,
+  required String confirmLabel,
+  VoidCallback? onCancel,
+  VoidCallback? onConfirm,
+  bool barrierDismissible = true,
+}) {
+  return showDialog<bool>(
+    context: context,
+    barrierDismissible: barrierDismissible,
+    builder: (dialogContext) => GameDialog(
+      title: title,
+      child: Text(message, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70)),
+      actions: [
+        GameButton(
+          label: cancelLabel,
+          variant: GameButtonVariant.secondary,
+          onPressed: () {
+            onCancel?.call();
+            Navigator.of(dialogContext).pop(false);
+          },
+        ),
+        GameButton(
+          label: confirmLabel,
+          variant: GameButtonVariant.danger,
+          onPressed: () {
+            onConfirm?.call();
+            Navigator.of(dialogContext).pop(true);
+          },
+        ),
+      ],
+    ),
+  );
 }

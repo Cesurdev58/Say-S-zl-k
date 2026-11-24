@@ -20,6 +20,7 @@ import '../theme/app_theme.dart';
 import '../widgets/ui/game_button.dart';
 import '../widgets/ui/game_card.dart';
 import '../widgets/ui/game_control_bar.dart';
+import '../widgets/ui/game_dialog.dart';
 import '../widgets/ui/game_hud.dart';
 
 class GameScreen extends StatefulWidget {
@@ -145,38 +146,15 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     setState(() => _isPausedForDialog = true);
     AudioService.instance.playClick();
 
-    bool? exit = await showDialog<bool>(
-      context: context,
+    bool? exit = await showGameConfirmDialog(
+      context,
+      title: 'Çıkmak Üzeresin!',
+      message: 'Şu ana kadarki tüm ilerlemen silinecek. Oyundan çıkmak istediğine emin misin?',
+      cancelLabel: 'İptal',
+      confirmLabel: 'Evet, Çık',
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Çıkmak Üzeresin!', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        content: const Text(
-          'Şu ana kadarki tüm ilerlemen silinecek. Oyundan çıkmak istediğine emin misin?',
-          style: TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              AudioService.instance.playClick();
-              Navigator.of(context).pop(false);
-            },
-            child: const Text('İptal', style: TextStyle(color: Colors.white54, fontWeight: FontWeight.bold)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            ),
-            onPressed: () {
-              AudioService.instance.playClick();
-              Navigator.of(context).pop(true);
-            },
-            child: const Text('Evet, Çık', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
+      onCancel: AudioService.instance.playClick,
+      onConfirm: AudioService.instance.playClick,
     );
 
     if (mounted) {

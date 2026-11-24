@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../services/audio_service.dart';
 import '../theme/app_colors.dart';
+import 'ui/game_dialog.dart';
 
 /// JOKER taşı için harf seçtiren ortak diyalog (solo ve çok oyunculu).
 ///
@@ -33,47 +34,38 @@ class _JokerPickerDialogState extends State<JokerPickerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: AppColors.surface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Joker Harf Seçin', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 300),
-              child: SingleChildScrollView(
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  alignment: WrapAlignment.center,
-                  children: JokerPickerDialog.alphabet.map((char) {
-                    return InkWell(
-                      onTap: () {
-                        if (_picked) return;
-                        _picked = true;
-                        AudioService.instance.playClick();
-                        Navigator.of(context).pop(char);
-                      },
-                      child: Container(
-                        width: 42,
-                        height: 42,
-                        decoration: BoxDecoration(color: AppColors.joker, borderRadius: BorderRadius.circular(10)),
-                        child: Center(
-                          child: Text(char, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+    return GameDialog(
+      title: 'Joker Harf Seçin',
+      padding: const EdgeInsets.all(20),
+      borderColor: AppColors.joker.withValues(alpha: 0.5),
+      child: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 300),
+                child: SingleChildScrollView(
+                  child: Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    alignment: WrapAlignment.center,
+                    children: JokerPickerDialog.alphabet.map((char) {
+                      return InkWell(
+                        onTap: () {
+                          if (_picked) return;
+                          _picked = true;
+                          AudioService.instance.playClick();
+                          Navigator.of(context).pop(char);
+                        },
+                        child: Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(color: AppColors.joker, borderRadius: BorderRadius.circular(10)),
+                          child: Center(
+                            child: Text(char, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+                          ),
                         ),
-                      ),
-                    );
-                  }).toList(),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
