@@ -9,7 +9,13 @@ import '../models/user_profile.dart';
 import '../services/user_service.dart';
 import '../services/audio_service.dart';
 import '../services/secure_storage_service.dart';
-import '../widgets/menu_button.dart';
+import '../widgets/game_background.dart';
+import '../widgets/game_intro_dialog.dart';
+import '../widgets/home/hero_mode_card.dart';
+import '../widgets/home/mode_grid_card.dart';
+import '../widgets/ui/game_card.dart';
+import '../widgets/ui/pressable.dart';
+import 'game_screen.dart';
 import '../widgets/profile_card.dart';
 import '../widgets/settings_bottom_sheet.dart';
 import 'solo_mode_select_screen.dart'; 
@@ -20,6 +26,7 @@ import 'matchmaking_screen.dart';
 import 'friends_screen.dart';
 import 'private_room_screen.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -455,136 +462,179 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// Bir ekranı açar; dönüşte profili (puan/elmas) yeniler.
+  Future<void> _open(Widget screen) async {
+    await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => screen));
+    _loadProfile();
+  }
+
+  /// Zamana karşı solo oyunu, Solo Mod Seçimi ekranındaki akışla birebir başlatır
+  /// (bilgilendirme + geri sayım diyaloğu, ardından oyun ekranı).
+  void _startTimedSolo(String subMode) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => GameIntroDialog(
+        isTimed: true,
+        subMode: subMode,
+        onStartGame: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => GameScreen(isTimed: true, subMode: subMode)),
+          );
+          _loadProfile();
+        },
+      ),
+    );
+  }
+
+  Future<void> _openMultiplayer(bool unlocked) async {
+    if (!unlocked) {
+      AudioService.instance.playError();
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Önce Solo modda pratik yapıp 500 puana ulaşmalısın!'), backgroundColor: Colors.orange));
+      return;
+    }
+    await _open(const MatchmakingScreen());
+  }
+
   @override
   Widget build(BuildContext context) {
-    bool isMultiplayerUnlocked = _profile != null && _profile!.totalScore >= 500;
+    final bool isMultiplayerUnlocked = _profile != null && _profile!.totalScore >= 500;
 
-    return Scaffold(
-      backgroundColor: AppColors.gradientBottom, 
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.gradientTop,
-              AppColors.gradientMid,
-              AppColors.gradientBottom,
-            ],
-          ),
-        ),
-        child: SafeArea(
-          bottom: false, 
+    return GameBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: SafeArea(
+          bottom: false,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHeader(context),
-                const SizedBox(height: 28),
-                
+                const SizedBox(height: 12),
                 _profile == null
                     ? Container(
-                        height: 110,
+                        height: 96,
                         width: double.infinity,
                         decoration: BoxDecoration(
                           color: AppColors.surface.withValues(alpha: 0.6),
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(AppRadius.lg),
                         ),
                         child: const Center(
                           child: SizedBox(
                             width: 24,
                             height: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              color: AppColors.accent,
-                            ),
+                            child: CircularProgressIndicator(strokeWidth: 2.5, color: AppColors.accent),
                           ),
                         ),
                       )
-                    : ProfileCard(
-                        profile: _profile!,
-                        onProfileUpdated: _loadProfile,
-                      ),
-                      
-                const SizedBox(height: 32),
+                    : ProfileCard(profile: _profile!, onProfileUpdated: _loadProfile),
+                const SizedBox(height: 20),
+
+                // Vitrin: ana oyun modu
+                HeroModeCard(
+                  title: 'Hızlı Oyun',
+                  subtitle: 'Kelime ve işlem bir arada. Süreye karşı yarış, puanı topla!',
+                  badge: 'ZAMANA KARŞI • KARIŞIK',
+                  icon: Icons.bolt_rounded,
+                  onTap: () {
+                    AudioService.instance.playClick();
+                    _startTimedSolo('mix');
+                  },
+                ),
+                const SizedBox(height: 24),
+
                 Text(
                   'Oyun Modları',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: Colors.white.withValues(alpha: 0.9),
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w800,
                         letterSpacing: 0.5,
                       ),
                 ),
+                const SizedBox(height: 12),
+                GridView(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    mainAxisExtent: ModeGridCard.extentFor(context),
+                  ),
+                  children: [
+                    ModeGridCard(
+                      title: 'Kelime',
+                      subtitle: 'Harflerden en uzun kelimeyi türet',
+                      icon: Icons.text_fields_rounded,
+                      color: AppColors.primaryAlt,
+                      onTap: () {
+                        AudioService.instance.playClick();
+                        _startTimedSolo('word');
+                      },
+                    ),
+                    ModeGridCard(
+                      title: 'İşlem',
+                      subtitle: 'Sayılarla hedefi tam bul',
+                      icon: Icons.calculate_rounded,
+                      color: AppColors.accent,
+                      onTap: () {
+                        AudioService.instance.playClick();
+                        _startTimedSolo('math');
+                      },
+                    ),
+                    ModeGridCard(
+                      title: 'Çok Oyunculu',
+                      subtitle: isMultiplayerUnlocked ? 'Dünyadan rakiplerle yarış' : 'Solo modda 500 puana ulaşınca açılır',
+                      icon: Icons.public_rounded,
+                      color: AppColors.sky,
+                      locked: !isMultiplayerUnlocked,
+                      onTap: () => _openMultiplayer(isMultiplayerUnlocked),
+                    ),
+                    ModeGridCard(
+                      title: 'Oda Kur / Katıl',
+                      subtitle: 'Arkadaşlarınla özel oda',
+                      icon: Icons.meeting_room_rounded,
+                      color: AppColors.joker,
+                      onTap: () => _open(const PrivateRoomScreen()),
+                    ),
+                    ModeGridCard(
+                      title: 'Alıştırma / Solo',
+                      subtitle: 'Sonsuz mod ve pratik',
+                      icon: Icons.psychology_rounded,
+                      color: AppColors.lavender,
+                      onTap: () => _open(const SoloModeSelectScreen()),
+                    ),
+                    ModeGridCard(
+                      title: 'Mağaza',
+                      subtitle: 'Elmas harca, profilini özelleştir',
+                      icon: Icons.storefront_rounded,
+                      color: AppColors.rose,
+                      onTap: () => _open(const StoreScreen()),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 16),
-                
-                MenuButton(
-                  label: 'Çok Oyunculu Yarış',
-                  subtitle: isMultiplayerUnlocked ? 'Dünyadan rakiplerle zamana karşı yarış' : 'Kilidi açmak için Solo modda 500 puana ulaş',
-                  icon: isMultiplayerUnlocked ? Icons.public_rounded : Icons.lock_rounded,
-                  isPrimary: isMultiplayerUnlocked,
-                  onTap: () async {
-                    if (!isMultiplayerUnlocked) {
-                      AudioService.instance.playError();
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Önce Solo modda pratik yapıp 500 puana ulaşmalısın!'), backgroundColor: Colors.orange));
-                      return;
-                    }
-                    await Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const MatchmakingScreen(),
-                      ),
-                    );
-                    _loadProfile(); 
-                  },
-                ),
-                const SizedBox(height: 12),
-                MenuButton(
-                  label: 'Oda Kur / Katıl',
-                  subtitle: 'Arkadaşlarınla özel oda oluştur',
-                  icon: Icons.meeting_room_rounded,
-                  onTap: () async {
-                    await Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const PrivateRoomScreen(),
-                      ),
-                    );
-                    _loadProfile();
-                  },
-                ),
-                const SizedBox(height: 12),
-                MenuButton(
-                  label: 'Alıştırma / Solo',
-                  subtitle: 'Tek başına pratik yap, seviye atla',
-                  icon: Icons.psychology_rounded,
-                  onTap: () async {
-                    await Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const SoloModeSelectScreen(),
-                      ),
-                    );
-                    _loadProfile(); 
-                  },
-                ),
-                const SizedBox(height: 12),
-                MenuButton(
-                  label: 'Mağaza (Market)',
-                  subtitle: 'Cevher harca, profilini özelleştir',
-                  icon: Icons.storefront_rounded,
-                  onTap: () async {
-                    await Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const StoreScreen(),
-                      ),
-                    );
-                    _loadProfile(); 
-                  },
-                ),
-                const SizedBox(height: 12),
-                MenuButton(
-                  label: 'Nasıl Oynanır?',
-                  subtitle: 'Oyun kuralları ve puanlama sistemi',
-                  icon: Icons.menu_book_rounded,
+                Pressable(
                   onTap: () => _showHowToPlayBottomSheet(context),
+                  semanticLabel: 'Nasıl oynanır? Oyun kuralları ve puanlama',
+                  child: GameCard(
+                    elevated: false,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.menu_book_rounded, color: AppColors.lavender, size: 22),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Text('Nasıl Oynanır?', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14)),
+                        ),
+                        Text('Kurallar ve puanlama', style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 11)),
+                        const SizedBox(width: 6),
+                        Icon(Icons.chevron_right_rounded, color: Colors.white.withValues(alpha: 0.4)),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -594,16 +644,40 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _headerIcon({required IconData icon, required Color color, required String tooltip, required VoidCallback onPressed, bool showBadge = false}) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        IconButton(
+          tooltip: tooltip,
+          constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+          onPressed: onPressed,
+          icon: Icon(icon, color: color, size: 26),
+        ),
+        if (showBadge)
+          Positioned(
+            top: 8,
+            right: 8,
+            child: Container(
+              width: 11,
+              height: 11,
+              decoration: BoxDecoration(
+                color: Colors.redAccent,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.background, width: 2),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
   Widget _buildHeader(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Image.asset(
-          'assets/images/logo.png',
-          height: 90, 
-          fit: BoxFit.contain,
-        ),
+        Image.asset('assets/images/logo.png', height: 64, fit: BoxFit.contain),
         Flexible(
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -611,94 +685,33 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    IconButton(
-                      onPressed: () async {
-                        await Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => const FriendsScreen(),
-                          ),
-                        );
-                      },
-                      icon: Icon(Icons.people_alt_rounded, color: Colors.white.withValues(alpha: 0.9), size: 28),
-                    ),
-                    if (_hasPendingRequests)
-                      Positioned(
-                        top: 6, right: 6, 
-                        child: Container(
-                          width: 12, height: 12, 
-                          decoration: BoxDecoration(
-                            color: Colors.redAccent, 
-                            shape: BoxShape.circle, 
-                            border: Border.all(color: AppColors.background, width: 2),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                IconButton(
+                _headerIcon(
+                  icon: Icons.people_alt_rounded,
+                  color: Colors.white.withValues(alpha: 0.9),
+                  tooltip: 'Arkadaşlar',
+                  showBadge: _hasPendingRequests,
                   onPressed: () async {
-                    await Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const LeaderboardScreen(),
-                      ),
-                    );
-                    _loadProfile();
+                    await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const FriendsScreen()));
                   },
-                  icon: const Icon(Icons.emoji_events_rounded, color: Colors.amber, size: 28),
                 ),
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    IconButton(
-                      onPressed: () async {
-                        await Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => const QuestsScreen(),
-                          ),
-                        );
-                        _loadProfile();
-                      },
-                      icon: Icon(Icons.track_changes_rounded, color: Colors.white.withValues(alpha: 0.9), size: 28),
-                    ),
-                    if (_hasUnclaimedRewards())
-                      Positioned(
-                        top: 6, left: 6, 
-                        child: Container(
-                          width: 12, height: 12, 
-                          decoration: BoxDecoration(
-                            color: Colors.redAccent, 
-                            shape: BoxShape.circle, 
-                            border: Border.all(color: AppColors.background, width: 2),
-                          ),
-                        ),
-                      ),
-                  ],
+                _headerIcon(
+                  icon: Icons.emoji_events_rounded,
+                  color: Colors.amber,
+                  tooltip: 'Liderlik tablosu',
+                  onPressed: () => _open(const LeaderboardScreen()),
                 ),
-                const SizedBox(width: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.diamond_rounded, color: AppColors.accent, size: 16),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${_profile?.gems ?? 0}', 
-                        style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
+                _headerIcon(
+                  icon: Icons.track_changes_rounded,
+                  color: Colors.white.withValues(alpha: 0.9),
+                  tooltip: 'Görevler',
+                  showBadge: _hasUnclaimedRewards(),
+                  onPressed: () => _open(const QuestsScreen()),
                 ),
-                IconButton(
+                _headerIcon(
+                  icon: Icons.settings_rounded,
+                  color: Colors.white.withValues(alpha: 0.8),
+                  tooltip: 'Ayarlar',
                   onPressed: () => showSettingsBottomSheet(context, _loadProfile),
-                  icon: Icon(Icons.settings_rounded, color: Colors.white.withValues(alpha: 0.8), size: 28),
                 ),
               ],
             ),
