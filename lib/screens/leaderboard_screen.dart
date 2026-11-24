@@ -5,6 +5,8 @@ import '../services/audio_service.dart';
 import '../services/user_service.dart'; 
 import '../models/user_profile.dart'; 
 import '../screens/statistics_screen.dart';
+import '../theme/app_colors.dart';
+import '../widgets/game_background.dart';
 
 class LeaderboardScreen extends StatefulWidget {
   const LeaderboardScreen({super.key});
@@ -18,8 +20,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF131127),
+    return GameBackground(child: Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -48,7 +50,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator(color: Color(0xFF7C5CFC)));
+            return const Center(child: CircularProgressIndicator(color: AppColors.primary));
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
@@ -87,7 +89,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   showDialog(
                     context: context,
                     barrierDismissible: false,
-                    builder: (context) => const Center(child: CircularProgressIndicator(color: Color(0xFF7C5CFC))),
+                    builder: (context) => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
                   );
 
                   final UserProfile? targetProfile = await UserService.instance.getUserProfileById(playerId);
@@ -109,14 +111,14 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isMe ? const Color(0xFF7C5CFC).withOpacity(0.15) : const Color(0xFF1D1B36),
+                    color: isMe ? AppColors.primary.withValues(alpha: 0.15) : AppColors.surface,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: isMe ? const Color(0xFF7C5CFC) : (rankColor?.withOpacity(0.5) ?? Colors.white.withOpacity(0.05)),
+                      color: isMe ? AppColors.primary : (rankColor?.withValues(alpha: 0.5) ?? Colors.white.withValues(alpha: 0.05)),
                       width: isMe || index < 3 ? 2 : 1,
                     ),
                     boxShadow: index < 3
-                        ? [BoxShadow(color: rankColor!.withOpacity(0.2), blurRadius: 10, spreadRadius: 1)]
+                        ? [BoxShadow(color: rankColor!.withValues(alpha: 0.2), blurRadius: 10, spreadRadius: 1)]
                         : [],
                   ),
                   child: Row(
@@ -136,7 +138,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                             Image.asset('assets/borders/$border.png', width: 58, height: 58, fit: BoxFit.contain),
                           CircleAvatar(
                             radius: 22,
-                            backgroundColor: const Color(0xFF131127),
+                            backgroundColor: AppColors.background,
                             backgroundImage: AssetImage('assets/avatars/$avatar.png'),
                           ),
                         ],
@@ -146,9 +148,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(username, style: TextStyle(color: isMe ? const Color(0xFFA78BFA) : Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                            Text(username, style: TextStyle(color: isMe ? AppColors.lavender : Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 4),
-                            Text(rankName, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                            Text(rankName, style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12)),
                           ],
                         ),
                       ),
@@ -171,6 +173,6 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
           );
         },
       ),
-    );
+    ));
   }
 }

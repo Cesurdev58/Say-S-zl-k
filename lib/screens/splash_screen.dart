@@ -6,6 +6,7 @@ import '../services/word_service.dart';
 import '../services/audio_service.dart';
 import 'home_screen.dart';
 import 'auth_screen.dart';
+import '../theme/app_colors.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -146,7 +147,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: AppColors.gradientTop,
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -179,7 +180,7 @@ class _SplashScreenState extends State<SplashScreen> {
           height: 56,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF7C5CFC),
+              backgroundColor: AppColors.primary,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               elevation: 8,
             ),
@@ -200,17 +201,17 @@ class _SplashScreenState extends State<SplashScreen> {
           height: 56,
           child: OutlinedButton(
             style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Color(0xFF00CEC9), width: 2),
+              side: const BorderSide(color: AppColors.accent, width: 2),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              backgroundColor: const Color(0xFF131127).withOpacity(0.8),
+              backgroundColor: AppColors.background.withValues(alpha: 0.8),
             ),
             onPressed: _startAsGuest,
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.sports_esports_rounded, color: Color(0xFF00CEC9)),
+                Icon(Icons.sports_esports_rounded, color: AppColors.accent),
                 SizedBox(width: 12),
-                Text('Misafir Olarak Oyna', style: TextStyle(color: Color(0xFF00CEC9), fontSize: 16, fontWeight: FontWeight.bold)),
+                Text('Misafir Olarak Oyna', style: TextStyle(color: AppColors.accent, fontSize: 16, fontWeight: FontWeight.bold)),
               ],
             ),
           ),
@@ -237,7 +238,7 @@ class _SplashScreenState extends State<SplashScreen> {
           height: 24,
           width: double.infinity,
           decoration: BoxDecoration(
-            color: const Color(0xFF131127).withOpacity(0.8),
+            color: AppColors.background.withValues(alpha: 0.8),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.black87, width: 2),
             boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 8, offset: Offset(0, 4))],
@@ -253,7 +254,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     height: double.infinity,
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [Color(0xFF00CEC9), Color(0xFF7C5CFC)],
+                        colors: [AppColors.accent, AppColors.primary],
                         begin: Alignment.centerLeft,
                         end: Alignment.centerRight,
                       ),

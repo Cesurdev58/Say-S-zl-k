@@ -8,6 +8,9 @@ import '../services/match_service.dart';
 import '../services/audio_service.dart';
 import '../services/user_service.dart';
 import 'multiplayer_game_screen.dart';
+import '../theme/app_colors.dart';
+import '../widgets/game_background.dart';
+import '../widgets/ui/game_sheet.dart';
 
 class PrivateRoomScreen extends StatefulWidget {
   final String? initialRoomCode;
@@ -84,7 +87,7 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
     bool? exit = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1D1B36),
+        backgroundColor: AppColors.surface,
         title: const Text('Odadan Çık?', style: TextStyle(color: Colors.white)),
         content: Text(
           _isHost
@@ -302,7 +305,7 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: const Color(0xFF1D1B36),
+        backgroundColor: AppColors.surface,
         title: const Text('Kuruculuğu Devret', style: TextStyle(color: Colors.white)),
         content: Text(
           '$targetName adlı oyuncuya oda kuruculuğunu devretmek istiyor musun?',
@@ -314,7 +317,7 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
             child: const Text('İptal', style: TextStyle(color: Colors.white54)),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00CEC9)),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.accent),
             onPressed: () async {
               Navigator.pop(dialogContext);
               if (_activeMatchId == null) return;
@@ -370,16 +373,12 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.6,
-        decoration: const BoxDecoration(
-          color: Color(0xFF1D1B36),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
+      builder: (context) => GameSheet(
+        heightFactor: 0.6,
         child: Column(
           children: [
             const Padding(
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: Text('Arkadaş Davet Et', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
             ),
             const Divider(color: Colors.white12, height: 1),
@@ -388,7 +387,7 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
                 stream: UserService.instance.getFriendsStream(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator(color: Color(0xFF00CEC9)));
+                    return const Center(child: CircularProgressIndicator(color: AppColors.accent));
                   }
                   final friends = snapshot.data ?? [];
                   if (friends.isEmpty) {
@@ -411,8 +410,8 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
                           alignment: Alignment.bottomRight,
                           children: [
                             CircleAvatar(
-                              backgroundColor: const Color(0xFF7C5CFC).withOpacity(0.2),
-                              child: const Icon(Icons.person, color: Color(0xFF7C5CFC)),
+                              backgroundColor: AppColors.primary.withValues(alpha: 0.2),
+                              child: const Icon(Icons.person, color: AppColors.primary),
                             ),
                             Container(
                               width: 12,
@@ -420,7 +419,7 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
                               decoration: BoxDecoration(
                                 color: isOnline ? Colors.green : (isIngame ? Colors.orange : Colors.grey),
                                 shape: BoxShape.circle,
-                                border: Border.all(color: const Color(0xFF1D1B36), width: 2),
+                                border: Border.all(color: AppColors.surface, width: 2),
                               ),
                             ),
                           ],
@@ -432,7 +431,7 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
                         ),
                         trailing: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: isOnline ? const Color(0xFF00CEC9) : Colors.grey,
+                            backgroundColor: isOnline ? AppColors.accent : Colors.grey,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                           ),
                           onPressed: isOnline
@@ -489,10 +488,17 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
-      child: Scaffold(
-        backgroundColor: const Color(0xFF131127),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final navigator = Navigator.of(context);
+        if (await _onWillPop()) {
+          if (mounted) navigator.pop();
+        }
+      },
+      child: GameBackground(child: Scaffold(
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -502,7 +508,7 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
             icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
             onPressed: () async {
               if (await _onWillPop()) {
-                if (mounted) Navigator.pop(context);
+                if (context.mounted) Navigator.pop(context);
               }
             },
           ),
@@ -514,7 +520,7 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const CircularProgressIndicator(color: Color(0xFF00CEC9)),
+                      const CircularProgressIndicator(color: AppColors.accent),
                       if (widget.waitForHostMatchId != null) ...[
                         const SizedBox(height: 24),
                         const Text(
@@ -530,7 +536,7 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
                   ? _buildLobbyView()
                   : _buildSelectionView(),
         ),
-      ),
+      )),
     );
   }
 
@@ -538,7 +544,7 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Icon(Icons.meeting_room_rounded, color: Color(0xFF7C5CFC), size: 80),
+        const Icon(Icons.meeting_room_rounded, color: AppColors.primary, size: 80),
         const SizedBox(height: 24),
         const Text('Grup Kapışması', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
@@ -553,7 +559,7 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
           height: 56,
           child: ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF7C5CFC),
+              backgroundColor: AppColors.primary,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             ),
             icon: const Icon(Icons.add_circle_outline_rounded, color: Colors.white),
@@ -568,7 +574,7 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFF1D1B36),
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: Colors.white12),
           ),
@@ -583,9 +589,9 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
                 decoration: InputDecoration(
                   counterText: "",
                   hintText: "KOD GİR",
-                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.2), fontSize: 24, letterSpacing: 4),
+                  hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.2), fontSize: 24, letterSpacing: 4),
                   filled: true,
-                  fillColor: const Color(0xFF131127),
+                  fillColor: AppColors.background,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                 ),
               ),
@@ -595,7 +601,7 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
                 height: 50,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF00CEC9),
+                    backgroundColor: AppColors.accent,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   onPressed: _joinRoom,
@@ -617,9 +623,9 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
         Container(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
           decoration: BoxDecoration(
-            color: const Color(0xFF1D1B36),
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFF7C5CFC), width: 1.5),
+            border: Border.all(color: AppColors.primary, width: 1.5),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -635,11 +641,11 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
                 ],
               ),
               IconButton(
-                icon: const Icon(Icons.copy_rounded, color: Color(0xFF7C5CFC), size: 24),
+                icon: const Icon(Icons.copy_rounded, color: AppColors.primary, size: 24),
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: _myRoomCode ?? ''));
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Kod Kopyalandı!'), backgroundColor: Color(0xFF00CEC9)),
+                    const SnackBar(content: Text('Kod Kopyalandı!'), backgroundColor: AppColors.accent),
                   );
                 },
               )
@@ -652,12 +658,12 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
           height: 48,
           child: ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF00CEC9).withOpacity(0.2),
-              side: const BorderSide(color: Color(0xFF00CEC9)),
+              backgroundColor: AppColors.accent.withValues(alpha: 0.2),
+              side: const BorderSide(color: AppColors.accent),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            icon: const Icon(Icons.person_add_rounded, color: Color(0xFF00CEC9)),
-            label: const Text('Arkadaş Davet Et', style: TextStyle(color: Color(0xFF00CEC9), fontWeight: FontWeight.bold)),
+            icon: const Icon(Icons.person_add_rounded, color: AppColors.accent),
+            label: const Text('Arkadaş Davet Et', style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold)),
             onPressed: _showInviteFriendDialog,
           ),
         ),
@@ -665,7 +671,7 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFF1D1B36),
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: Colors.white12),
           ),
@@ -687,10 +693,10 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
                   _isHost
                       ? DropdownButton<String>(
                           value: _gameMode,
-                          dropdownColor: const Color(0xFF232042),
+                          dropdownColor: AppColors.surfaceHigh,
                           underline: const SizedBox(),
-                          icon: const Icon(Icons.arrow_drop_down, color: Color(0xFF00CEC9)),
-                          style: const TextStyle(color: Color(0xFF00CEC9), fontWeight: FontWeight.bold),
+                          icon: const Icon(Icons.arrow_drop_down, color: AppColors.accent),
+                          style: const TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold),
                           items: const [
                             DropdownMenuItem(value: 'mix', child: Text('Karışık')),
                             DropdownMenuItem(value: 'word', child: Text('Sadece Kelime')),
@@ -700,7 +706,7 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
                         )
                       : Text(
                           _gameMode == 'mix' ? 'Karışık' : (_gameMode == 'word' ? 'Sadece Kelime' : 'Sadece İşlem'),
-                          style: const TextStyle(color: Color(0xFF00CEC9), fontWeight: FontWeight.bold),
+                          style: const TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold),
                         ),
                 ],
               ),
@@ -777,19 +783,19 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
                   margin: const EdgeInsets.only(bottom: 8),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: isMe ? const Color(0xFF7C5CFC).withOpacity(0.2) : const Color(0xFF1D1B36),
+                    color: isMe ? AppColors.primary.withValues(alpha: 0.2) : AppColors.surface,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: isMe ? const Color(0xFF7C5CFC) : Colors.white12),
+                    border: Border.all(color: isMe ? AppColors.primary : Colors.white12),
                   ),
                   child: Row(
                     children: [
                       CircleAvatar(
                         radius: 16,
-                        backgroundColor: isHostPlayer ? Colors.amber.withOpacity(0.2) : const Color(0xFF00CEC9).withOpacity(0.2),
+                        backgroundColor: isHostPlayer ? Colors.amber.withValues(alpha: 0.2) : AppColors.accent.withValues(alpha: 0.2),
                         child: Icon(
                           isHostPlayer ? Icons.star_rounded : Icons.person,
                           size: 16,
-                          color: isHostPlayer ? Colors.amber : const Color(0xFF00CEC9),
+                          color: isHostPlayer ? Colors.amber : AppColors.accent,
                         ),
                       ),
                       const SizedBox(width: 12),

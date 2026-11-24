@@ -21,14 +21,14 @@ class AudioService {
     if (_isInitialized) return;
 
     // ARKA PLANDAKİ MÜZİĞİ (Spotify, YouTube vb.) KESMEMESİ İÇİN SES ODAĞI (AUDIO CONTEXT) AYARI
-    final AudioContext audioContext = AudioContext(
+    const AudioContext audioContext = AudioContext(
       iOS: AudioContextIOS(
         category: AVAudioSessionCategory.ambient,
-        options: const [
+        options: [
           AVAudioSessionOptions.mixWithOthers,
         ],
       ),
-      android: const AudioContextAndroid(
+      android: AudioContextAndroid(
         isSpeakerphoneOn: false,
         stayAwake: false,
         contentType: AndroidContentType.sonification,
@@ -55,39 +55,49 @@ class AudioService {
     _isInitialized = true;
   }
 
+  /// Titreşim ayarı (Ayarlar > Titreşim). `Haptics` bu değeri okur.
+  bool get vibrationEnabled => _vibrationEnabled;
+
   // AYAR DEĞİŞİNCE RAM'İ GÜNCELLE
   void updateSettings(bool sound, bool vibration) {
     _soundEnabled = sound;
     _vibrationEnabled = vibration;
   }
 
-  Future<void> playClick() async {
-    if (_vibrationEnabled) HapticFeedback.lightImpact();
+  /// [haptic] false ise yalnızca ses çalar (titreşimi çağıran taraf `Haptics` ile verir).
+  Future<void> playClick({bool haptic = true}) async {
+    if (haptic && _vibrationEnabled) HapticFeedback.lightImpact();
     if (_soundEnabled) {
       try {
         if (_clickPlayer.state == PlayerState.playing) await _clickPlayer.stop();
         await _clickPlayer.resume();
-      } catch (e) {}
+      } catch (e) {
+        // Ses çalınamasa da oyun akışı etkilenmez.
+      }
     }
   }
 
-  Future<void> playSuccess() async {
-    if (_vibrationEnabled) HapticFeedback.mediumImpact();
+  Future<void> playSuccess({bool haptic = true}) async {
+    if (haptic && _vibrationEnabled) HapticFeedback.mediumImpact();
     if (_soundEnabled) {
       try {
         if (_successPlayer.state == PlayerState.playing) await _successPlayer.stop();
         await _successPlayer.resume();
-      } catch (e) {}
+      } catch (e) {
+        // Ses çalınamasa da oyun akışı etkilenmez.
+      }
     }
   }
 
-  Future<void> playError() async {
-    if (_vibrationEnabled) HapticFeedback.heavyImpact();
+  Future<void> playError({bool haptic = true}) async {
+    if (haptic && _vibrationEnabled) HapticFeedback.heavyImpact();
     if (_soundEnabled) {
       try {
         if (_errorPlayer.state == PlayerState.playing) await _errorPlayer.stop();
         await _errorPlayer.resume();
-      } catch (e) {}
+      } catch (e) {
+        // Ses çalınamasa da oyun akışı etkilenmez.
+      }
     }
   }
 }

@@ -1,36 +1,49 @@
 import 'package:flutter/material.dart';
 
-/// Oyun ekranlarında kullanılan mor-lacivert gradient arka plan.
+import '../theme/app_colors.dart';
+
+/// Atmosferik ekran arka planı: derin gece lacivertinden koyu mora yumuşak
+/// gradyan ve üstte hafif bir ışık hâlesi. Statik katman `RepaintBoundary`
+/// içindedir; üstteki animasyonlar arka planı yeniden çizdirmez.
 class GameBackground extends StatelessWidget {
   const GameBackground({super.key, required this.child});
 
   final Widget child;
 
-  static BoxDecoration get decoration => const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFF0F172A),
-            Color(0xFF1E1B4B),
-            Color(0xFF312E81),
-          ],
-        ),
-      );
+  static const BoxDecoration decoration = BoxDecoration(
+    gradient: LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [AppColors.atmosphereTop, AppColors.atmosphereMid, AppColors.atmosphereBottom],
+      stops: [0.0, 0.55, 1.0],
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
-    return Container(decoration: decoration, child: child);
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        const RepaintBoundary(
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              DecoratedBox(decoration: decoration),
+              // Üstten yumuşak ışık hâlesi
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    center: Alignment(0, -1.0),
+                    radius: 1.1,
+                    colors: [Color(0x337C5CFC), Color(0x00000000)],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        child,
+      ],
+    );
   }
-}
-
-/// Oyun ekranları için ortak renk sabitleri.
-abstract final class GameColors {
-  static const primary = Color(0xFF7C5CFC);
-  static const primaryDark = Color(0xFF4F46E5);
-  static const accent = Color(0xFFA78BFA);
-  static const cardGradientStart = Color(0xFF5B3FD9);
-  static const cardGradientEnd = Color(0xFF1E3A8A);
-  static const success = Color(0xFF34D399);
-  static const error = Color(0xFFF87171);
 }

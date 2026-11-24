@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class SolutionResult {
   final int target;
   final int achievedNumber;
@@ -97,4 +99,18 @@ class NumberSolverService {
     final res = findBestSolution(numbers, target);
     return res.steps.isEmpty ? ['Çözüm bulunamadı'] : res.steps;
   }
+
+  /// [solveSteps] ile aynı algoritma; ana thread'i bloklamamak için isolate'te çalışır.
+  Future<List<String>> solveStepsAsync(List<int> numbers, int target) {
+    return compute(_solveStepsIsolate, _SolveRequest(List<int>.from(numbers), target));
+  }
 }
+
+class _SolveRequest {
+  const _SolveRequest(this.numbers, this.target);
+  final List<int> numbers;
+  final int target;
+}
+
+List<String> _solveStepsIsolate(_SolveRequest request) =>
+    NumberSolverService.instance.solveSteps(request.numbers, request.target);

@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../services/match_service.dart';
 import '../services/audio_service.dart';
 import 'multiplayer_game_screen.dart';
+import '../theme/app_colors.dart';
+import '../widgets/game_background.dart';
 
 class MatchmakingScreen extends StatefulWidget {
   const MatchmakingScreen({super.key});
@@ -185,8 +187,8 @@ class _MatchmakingScreenState extends State<MatchmakingScreen> with SingleTicker
   Widget build(BuildContext context) {
     final String? myUid = FirebaseAuth.instance.currentUser?.uid;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF131127),
+    return GameBackground(child: Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -211,10 +213,10 @@ class _MatchmakingScreenState extends State<MatchmakingScreen> with SingleTicker
                 height: 140,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFF7C5CFC).withOpacity(0.5), width: 2),
-                  gradient: RadialGradient(colors: [const Color(0xFF7C5CFC).withOpacity(0.2), Colors.transparent]),
+                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.5), width: 2),
+                  gradient: RadialGradient(colors: [AppColors.primary.withValues(alpha: 0.2), Colors.transparent]),
                 ),
-                child: const Center(child: Icon(Icons.radar_rounded, color: Color(0xFF7C5CFC), size: 64)),
+                child: const Center(child: Icon(Icons.radar_rounded, color: AppColors.primary, size: 64)),
               ),
             ),
             const SizedBox(height: 32),
@@ -236,7 +238,7 @@ class _MatchmakingScreenState extends State<MatchmakingScreen> with SingleTicker
                     return Column(
                       children: [
                         CircleAvatar(
-                          backgroundColor: isMe ? const Color(0xFF00CEC9) : const Color(0xFF7C5CFC),
+                          backgroundColor: isMe ? AppColors.accent : AppColors.primary,
                           radius: 24,
                           child: const Icon(Icons.person, color: Colors.white),
                         ),
@@ -246,7 +248,7 @@ class _MatchmakingScreenState extends State<MatchmakingScreen> with SingleTicker
                           child: Text(
                             name,
                             style: TextStyle(
-                              color: isMe ? const Color(0xFF00CEC9) : Colors.white,
+                              color: isMe ? AppColors.accent : Colors.white,
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
                             ),
@@ -260,7 +262,7 @@ class _MatchmakingScreenState extends State<MatchmakingScreen> with SingleTicker
                     return Column(
                       children: [
                         CircleAvatar(
-                          backgroundColor: Colors.white.withOpacity(0.1),
+                          backgroundColor: Colors.white.withValues(alpha: 0.1),
                           radius: 24,
                           child: const Icon(Icons.person, color: Colors.white24),
                         ),
@@ -295,6 +297,6 @@ class _MatchmakingScreenState extends State<MatchmakingScreen> with SingleTicker
           ],
         ),
       ),
-    );
+    ));
   }
 }

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/audio_service.dart';
 import '../services/user_service.dart';
+import '../theme/app_colors.dart';
+import '../widgets/game_background.dart';
 
 class AuthScreen extends StatefulWidget {
   final VoidCallback onProfileUpdated;
@@ -82,7 +84,9 @@ class _AuthScreenState extends State<AuthScreen> {
             widget.onProfileUpdated();
           }
         }
-      } catch (e) {}
+      } catch (e) {
+        // Yoklama hatası yok sayılır; bir sonraki turda tekrar denenir.
+      }
     });
   }
 
@@ -103,8 +107,8 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF131127),
+    return GameBackground(child: Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -125,7 +129,7 @@ class _AuthScreenState extends State<AuthScreen> {
           child: _isVerificationPending ? _buildVerificationUI() : _buildAuthUI(),
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildVerificationUI() {
@@ -156,7 +160,9 @@ class _AuthScreenState extends State<AuthScreen> {
                     setState(() => _isLoading = true);
                     try {
                       await FirebaseAuth.instance.currentUser?.reload();
-                    } catch (e) {}
+                    } catch (e) {
+                      // reload başarısız olsa da mevcut kullanıcı bilgisiyle devam edilir.
+                    }
                     final user = FirebaseAuth.instance.currentUser;
 
                     if (user != null && user.emailVerified) {
@@ -230,7 +236,7 @@ class _AuthScreenState extends State<AuthScreen> {
         Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: const Color(0xFF1D1B36),
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: Colors.white12),
           ),
@@ -245,7 +251,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
-                      color: _isLoginMode ? const Color(0xFF7C5CFC) : Colors.transparent,
+                      color: _isLoginMode ? AppColors.primary : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(
@@ -269,7 +275,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
-                      color: !_isLoginMode ? const Color(0xFF00CEC9) : Colors.transparent,
+                      color: !_isLoginMode ? AppColors.accent : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Center(
@@ -287,7 +293,7 @@ class _AuthScreenState extends State<AuthScreen> {
         const SizedBox(height: 32),
         Icon(
           _isLoginMode ? Icons.login_rounded : Icons.security_rounded,
-          color: _isLoginMode ? const Color(0xFF7C5CFC) : const Color(0xFF00CEC9),
+          color: _isLoginMode ? AppColors.primary : AppColors.accent,
           size: 64,
         ),
         const SizedBox(height: 16),
@@ -310,9 +316,9 @@ class _AuthScreenState extends State<AuthScreen> {
           keyboardType: TextInputType.emailAddress,
           decoration: InputDecoration(
             hintText: 'E-posta Adresi',
-            hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+            hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
             filled: true,
-            fillColor: const Color(0xFF1D1B36),
+            fillColor: AppColors.surface,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
             prefixIcon: const Icon(Icons.email_rounded, color: Colors.white54),
           ),
@@ -327,9 +333,9 @@ class _AuthScreenState extends State<AuthScreen> {
           },
           decoration: InputDecoration(
             hintText: 'Şifre',
-            hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+            hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
             filled: true,
-            fillColor: const Color(0xFF1D1B36),
+            fillColor: AppColors.surface,
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
             prefixIcon: const Icon(Icons.lock_rounded, color: Colors.white54),
             suffixIcon: IconButton(
@@ -398,15 +404,15 @@ class _AuthScreenState extends State<AuthScreen> {
         ],
         const SizedBox(height: 40),
         _isLoading
-            ? CircularProgressIndicator(color: _isLoginMode ? const Color(0xFF7C5CFC) : const Color(0xFF00CEC9))
+            ? CircularProgressIndicator(color: _isLoginMode ? AppColors.primary : AppColors.accent)
             : SizedBox(
                 width: double.infinity,
                 height: 54,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _isLoginMode
-                        ? const Color(0xFF7C5CFC)
-                        : ((!_isLoginMode && !_isPasswordValid) ? Colors.grey : const Color(0xFF00CEC9)),
+                        ? AppColors.primary
+                        : ((!_isLoginMode && !_isPasswordValid) ? Colors.grey : AppColors.accent),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
                   onPressed: _submitAuth,
@@ -427,9 +433,9 @@ class _AuthScreenState extends State<AuthScreen> {
           duration: const Duration(milliseconds: 300),
           height: 6,
           decoration: BoxDecoration(
-            color: isMet ? Colors.greenAccent : Colors.white.withOpacity(0.1),
+            color: isMet ? Colors.greenAccent : Colors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(3),
-            boxShadow: isMet ? [BoxShadow(color: Colors.greenAccent.withOpacity(0.5), blurRadius: 4)] : [],
+            boxShadow: isMet ? [BoxShadow(color: Colors.greenAccent.withValues(alpha: 0.5), blurRadius: 4)] : [],
           ),
         ),
         const SizedBox(height: 6),

@@ -5,6 +5,8 @@ import '../models/user_profile.dart';
 import '../services/user_service.dart';
 import '../services/audio_service.dart';
 import '../services/ad_service.dart';
+import '../theme/app_colors.dart';
+import '../widgets/game_background.dart';
 
 class StoreScreen extends StatefulWidget {
   const StoreScreen({super.key});
@@ -137,7 +139,7 @@ class _StoreScreenState extends State<StoreScreen> {
     if (!mounted) return;
     AudioService.instance.playSuccess();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: const Color(0xFF00CEC9)),
+      SnackBar(content: Text(message), backgroundColor: AppColors.accent),
     );
   }
 
@@ -195,11 +197,11 @@ class _StoreScreenState extends State<StoreScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: const Color(0xFF1D1B36),
+        backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Row(
           children: [
-            Icon(Icons.shopping_cart_checkout_rounded, color: Color(0xFF00CEC9)),
+            Icon(Icons.shopping_cart_checkout_rounded, color: AppColors.accent),
             SizedBox(width: 8),
             Text('Satın Almayı Onayla', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
           ],
@@ -218,7 +220,7 @@ class _StoreScreenState extends State<StoreScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF00CEC9),
+              backgroundColor: AppColors.accent,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () async {
@@ -320,8 +322,8 @@ class _StoreScreenState extends State<StoreScreen> {
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
-      child: Scaffold(
-        backgroundColor: const Color(0xFF131127),
+      child: GameBackground(child: Scaffold(
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -337,13 +339,13 @@ class _StoreScreenState extends State<StoreScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1D1B36),
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFF00CEC9).withOpacity(0.3)),
+                  border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.diamond_rounded, color: Color(0xFF00CEC9), size: 14),
+                    const Icon(Icons.diamond_rounded, color: AppColors.accent, size: 14),
                     const SizedBox(width: 4),
                     Text('${_profile?.gems ?? 0}', style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
                   ],
@@ -353,9 +355,9 @@ class _StoreScreenState extends State<StoreScreen> {
           ),
           centerTitle: true,
           bottom: const TabBar(
-            indicatorColor: Color(0xFF00CEC9),
+            indicatorColor: AppColors.accent,
             indicatorWeight: 3,
-            labelColor: Color(0xFF00CEC9),
+            labelColor: AppColors.accent,
             unselectedLabelColor: Colors.white54,
             tabs: [
               Tab(text: 'Özel Karakterler'),
@@ -364,7 +366,7 @@ class _StoreScreenState extends State<StoreScreen> {
           ),
         ),
         body: _profile == null
-            ? const Center(child: CircularProgressIndicator(color: Color(0xFF7C5CFC)))
+            ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
             : Column(
                 children: [
                   _buildAdBanner(),
@@ -378,7 +380,7 @@ class _StoreScreenState extends State<StoreScreen> {
                   ),
                 ],
               ),
-      ),
+      )),
     );
   }
 
@@ -388,10 +390,10 @@ class _StoreScreenState extends State<StoreScreen> {
       margin: const EdgeInsets.fromLTRB(20, 16, 20, 0),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(colors: [Color(0xFF6C5CE7), Color(0xFF00CEC9)]),
+        gradient: const LinearGradient(colors: [AppColors.primaryAlt, AppColors.accent]),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: const Color(0xFF00CEC9).withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4)),
+          BoxShadow(color: AppColors.accent.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4)),
         ],
       ),
       child: Row(
@@ -405,7 +407,7 @@ class _StoreScreenState extends State<StoreScreen> {
                 const Text('Ücretsiz Cevher', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                 const SizedBox(height: 2),
                 Text(canWatch ? 'Reklam izle, 25 cevher kazan!' : _getRemainingTimeText(),
-                    style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 13)),
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 13)),
                 const SizedBox(height: 4),
                 Text('İzlenen: $_adCount/2', style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 12)),
               ],
@@ -443,7 +445,7 @@ class _StoreScreenState extends State<StoreScreen> {
               padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
               child: Text(
                 category['title'],
-                style: const TextStyle(color: Color(0xFF00CEC9), fontSize: 16, fontWeight: FontWeight.bold),
+                style: const TextStyle(color: AppColors.accent, fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
             GridView.builder(
@@ -483,7 +485,7 @@ class _StoreScreenState extends State<StoreScreen> {
             padding: const EdgeInsets.only(bottom: 16),
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent.withOpacity(0.2),
+                backgroundColor: Colors.redAccent.withValues(alpha: 0.2),
                 foregroundColor: Colors.redAccent,
                 elevation: 0,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: Colors.redAccent)),
@@ -505,7 +507,7 @@ class _StoreScreenState extends State<StoreScreen> {
                 children: [
                   CircleAvatar(
                     radius: 26,
-                    backgroundColor: const Color(0xFF131127),
+                    backgroundColor: AppColors.background,
                     backgroundImage: AssetImage('assets/avatars/${_profile!.avatar}.png'),
                   ),
                   Image.asset(
@@ -550,16 +552,16 @@ class _StoreScreenState extends State<StoreScreen> {
             Text(title, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             if (isEquipped)
-              const Text('Kuşanıldı', style: const TextStyle(color: Color(0xFF00CEC9), fontWeight: FontWeight.bold))
+              const Text('Kuşanıldı', style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold))
             else if (isOwned)
-              const Text('Sahipsin', style: const TextStyle(color: Colors.white54, fontWeight: FontWeight.bold))
+              const Text('Sahipsin', style: TextStyle(color: Colors.white54, fontWeight: FontWeight.bold))
             else
               Row(
                 mainAxisAlignment: isHorizontal ? MainAxisAlignment.start : MainAxisAlignment.center,
                 children: [
-                  Text('$price', style: const TextStyle(color: Color(0xFF00CEC9), fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text('$price', style: const TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold, fontSize: 16)),
                   const SizedBox(width: 4),
-                  const Icon(Icons.diamond_rounded, color: Color(0xFF00CEC9), size: 16),
+                  const Icon(Icons.diamond_rounded, color: AppColors.accent, size: 16),
                 ],
               ),
           ],
@@ -573,9 +575,9 @@ class _StoreScreenState extends State<StoreScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isEquipped ? const Color(0xFF00CEC9).withOpacity(0.1) : const Color(0xFF1D1B36),
+          color: isEquipped ? AppColors.accent.withValues(alpha: 0.1) : AppColors.surface,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: isEquipped ? const Color(0xFF00CEC9) : Colors.white.withOpacity(0.05), width: isEquipped ? 2 : 1),
+          border: Border.all(color: isEquipped ? AppColors.accent : Colors.white.withValues(alpha: 0.05), width: isEquipped ? 2 : 1),
         ),
         child: isHorizontal ? Row(children: content) : Column(mainAxisAlignment: MainAxisAlignment.center, children: content),
       ),

@@ -1,18 +1,42 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:confetti/confetti.dart';
 
+import '../services/score_calculator.dart';
 import '../services/word_service.dart';
 import '../services/number_solver_service.dart';
 import '../services/audio_service.dart';
 import '../services/user_service.dart';
 import '../services/ad_service.dart';
+import '../services/haptics.dart';
 import '../services/match_service.dart';
+import '../widgets/joker_picker_dialog.dart';
+import '../widgets/match_ranking_list.dart';
+import '../widgets/missed_solution_tile.dart';
+import '../widgets/timer_chip.dart';
 import 'private_room_screen.dart';
 import 'matchmaking_screen.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
+import '../widgets/ui/game_button.dart';
+import '../widgets/ui/game_control_bar.dart';
+import '../widgets/ui/game_dialog.dart';
+import '../widgets/ui/animated_slot.dart';
+import '../widgets/ui/answer_slots.dart';
+import '../widgets/ui/game_card.dart';
+import '../widgets/ui/count_up_text.dart';
+import '../widgets/ui/error_shake.dart';
+import '../widgets/ui/game_hud.dart';
+import '../widgets/ui/game_tile.dart';
+import '../widgets/ui/motion.dart';
+import '../widgets/ui/recessed_slot.dart';
+import '../widgets/ui/target_core.dart';
+import '../widgets/game_background.dart';
+import '../widgets/ui/game_sheet.dart';
+import '../widgets/ui/game_confetti.dart';
+import '../widgets/ui/praise_overlay.dart';
 
 class MultiplayerGameScreen extends StatefulWidget {
   final String matchId;
@@ -33,17 +57,34 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
   bool isPrivate = false;
   bool isGameOver = false;
   bool _isSubmittingAnswer = false;
+  bool _isResolvingSolution = false;
+  // Yanlış kelime / geçersiz işlemde cevap alanını sallamak için artırılır.
+  final ValueNotifier<int> _errorSignal = ValueNotifier<int>(0);
+  int _lastTickSecond = -1;
+
+  void _signalError() {
+    Haptics.error();
+    _errorSignal.value++;
+  }
+
+  void _playConfetti() {
+    if (!Motion.reduced(context)) _confettiController.play();
+  }
+  Future<List<String>>? _mathStepsFuture;
   int searchEndTime = 0;
   String? currentRoomCode;
 
   Map<String, dynamic> _players = {};
 
   Set<String> _friendUids = {};
-  Set<String> _pendingRequestUids = {};
+  final Set<String> _pendingRequestUids = {};
 
   bool _settingsLoaded = false;
   String matchMode = 'mix';
-  int remainingSeconds = 120;
+  // Kalan süre ValueNotifier'da tutulur; saniyelik tikler tüm ekranı rebuild etmez.
+  final ValueNotifier<int> _remainingNotifier = ValueNotifier<int>(120);
+  int get remainingSeconds => _remainingNotifier.value;
+  set remainingSeconds(int v) => _remainingNotifier.value = v;
   int remainingPasses = 3;
 
   Timer? gameTimer;
@@ -67,18 +108,12 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
   int? firstNumValue;
   String? selectedOp;
 
-  final List<String> _alphabet = [
-    'A', 'B', 'C', 'Ç', 'D', 'E', 'F', 'G', 'Ğ', 'H',
-    'I', 'İ', 'J', 'K', 'L', 'M', 'N', 'O', 'Ö', 'P',
-    'R', 'S', 'Ş', 'T', 'U', 'Ü', 'V', 'Y', 'Z'
-  ];
 
   late ConfettiController _confettiController;
   late AnimationController _pulseController;
 
-  String _praiseText = "";
-  double _praiseBottom = 0;
-  double _praiseOpacity = 0.0;
+  // Övgü yazısı bu sinyal arttığında bir kez oynar.
+  final ValueNotifier<int> _praiseSignal = ValueNotifier<int>(0);
 
   int _lastMessageTime = 0;
   String? _floatingEmojiText;
@@ -93,9 +128,8 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
     super.initState();
     UserService.instance.updateUserStatus('oyunda');
 
-    _confettiController = ConfettiController(duration: const Duration(seconds: 1));
+    _confettiController = GameConfetti.newController();
     _pulseController = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
-    _praiseBottom = 250;
 
     _loadMyFriendsAndRequests();
     _initMatchSync();
@@ -117,27 +151,13 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
   Future<bool> _onWillPop() async {
     if (isGameOver) return true;
 
-    bool? exit = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1D1B36),
-        title: const Text('Pes mi Ediyorsun?', style: TextStyle(color: Colors.white)),
-        content: const Text('Oyundan çıkarsanız yenilmiş sayılacaksınız. Emin misiniz?', style: TextStyle(color: Colors.white70)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Hayır, Devam Et', style: TextStyle(color: Colors.white54)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-            onPressed: () {
-              MatchService.instance.cancelMatchmaking(widget.matchId);
-              Navigator.of(context).pop(true);
-            },
-            child: const Text('Çık', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
+    bool? exit = await showGameConfirmDialog(
+      context,
+      title: 'Pes mi Ediyorsun?',
+      message: 'Oyundan çıkarsanız yenilmiş sayılacaksınız. Emin misiniz?',
+      cancelLabel: 'Hayır, Devam Et',
+      confirmLabel: 'Çık',
+      onConfirm: () => MatchService.instance.cancelMatchmaking(widget.matchId),
     );
     return exit ?? false;
   }
@@ -176,17 +196,11 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: Color(0xFF1D1B36),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-        ),
+      builder: (context) => GameSheet(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(2))),
-            const SizedBox(height: 24),
             const Text('Hızlı Mesaj', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             Wrap(
@@ -198,14 +212,14 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                         onTap: () => _sendEmoji(e),
                         child: Container(
                           padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(color: const Color(0xFF131127), borderRadius: BorderRadius.circular(16)),
+                          decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(16)),
                           child: Text(e, style: const TextStyle(fontSize: 28)),
                         ),
                       ))
                   .toList(),
             ),
             const SizedBox(height: 16),
-            Divider(color: Colors.white.withOpacity(0.1)),
+            Divider(color: Colors.white.withValues(alpha: 0.1)),
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
@@ -217,9 +231,9 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                           decoration: BoxDecoration(
-                              color: const Color(0xFF7C5CFC).withOpacity(0.2),
+                              color: AppColors.primary.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: const Color(0xFF7C5CFC).withOpacity(0.5))),
+                              border: Border.all(color: AppColors.primary.withValues(alpha: 0.5))),
                           child: Text(text, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                         ),
                       ))
@@ -234,32 +248,15 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
     });
   }
 
-  void _showPraiseAnimation() {
-    final random = Random();
-    final words = ['MÜKEMMEL!', 'HARİKA!', 'ZEKİCE!', 'EFSANE!', 'ZAFER!'];
-
-    setState(() {
-      _praiseText = words[random.nextInt(words.length)];
-      _praiseBottom = MediaQuery.of(context).size.height * 0.4;
-      _praiseOpacity = 0.0;
-    });
-
-    Future.microtask(() {
-      if (mounted) {
-        setState(() {
-          _praiseBottom = MediaQuery.of(context).size.height * 0.6;
-          _praiseOpacity = 1.0;
-        });
-      }
-    });
-
-    Future.delayed(const Duration(milliseconds: 1200), () {
-      if (mounted) {
-        setState(() {
-          _praiseOpacity = 0.0;
-          _praiseBottom = MediaQuery.of(context).size.height * 0.65;
-        });
-      }
+  /// Doğru cevap efektleri (ses, titreşim, konfeti, övgü) soru değişimiyle aynı karede
+  /// değil, bir sonraki karede tetiklenir; böylece tek karede darboğaz oluşmaz.
+  void _celebrate({bool exact = false}) {
+    Motion.afterFrame(() {
+      if (!mounted) return;
+      AudioService.instance.playSuccess(haptic: false);
+      Haptics.success(exact: exact);
+      _playConfetti();
+      _praiseSignal.value++;
     });
   }
 
@@ -272,7 +269,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
             context: context,
             barrierDismissible: false,
             builder: (context) => AlertDialog(
-              backgroundColor: const Color(0xFF1D1B36),
+              backgroundColor: AppColors.surface,
               title: const Text('Maç İptal Edildi', style: TextStyle(color: Colors.white)),
               content: const Text('Yeterli oyuncu bulunamadı veya oda kapatıldı.', style: TextStyle(color: Colors.white70)),
               actions: [
@@ -281,7 +278,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                     Navigator.pop(context);
                     Navigator.pop(context);
                   },
-                  child: const Text('Ana Menü', style: TextStyle(color: Color(0xFF00CEC9))),
+                  child: const Text('Ana Menü', style: TextStyle(color: AppColors.accent)),
                 )
               ],
             ),
@@ -354,14 +351,14 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
     });
   }
 
-  void _triggerLocalGameOver() {
+  Future<void> _triggerLocalGameOver() async {
     if (isGameOver) return;
     isGameOver = true;
     gameTimer?.cancel();
     _pulseController.stop();
 
     if (currentRoundType != 'done') {
-      _recordCurrentSolution();
+      await _recordCurrentSolution();
     }
 
     if (_isDialogShowing && mounted) {
@@ -418,12 +415,14 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
       }
 
       if (mounted && !isGameOver) {
-        setState(() {
-          remainingSeconds = rem;
-          if (remainingSeconds <= 10 && !_pulseController.isAnimating) {
-            _pulseController.repeat(reverse: true);
-          }
-        });
+        remainingSeconds = rem;
+        if (rem <= 5 && rem != _lastTickSecond) {
+          _lastTickSecond = rem;
+          Haptics.tick();
+        }
+        if (remainingSeconds <= 10 && !_pulseController.isAnimating) {
+          _pulseController.repeat(reverse: true);
+        }
       }
     });
   }
@@ -459,6 +458,8 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
         targetNumber = q['target'];
         originalNumbers = List<int>.from(q['numbers']);
         currentNumbers = List<int>.from(originalNumbers);
+        // Çözüm adımları arka planda (isolate) önceden hesaplanır.
+        _mathStepsFuture = NumberSolverService.instance.solveStepsAsync(originalNumbers, targetNumber);
       }
     });
   }
@@ -469,35 +470,44 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
     _loadCurrentQuestion();
   }
 
-  List<String> _calculateRealMathSteps() {
-    return NumberSolverService.instance.solveSteps(originalNumbers, targetNumber);
+  Future<List<String>> _calculateRealMathSteps() {
+    return _mathStepsFuture ??=
+        NumberSolverService.instance.solveStepsAsync(originalNumbers, targetNumber);
   }
 
-  String _calculateRealLongestWord() {
-    String b = WordService.instance.findLongestWord(availableLetters);
+  Future<String> _calculateRealLongestWord() async {
+    String b = await WordService.instance.findLongestWordAsync(availableLetters);
     return b.isEmpty ? "BULUNAMADI" : b;
   }
 
-  void _recordCurrentSolution() {
+  Future<void> _recordCurrentSolution() async {
     if (currentRoundType == 'word') {
+      final letters = availableLetters.where((l) => l != 'JOKER').join(', ');
       missedSolutions.add({
         'type': 'word',
-        'letters': availableLetters.where((l) => l != 'JOKER').join(', '),
-        'bestWord': _calculateRealLongestWord(),
+        'letters': letters,
+        'bestWord': await _calculateRealLongestWord(),
       });
     } else if (currentRoundType == 'math') {
+      final target = targetNumber;
       missedSolutions.add({
         'type': 'math',
-        'target': targetNumber,
-        'mathSteps': _calculateRealMathSteps(),
+        'target': target,
+        'mathSteps': await _calculateRealMathSteps(),
       });
     }
   }
 
-  void _passQuestion() {
-    if (_isSubmittingAnswer || isGameOver || remainingSeconds <= 0 || remainingPasses <= 0) return;
+  Future<void> _passQuestion() async {
+    if (_isSubmittingAnswer || _isResolvingSolution || isGameOver || remainingSeconds <= 0 || remainingPasses <= 0) return;
     AudioService.instance.playClick();
-    _recordCurrentSolution();
+    _isResolvingSolution = true;
+    try {
+      await _recordCurrentSolution();
+    } finally {
+      _isResolvingSolution = false;
+    }
+    if (!mounted || isGameOver) return;
     setState(() => remainingPasses--);
     _nextQuestion();
   }
@@ -548,9 +558,9 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
             child: Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                  color: const Color(0xFF1D1B36),
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: didWin ? Colors.amber : const Color(0xFF7C5CFC), width: 2)),
+                  border: Border.all(color: didWin ? Colors.amber : AppColors.primary, width: 2)),
               child: Column(
                 children: [
                   Text(didWin ? '🏆 ŞAMPİYON SENSİN!' : '$myRank. OLDUN',
@@ -558,61 +568,16 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                   const SizedBox(height: 16),
                   Expanded(
                     flex: 3,
-                    child: Container(
-                      decoration: BoxDecoration(color: const Color(0xFF131127), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white12)),
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(12),
-                        itemCount: sortedPlayers.length,
-                        itemBuilder: (context, index) {
-                          var p = sortedPlayers[index];
-                          bool isMe = p.key == myUid;
-
-                          bool isFriend = _friendUids.contains(p.key);
-                          bool isPending = _pendingRequestUids.contains(p.key);
-
-                          Color rankColor = index == 0
-                              ? Colors.amber
-                              : (index == 1 ? Colors.grey[400]! : (index == 2 ? Colors.brown[300]! : Colors.white54));
-
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                                color: isMe ? const Color(0xFF7C5CFC).withOpacity(0.3) : Colors.transparent,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: isMe ? const Color(0xFF7C5CFC) : Colors.transparent)),
-                            child: Row(
-                              children: [
-                                Text('${index + 1}.', style: TextStyle(color: rankColor, fontSize: 20, fontWeight: FontWeight.bold)),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                    child: Text(p.value['name'].toString(),
-                                        style: TextStyle(color: isMe ? Colors.white : Colors.white70, fontWeight: FontWeight.bold, fontSize: 16))),
-                                Text('${p.value['score']} P', style: TextStyle(color: rankColor, fontWeight: FontWeight.bold, fontSize: 18)),
-                                if (!isMe && !isFriend) ...[
-                                  const SizedBox(width: 8),
-                                  IconButton(
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(),
-                                    onPressed: isPending
-                                        ? null
-                                        : () async {
-                                            AudioService.instance.playClick();
-                                            await _sendFriendRequest(p.key, p.value['name'].toString());
-                                            setDialogState(() {});
-                                          },
-                                    icon: Icon(
-                                      isPending ? Icons.check_circle_rounded : Icons.person_add_alt_1_rounded,
-                                      color: isPending ? Colors.greenAccent : const Color(0xFF00CEC9),
-                                      size: 24,
-                                    ),
-                                  )
-                                ]
-                              ],
-                            ),
-                          );
-                        },
-                      ),
+                    child: MatchRankingList(
+                      sortedPlayers: sortedPlayers,
+                      myUid: myUid,
+                      friendUids: _friendUids,
+                      pendingRequestUids: _pendingRequestUids,
+                      onAddFriend: (uid, name) async {
+                        AudioService.instance.playClick();
+                        await _sendFriendRequest(uid, name);
+                        setDialogState(() {});
+                      },
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -623,27 +588,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                       flex: 2,
                       child: ListView.builder(
                         itemCount: missedSolutions.length,
-                        itemBuilder: (context, index) {
-                          var sol = missedSolutions[index];
-                          bool isWord = sol['type'] == 'word';
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                                color: const Color(0xFF131127), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white12)),
-                            child: isWord
-                                ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                    Text('Harfler: ${sol['letters']}', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)),
-                                    Text('${sol['bestWord']} (${sol['bestWord'].length} Harf)',
-                                        style: const TextStyle(color: Color(0xFF00CEC9), fontSize: 14, fontWeight: FontWeight.bold))
-                                  ])
-                                : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                    Text('Hedef: ${sol['target']}', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)),
-                                    ...(sol['mathSteps'] as List<String>).map((step) =>
-                                        Text(step, style: const TextStyle(color: Color(0xFF00CEC9), fontSize: 12, fontWeight: FontWeight.bold)))
-                                  ]),
-                          );
-                        },
+                        itemBuilder: (context, index) => MissedSolutionTile(solution: missedSolutions[index]),
                       ),
                     ),
                   ],
@@ -654,7 +599,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                       height: 48,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF00CEC9), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                            backgroundColor: AppColors.accent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                         onPressed: () async {
                           AudioService.instance.playClick();
                           if (isHost) {
@@ -663,7 +608,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                               matchMode,
                               _players,
                             );
-                            if (mounted) {
+                            if (mounted && context.mounted) {
                               Navigator.pop(context);
                               Navigator.pop(context);
                               Navigator.push(
@@ -697,7 +642,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                             height: 48,
                             child: OutlinedButton(
                               style: OutlinedButton.styleFrom(
-                                  side: BorderSide(color: Colors.white.withOpacity(0.2)),
+                                  side: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                               onPressed: _exitToMainMenu,
                               child: const Text('Ana Menü', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
@@ -710,7 +655,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                             height: 48,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF6C5CE7), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                                  backgroundColor: AppColors.primaryAlt, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                               onPressed: () {
                                 AudioService.instance.playClick();
                                 Navigator.pop(context);
@@ -780,7 +725,8 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
     if (word.isEmpty) return;
 
     if (word.length == 1) {
-      AudioService.instance.playError();
+      AudioService.instance.playError(haptic: false);
+      _signalError();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('En az 2 harfli bir kelime girmelisiniz!'), backgroundColor: Colors.orange, duration: Duration(seconds: 1)),
       );
@@ -790,15 +736,14 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
     _isSubmittingAnswer = true;
     var result = WordService.instance.validateWord(word, availableLetters);
     if (result == WordValidationResult.valid) {
-      AudioService.instance.playSuccess();
-      _confettiController.play();
-      _showPraiseAnimation();
-      int earned = word.length >= 7 ? word.length + 5 : word.length;
+      _celebrate();
+      int earned = ScoreCalculator.multiWordScore(word.length);
       _updateMyScore(earned);
       _nextQuestion();
     } else {
       _isSubmittingAnswer = false;
-      AudioService.instance.playError();
+      AudioService.instance.playError(haptic: false);
+      _signalError();
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(result.message), backgroundColor: Colors.redAccent, duration: const Duration(seconds: 1)));
     }
@@ -818,14 +763,13 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
     }
     if (minDiff <= 10) {
       _isSubmittingAnswer = true;
-      AudioService.instance.playSuccess();
-      _confettiController.play();
-      _showPraiseAnimation();
-      int earned = (10 - minDiff) + (currentNumbers.length * 2);
+      _celebrate(exact: minDiff == 0);
+      int earned = ScoreCalculator.mathScore(minDiff, currentNumbers.length);
       _updateMyScore(earned);
       _nextQuestion();
     } else {
-      AudioService.instance.playError();
+      AudioService.instance.playError(haptic: false);
+      _signalError();
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Hedefe en fazla 10 yaklaşmalısınız!'), backgroundColor: Colors.orange, duration: Duration(seconds: 1)));
     }
@@ -833,7 +777,8 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
 
   void _undoLastAction() {
     if (_isSubmittingAnswer || isGameOver || remainingSeconds <= 0) return;
-    AudioService.instance.playClick();
+    AudioService.instance.playClick(haptic: false);
+    Haptics.selection();
     setState(() {
       if (currentRoundType == 'word') {
         if (selectedLetters.isNotEmpty) {
@@ -860,53 +805,23 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
     _isDialogShowing = true;
     AudioService.instance.playClick();
 
-    showDialog(
-        context: context,
-        builder: (context) {
-          return Dialog(
-              backgroundColor: const Color(0xFF1D1B36),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-              child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    const Text('Joker Harf Seçin', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 16),
-                    ConstrainedBox(
-                        constraints: const BoxConstraints(maxHeight: 300),
-                        child: SingleChildScrollView(
-                            child: Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                alignment: WrapAlignment.center,
-                                children: _alphabet
-                                    .map((char) => InkWell(
-                                        onTap: () {
-                                          AudioService.instance.playClick();
-                                          Navigator.pop(context);
-                                          if (!isGameOver && remainingSeconds > 0) {
-                                            setState(() {
-                                              selectedIndices.add(index);
-                                              selectedLetters.add(char);
-                                            });
-                                          }
-                                        },
-                                        child: Container(
-                                            width: 42,
-                                            height: 42,
-                                            decoration: BoxDecoration(color: const Color(0xFFFF9F43), borderRadius: BorderRadius.circular(10)),
-                                            child: Center(
-                                                child: Text(char,
-                                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15))))))
-                                    .toList())))
-                  ])));
-        }).then((_) {
+    JokerPickerDialog.show(context).then((char) {
       _isDialogShowing = false;
+      if (char == null || !mounted) return;
+      if (!isGameOver && remainingSeconds > 0) {
+        Haptics.selection();
+        setState(() {
+          selectedIndices.add(index);
+          selectedLetters.add(char);
+        });
+      }
     });
   }
 
   void _onNumberTap(int index, int num) {
     if (_isSubmittingAnswer || isGameOver || remainingSeconds <= 0) return;
-    AudioService.instance.playClick();
+    AudioService.instance.playClick(haptic: false);
+    Haptics.selection();
     if (firstNumIndex == null) {
       setState(() {
         firstNumIndex = index;
@@ -921,6 +836,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
         if (firstNumValue! - secondNum > 0) {
           result = firstNumValue! - secondNum;
         } else {
+          _signalError();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Çıkarma sonucu pozitif bir tam sayı olmalıdır!'),
@@ -935,6 +851,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
         if (secondNum > 0 && firstNumValue! % secondNum == 0) {
           result = firstNumValue! ~/ secondNum;
         } else {
+          _signalError();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Bölme işlemi kalansız olmalıdır!'),
@@ -980,17 +897,27 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
     _emojiTimer?.cancel();
     _confettiController.dispose();
     _pulseController.dispose();
+    _remainingNotifier.dispose();
+    _errorSignal.dispose();
+    _praiseSignal.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
-      child: Scaffold(
-        backgroundColor: const Color(0xFF131127),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final navigator = Navigator.of(context);
+        if (await _onWillPop()) {
+          if (mounted) navigator.pop();
+        }
+      },
+      child: GameBackground(child: Scaffold(
+        backgroundColor: Colors.transparent,
         body: currentRoundType == 'loading' ? _buildLoading() : _buildGameUI(),
-      ),
+      )),
     );
   }
 
@@ -1003,7 +930,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
 
     return Center(
         child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-      const CircularProgressIndicator(color: Color(0xFF7C5CFC)),
+      const CircularProgressIndicator(color: AppColors.primary),
       const SizedBox(height: 20),
       Text(
           isPrivate
@@ -1014,7 +941,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
       if (isHost && isPrivate) ...[
         const SizedBox(height: 20),
         ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6C5CE7)),
+          style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryAlt),
           onPressed: _startMatchAutomatically,
           child: const Text('Oyunu Başlat', style: TextStyle(color: Colors.white)),
         )
@@ -1049,32 +976,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
               ),
             ],
           ),
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 700),
-            curve: Curves.easeOutBack,
-            bottom: _praiseBottom,
-            left: 0,
-            right: 0,
-            child: IgnorePointer(
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 400),
-                opacity: _praiseOpacity,
-                child: Text(
-                  _praiseText,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      color: Colors.amber,
-                      fontSize: 48,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 2,
-                      shadows: [
-                        Shadow(color: Color(0xFF7C5CFC), blurRadius: 20, offset: Offset(0, 0)),
-                        Shadow(color: Colors.black, blurRadius: 10, offset: Offset(2, 2))
-                      ]),
-                ),
-              ),
-            ),
-          ),
+          PraiseOverlay(trigger: _praiseSignal),
           Align(
             alignment: Alignment.topCenter,
             child: Padding(
@@ -1088,18 +990,18 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                       : Container(
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF131127).withOpacity(0.95),
+                            color: AppColors.background.withValues(alpha: 0.95),
                             borderRadius: BorderRadius.circular(30),
-                            border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
                             boxShadow: [
-                              BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 10, offset: const Offset(0, 4)),
+                              BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 10, offset: const Offset(0, 4)),
                             ],
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text('$_floatingEmojiSenderName',
-                                  style: const TextStyle(color: Color(0xFF00CEC9), fontSize: 13, fontWeight: FontWeight.bold)),
+                                  style: const TextStyle(color: AppColors.accent, fontSize: 13, fontWeight: FontWeight.bold)),
                               const Text(': ', style: TextStyle(color: Colors.white54, fontSize: 13, fontWeight: FontWeight.bold)),
                               Text(_floatingEmojiText!, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
                             ],
@@ -1109,52 +1011,36 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
               ),
             ),
           ),
-          IgnorePointer(
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: ConfettiWidget(
-                  confettiController: _confettiController,
-                  blastDirectionality: BlastDirectionality.explosive,
-                  shouldLoop: false,
-                  colors: const [Colors.green, Colors.blue, Colors.pink, Colors.orange, Colors.purple]),
-            ),
-          ),
+          GameConfetti(controller: _confettiController, alignment: Alignment.topCenter, numberOfParticles: 12),
         ],
       ),
     );
   }
 
   Widget _buildAppBar() {
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
-            onPressed: () async {
-              if (await _onWillPop()) {
-                if (mounted) Navigator.pop(context);
-              }
-            },
-          ),
-          Text('Soru: ${myQuestionIndex + 1}/${matchQuestions.length}',
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-          const Spacer(),
-          IconButton(
-            icon: const Icon(Icons.chat_bubble_rounded, color: Color(0xFF00CEC9)),
-            onPressed: _showChatPanel,
-          ),
-          AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              decoration: BoxDecoration(
-                  color: remainingSeconds <= 10 ? Colors.redAccent.withOpacity(0.3) : const Color(0xFF232042),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: remainingSeconds <= 10 ? Colors.redAccent : const Color(0xFF7C5CFC))),
-              child: Text('${remainingSeconds}s',
-                  style: TextStyle(color: remainingSeconds <= 10 ? Colors.redAccent : Colors.white, fontWeight: FontWeight.bold, fontSize: 16))),
-        ],
-      ),
+    return GameHud(
+      title: 'Soru: ${myQuestionIndex + 1}/${matchQuestions.length}',
+      onBack: () async {
+        if (await _onWillPop()) {
+          if (mounted) Navigator.pop(context);
+        }
+      },
+      trailing: [
+        IconButton(
+          tooltip: 'Sohbet',
+          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+          icon: const Icon(Icons.chat_bubble_rounded, color: AppColors.accent),
+          onPressed: _showChatPanel,
+        ),
+        TimerChip(
+          seconds: _remainingNotifier,
+          warnAt: 10,
+          horizontalPadding: 16,
+          verticalPadding: 6,
+          borderRadius: 14,
+          fontSize: 16,
+        ),
+      ],
     );
   }
 
@@ -1172,11 +1058,12 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
           bool isMe = p.key == myUid;
           int rank = index + 1;
 
-          Color bgColor = isMe ? const Color(0xFF00CEC9).withOpacity(0.2) : const Color(0xFF232042);
-          Color borderColor = isMe ? const Color(0xFF00CEC9) : Colors.white12;
+          Color bgColor = isMe ? AppColors.accent.withValues(alpha: 0.2) : AppColors.surfaceHigh;
+          Color borderColor = isMe ? AppColors.accent : Colors.white12;
           Color rankColor = rank == 1 ? Colors.amber : (rank == 2 ? Colors.grey[400]! : (rank == 3 ? Colors.brown[300]! : Colors.white54));
 
           return Container(
+            key: ValueKey('score-${p.key}'),
             margin: const EdgeInsets.only(right: 8),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(16), border: Border.all(color: borderColor)),
@@ -1189,8 +1076,8 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(p.value['name'].toString(),
-                        style: TextStyle(color: isMe ? const Color(0xFF00CEC9) : Colors.white70, fontSize: 10, fontWeight: FontWeight.bold)),
-                    Text('${p.value['score']} P', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                        style: TextStyle(color: isMe ? AppColors.accent : Colors.white70, fontSize: 10, fontWeight: FontWeight.bold)),
+                    CountUpText(value: (p.value['score'] as int?) ?? 0, suffix: ' P', style: AppText.counter(fontSize: 16)),
                   ],
                 ),
               ],
@@ -1204,22 +1091,14 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
   Widget _buildWordArea() {
     final bool isLocked = _isSubmittingAnswer || isGameOver || remainingSeconds <= 0;
     return Column(children: [
-      Container(
-          height: 60,
-          decoration: BoxDecoration(
-              color: const Color(0xFF1D1B36),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: const Color(0xFF5A4FCF).withOpacity(0.4))),
-          child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: selectedLetters
-                  .map((char) => Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 3),
-                      width: 36,
-                      height: 42,
-                      decoration: BoxDecoration(color: const Color(0xFF5A4FCF), borderRadius: BorderRadius.circular(10)),
-                      child: Center(child: Text(char, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)))))
-                  .toList())),
+      ErrorShake(
+        trigger: _errorSignal,
+        borderRadius: 18,
+        child: GameCard(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          child: AnswerSlots(letters: selectedLetters, slotCount: availableLetters.length),
+        ),
+      ),
       const SizedBox(height: 24),
       GridView.builder(
           shrinkWrap: true,
@@ -1230,102 +1109,140 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
           itemBuilder: (context, index) {
             String char = availableLetters[index];
             bool isUsed = selectedIndices.contains(index);
-            return InkWell(
-                onTap: (isUsed || isLocked)
-                    ? null
-                    : () {
-                        if (char == 'JOKER') {
-                          _openJokerPicker(index);
-                        } else {
-                          AudioService.instance.playClick();
-                          setState(() {
-                            selectedIndices.add(index);
-                            selectedLetters.add(char);
-                          });
-                        }
-                      },
-                child: Container(
-                    decoration: BoxDecoration(
-                        color: isUsed ? const Color(0xFF1D1B36).withOpacity(0.4) : (char == 'JOKER' ? const Color(0xFFFF9F43) : const Color(0xFF5A4FCF)),
-                        borderRadius: BorderRadius.circular(16)),
-                    child: Center(
-                        child: Text(char,
-                            style: TextStyle(
-                                color: isUsed ? Colors.white24 : Colors.white, fontSize: char == 'JOKER' ? 14 : 20, fontWeight: FontWeight.bold)))));
+            return GameTile(
+              radius: AppRadius.md + 2,
+              flat: isUsed,
+              color: isUsed ? AppColors.surface.withValues(alpha: 0.4) : (char == 'JOKER' ? AppColors.joker : AppColors.primaryDeep),
+              onTap: (isUsed || isLocked)
+                  ? null
+                  : () {
+                      if (char == 'JOKER') {
+                        _openJokerPicker(index);
+                      } else {
+                        AudioService.instance.playClick(haptic: false);
+                        Haptics.selection();
+                        setState(() {
+                          selectedIndices.add(index);
+                          selectedLetters.add(char);
+                        });
+                      }
+                    },
+              child: Text(char,
+                  style: TextStyle(
+                      color: isUsed ? Colors.white24 : Colors.white, fontSize: char == 'JOKER' ? 14 : 20, fontWeight: FontWeight.bold)),
+            );
           })
     ]);
   }
 
   Widget _buildMathArea() {
     final bool isLocked = _isSubmittingAnswer || isGameOver || remainingSeconds <= 0;
+    // 6 sayıyla en fazla 5 işlem adımı yapılabilir.
+    final int stepSlots = historySteps.length > 5 ? historySteps.length : 5;
     return Column(children: [
-      Text('HEDEF SAYI', style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 12, fontWeight: FontWeight.bold)),
-      Text('$targetNumber', style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w900)),
-      const SizedBox(height: 20),
-      Wrap(
+      TargetCore(value: targetNumber, numberSize: 42),
+      const SizedBox(height: 12),
+      ErrorShake(
+        trigger: _errorSignal,
+        borderRadius: 12,
+        child: RecessedSlot(
+          height: 40,
+          radius: 12,
+          dashed: false,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: List.generate(stepSlots, (i) {
+              final bool filled = i < historySteps.length;
+              final String step = filled ? historySteps[i] : '';
+              return AnimatedSlot(
+                child: filled
+                    ? Container(
+                        key: ValueKey('step-$i-$step'),
+                        margin: const EdgeInsets.only(right: 6, top: 5, bottom: 5),
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(color: AppColors.surfaceHigh, borderRadius: BorderRadius.circular(8)),
+                        child: Center(child: Text(step, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11))),
+                      )
+                    : null,
+              );
+            }),
+          ),
+        ),
+      ),
+      const SizedBox(height: 12),
+      AnimatedSwitcher(
+        duration: Motion.of(context, const Duration(milliseconds: 200)),
+        transitionBuilder: AnimatedSlot.transition,
+        child: Wrap(
+          key: ValueKey('numbers-${currentNumbers.join(',')}'),
           spacing: 10,
           runSpacing: 10,
           alignment: WrapAlignment.center,
           children: List.generate(currentNumbers.length, (index) {
             bool isSelected = firstNumIndex == index;
-            return GestureDetector(
-                onTap: isLocked ? null : () => _onNumberTap(index, currentNumbers[index]),
-                child: Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                        color: isSelected ? const Color(0xFFFF9F43) : const Color(0xFF232042),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: isSelected ? const Color(0xFFFF9F43) : Colors.white12)),
-                    child: Center(
-                        child: Text('${currentNumbers[index]}',
-                            style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)))));
-          })),
+            return GameTile(
+              width: 52,
+              height: 52,
+              color: isSelected ? AppColors.joker : AppColors.surfaceHigh,
+              borderColor: isSelected ? AppColors.joker : Colors.white12,
+              onTap: isLocked ? null : () => _onNumberTap(index, currentNumbers[index]),
+              child: Text('${currentNumbers[index]}', style: AppText.counter(fontSize: 18)),
+            );
+          }),
+        ),
+      ),
       const SizedBox(height: 20),
       Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: ['+', '-', '*', '/']
               .map((op) => Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: InkWell(
-                      onTap: isLocked ? null : () => setState(() => selectedOp = op),
-                      child: Container(
-                          width: 46,
-                          height: 46,
-                          decoration: BoxDecoration(
-                              color: selectedOp == op ? const Color(0xFFFF9F43) : const Color(0xFF5A4FCF), borderRadius: BorderRadius.circular(12)),
-                          child: Center(child: Text(op, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)))))))
+                  child: GameTile(
+                      width: 46,
+                      height: 46,
+                      radius: AppRadius.md - 2,
+                      color: selectedOp == op ? AppColors.joker : AppColors.primaryDeep,
+                      onTap: isLocked
+                          ? null
+                          : () {
+                              AudioService.instance.playClick(haptic: false);
+                              Haptics.selection();
+                              setState(() => selectedOp = op);
+                            },
+                      child: Text(op, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)))))
               .toList())
     ]);
   }
 
   Widget _buildBottomControls() {
     final bool isLocked = _isSubmittingAnswer || isGameOver || remainingSeconds <= 0;
-    return Row(children: [
-      Expanded(
+    return GameControlBar(
+      items: [
+        GameBarItem(
           flex: 2,
-          child: SizedBox(
-              height: 46,
-              child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      side: BorderSide(color: Colors.white.withOpacity(0.15)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-                  onPressed: isLocked ? null : _undoLastAction,
-                  child: const Text('Sil', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12))))),
-      const SizedBox(width: 6),
-      Expanded(
+          child: GameButton(
+            label: 'Sil',
+            icon: Icons.backspace_rounded,
+            stacked: true,
+            variant: GameButtonVariant.secondary,
+            fontSize: 11,
+            onPressed: isLocked ? null : _undoLastAction,
+          ),
+        ),
+        GameBarItem(
           flex: 2,
-          child: SizedBox(
-              height: 46,
-              child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      side: BorderSide(color: Colors.white.withOpacity(0.15)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-                  onPressed: isLocked
+          child: GameButton(
+            label: 'Temizle',
+            icon: Icons.delete_sweep_rounded,
+            stacked: true,
+            variant: GameButtonVariant.secondary,
+            fontSize: 11,
+            onPressed: isLocked
                       ? null
-                      : () => setState(() {
+                      : () {
+                          Haptics.selection();
+                          setState(() {
                             if (currentRoundType == 'word') {
                               selectedLetters.clear();
                               selectedIndices.clear();
@@ -1336,33 +1253,33 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                               firstNumIndex = null;
                               selectedOp = null;
                             }
-                          }),
-                  child: const Text('Temizle', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12))))),
-      const SizedBox(width: 6),
-      Expanded(
+                          });
+                        },
+          ),
+        ),
+        GameBarItem(
           flex: 2,
-          child: SizedBox(
-              height: 46,
-              child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      backgroundColor: (remainingPasses > 0 && !isLocked) ? Colors.orangeAccent : Colors.grey.withOpacity(0.5),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-                  onPressed: (remainingPasses > 0 && !isLocked) ? _passQuestion : null,
-                  child: Text('Pas ($remainingPasses)',
-                      style: TextStyle(color: remainingPasses > 0 ? Colors.white : Colors.white54, fontWeight: FontWeight.bold, fontSize: 13))))),
-      const SizedBox(width: 6),
-      Expanded(
-          flex: 3,
-          child: SizedBox(
-              height: 46,
-              child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      backgroundColor: const Color(0xFF00CEC9),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
-                  onPressed: isLocked ? null : (currentRoundType == 'word' ? _submitWord : _submitMath),
-                  child: const Text('Gönder', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)))))
-    ]);
+          child: GameButton(
+            label: 'Pas ($remainingPasses)',
+            icon: Icons.skip_next_rounded,
+            stacked: true,
+            fontSize: 11,
+            variant: GameButtonVariant.warning,
+            onPressed: (remainingPasses > 0 && !isLocked) ? _passQuestion : null,
+          ),
+        ),
+        GameBarItem(
+          flex: 4,
+          child: GameButton(
+            label: 'Gönder',
+            icon: Icons.send_rounded,
+            emphasized: true,
+            fontSize: 14,
+            variant: GameButtonVariant.accent,
+            onPressed: isLocked ? null : (currentRoundType == 'word' ? _submitWord : _submitMath),
+          ),
+        ),
+      ],
+    );
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 
 class GameIntroDialog extends StatefulWidget {
   final bool isTimed;
@@ -64,9 +65,9 @@ class _GameIntroDialogState extends State<GameIntroDialog> {
       width: double.infinity,
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: const Color(0xFF131127).withOpacity(0.95),
+        color: AppColors.background.withValues(alpha: 0.95),
         borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: const Color(0xFF7C5CFC), width: 2),
+        border: Border.all(color: AppColors.primary, width: 2),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -91,7 +92,7 @@ class _GameIntroDialogState extends State<GameIntroDialog> {
               '$_count',
               key: ValueKey(_count),
               style: const TextStyle(
-                color: Color(0xFFFD79A8),
+                color: AppColors.rose,
                 fontSize: 90,
                 fontWeight: FontWeight.w900,
               ),
@@ -107,9 +108,9 @@ class _GameIntroDialogState extends State<GameIntroDialog> {
       key: const ValueKey('rules'),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: const Color(0xFF1D1B36),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -120,12 +121,12 @@ class _GameIntroDialogState extends State<GameIntroDialog> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF7C5CFC).withOpacity(0.2),
+                  color: AppColors.primary.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   widget.isTimed ? Icons.timer : Icons.all_inclusive,
-                  color: const Color(0xFF7C5CFC),
+                  color: AppColors.primary,
                 ),
               ),
               const SizedBox(width: 12),
@@ -164,7 +165,7 @@ class _GameIntroDialogState extends State<GameIntroDialog> {
             height: 52,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF5A4FCF),
+                backgroundColor: AppColors.primaryDeep,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -214,11 +215,11 @@ class _GameIntroDialogState extends State<GameIntroDialog> {
       return Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFF131127),
+          color: AppColors.background,
           borderRadius: BorderRadius.circular(14),
         ),
-        child: Column(
-          children: const [
+        child: const Column(
+          children: [
             _TableRow(left: '1 Harf', right: 'Süre Vermez'),
             SizedBox(height: 6),
             _TableRow(left: '2 - 6 Harf', right: '+Harf Sayısı Süre & Puan'),
@@ -235,11 +236,11 @@ class _GameIntroDialogState extends State<GameIntroDialog> {
       return Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFF131127),
+          color: AppColors.background,
           borderRadius: BorderRadius.circular(14),
         ),
-        child: Column(
-          children: const [
+        child: const Column(
+          children: [
             _TableRow(left: 'Tam Hedef (Δ=0)', right: '+5s Süre Bonusu'),
             SizedBox(height: 6),
             _TableRow(left: 'Yaklaşım (±1..±10)', right: 'Sadece Puan Kazandırır'),
@@ -256,11 +257,11 @@ class _GameIntroDialogState extends State<GameIntroDialog> {
       return Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color(0xFF131127),
+          color: AppColors.background,
           borderRadius: BorderRadius.circular(14),
         ),
-        child: Column(
-          children: const [
+        child: const Column(
+          children: [
             _TableRow(left: 'Kelime Turu', right: 'Uzun kelimelere 2x Süre Ödülü'),
             SizedBox(height: 6),
             _TableRow(left: 'İşlem Turu', right: 'Tam isabet ve Artan Sayı Bonusu'),
@@ -290,7 +291,7 @@ class _TableRow extends StatelessWidget {
         Text(
           left,
           style: TextStyle(
-            color: highlight ? const Color(0xFFFD79A8) : Colors.white,
+            color: highlight ? AppColors.rose : Colors.white,
             fontSize: 12,
             fontWeight: FontWeight.bold,
           ),
@@ -298,7 +299,7 @@ class _TableRow extends StatelessWidget {
         Text(
           right,
           style: TextStyle(
-            color: highlight ? const Color(0xFFFD79A8) : Colors.white70,
+            color: highlight ? AppColors.rose : Colors.white70,
             fontSize: 11,
           ),
         ),

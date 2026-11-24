@@ -3,6 +3,11 @@ import '../models/user_profile.dart';
 import '../screens/statistics_screen.dart';
 import '../screens/rank_road_screen.dart'; 
 import '../services/user_service.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
+import 'ui/game_card.dart';
+import 'ui/pressable.dart';
+import 'ui/game_sheet.dart';
 
 class ProfileCard extends StatefulWidget {
   final UserProfile profile;
@@ -29,22 +34,16 @@ class _ProfileCardState extends State<ProfileCard> {
       isScrollControlled: true,
       builder: (context) => DefaultTabController(
         length: 2,
-        child: Container(
-          height: MediaQuery.of(context).size.height * 0.6,
-          decoration: const BoxDecoration(
-            color: Color(0xFF131127),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-          ),
+        child: GameSheet(
+          heightFactor: 0.6,
+          color: AppColors.background,
           child: Column(
             children: [
-              const SizedBox(height: 12),
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(2))),
-              const SizedBox(height: 16),
               const Text('Profilini Özelleştir', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
               
               const TabBar(
-                indicatorColor: Color(0xFF00CEC9),
-                labelColor: Color(0xFF00CEC9),
+                indicatorColor: AppColors.accent,
+                labelColor: AppColors.accent,
                 unselectedLabelColor: Colors.white54,
                 tabs: [
                   Tab(text: 'Karakterler', icon: Icon(Icons.person)),
@@ -70,14 +69,14 @@ class _ProfileCardState extends State<ProfileCard> {
                           onTap: () async {
                             await UserService.instance.updateAvatar(avatarId);
                             if (widget.onProfileUpdated != null) widget.onProfileUpdated!(); 
-                            Navigator.pop(context);
+                            if (context.mounted) Navigator.pop(context);
                           },
                           child: Container(
                             decoration: BoxDecoration(
-                              color: isSelected ? const Color(0xFF7C5CFC).withOpacity(0.3) : const Color(0xFF1D1B36),
+                              color: isSelected ? AppColors.primary.withValues(alpha: 0.3) : AppColors.surface,
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: isSelected ? const Color(0xFF7C5CFC) : Colors.white.withOpacity(0.05),
+                                color: isSelected ? AppColors.primary : Colors.white.withValues(alpha: 0.05),
                                 width: isSelected ? 2 : 1,
                               ),
                             ),
@@ -95,7 +94,7 @@ class _ProfileCardState extends State<ProfileCard> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.shield_outlined, color: Colors.white.withOpacity(0.2), size: 48),
+                            Icon(Icons.shield_outlined, color: Colors.white.withValues(alpha: 0.2), size: 48),
                             const SizedBox(height: 16),
                             const Text('Henüz çerçeven yok.\nMağazadan satın alabilirsin.', textAlign: TextAlign.center, style: TextStyle(color: Colors.white54)),
                           ],
@@ -114,13 +113,13 @@ class _ProfileCardState extends State<ProfileCard> {
                               onTap: () async {
                                 await UserService.instance.setBorder('none');
                                 if (widget.onProfileUpdated != null) widget.onProfileUpdated!(); 
-                                Navigator.pop(context);
+                                if (context.mounted) Navigator.pop(context);
                               },
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: isNoneSelected ? const Color(0xFF00CEC9).withOpacity(0.3) : const Color(0xFF1D1B36),
+                                  color: isNoneSelected ? AppColors.accent.withValues(alpha: 0.3) : AppColors.surface,
                                   borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: isNoneSelected ? const Color(0xFF00CEC9) : Colors.white12, width: isNoneSelected ? 2 : 1),
+                                  border: Border.all(color: isNoneSelected ? AppColors.accent : Colors.white12, width: isNoneSelected ? 2 : 1),
                                 ),
                                 child: const Center(child: Icon(Icons.block, color: Colors.white54, size: 32)),
                               ),
@@ -134,14 +133,14 @@ class _ProfileCardState extends State<ProfileCard> {
                             onTap: () async {
                               await UserService.instance.setBorder(borderId);
                               if (widget.onProfileUpdated != null) widget.onProfileUpdated!(); 
-                              Navigator.pop(context);
+                              if (context.mounted) Navigator.pop(context);
                             },
                             child: Container(
                               decoration: BoxDecoration(
-                                color: isSelected ? const Color(0xFF00CEC9).withOpacity(0.3) : const Color(0xFF1D1B36),
+                                color: isSelected ? AppColors.accent.withValues(alpha: 0.3) : AppColors.surface,
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: isSelected ? const Color(0xFF00CEC9) : Colors.white.withOpacity(0.05),
+                                  color: isSelected ? AppColors.accent : Colors.white.withValues(alpha: 0.05),
                                   width: isSelected ? 2 : 1,
                                 ),
                               ),
@@ -164,161 +163,138 @@ class _ProfileCardState extends State<ProfileCard> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    final p = widget.profile;
+    return Pressable(
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => StatisticsScreen(profile: widget.profile)),
+          MaterialPageRoute(builder: (context) => StatisticsScreen(profile: p)),
         );
       },
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: const Color(0xFF1D1B36),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.white.withOpacity(0.08)),
-          boxShadow: [
-            BoxShadow(color: const Color(0xFF7C5CFC).withOpacity(0.15), blurRadius: 20, offset: const Offset(0, 10)),
-          ],
-        ),
+      semanticLabel: '${p.username}, seviye ${p.level}. İstatistikleri aç',
+      child: GameCard(
+        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+        borderColor: AppColors.primary.withValues(alpha: 0.35),
         child: Column(
           children: [
             Row(
               children: [
+                // Avatar + çerçeve (dokununca özelleştirme)
                 GestureDetector(
-                  onTap: _showCustomizationPicker, 
+                  onTap: _showCustomizationPicker,
                   child: Stack(
                     alignment: Alignment.bottomRight,
                     children: [
-                      Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          if (widget.profile.selectedBorder != 'none')
-                            Image.asset(
-                              'assets/borders/${widget.profile.selectedBorder}.png',
-                              width: 90, 
-                              height: 90,
-                              fit: BoxFit.contain,
+                      SizedBox(
+                        width: 64,
+                        height: 64,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            if (p.selectedBorder != 'none')
+                              Image.asset('assets/borders/${p.selectedBorder}.png', width: 64, height: 64, fit: BoxFit.contain),
+                            CircleAvatar(
+                              radius: 24,
+                              backgroundColor: AppColors.background,
+                              backgroundImage: AssetImage('assets/avatars/${p.avatar}.png'),
                             ),
-                          CircleAvatar(
-                            radius: 34,
-                            backgroundColor: const Color(0xFF131127),
-                            backgroundImage: AssetImage('assets/avatars/${widget.profile.avatar}.png'),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(color: const Color(0xFF00CEC9), shape: BoxShape.circle, border: Border.all(color: const Color(0xFF1D1B36), width: 2)),
-                        child: const Icon(Icons.edit_rounded, color: Colors.white, size: 12),
+                        padding: const EdgeInsets.all(3),
+                        decoration: BoxDecoration(color: AppColors.accent, shape: BoxShape.circle, border: Border.all(color: AppColors.surface, width: 2)),
+                        child: const Icon(Icons.edit_rounded, color: Colors.white, size: 10),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(widget.profile.username, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                      Text(p.username, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800)),
                       const SizedBox(height: 4),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => RankRoadScreen(profile: widget.profile)),
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF7C5CFC).withOpacity(0.2), 
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFF7C5CFC).withOpacity(0.5)),
+                      Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => RankRoadScreen(profile: p)),
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: AppColors.primary.withValues(alpha: 0.5)),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(p.rankName, style: const TextStyle(color: AppColors.lavender, fontSize: 11, fontWeight: FontWeight.bold)),
+                                  const SizedBox(width: 3),
+                                  const Icon(Icons.info_outline_rounded, color: AppColors.lavender, size: 11),
+                                ],
+                              ),
+                            ),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(widget.profile.rankName, style: const TextStyle(color: Color(0xFFA78BFA), fontSize: 12, fontWeight: FontWeight.bold)),
-                              const SizedBox(width: 4),
-                              const Icon(Icons.info_outline_rounded, color: Color(0xFFA78BFA), size: 12),
-                            ],
-                          ),
-                        ),
+                          const SizedBox(width: 8),
+                          const Icon(Icons.star_rounded, color: Colors.amber, size: 14),
+                          const SizedBox(width: 2),
+                          Text(_formatNumber(p.totalScore), style: AppText.counter(color: Colors.white70, fontSize: 12)),
+                        ],
                       ),
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right_rounded, color: Colors.white.withOpacity(0.3), size: 28),
-              ],
-            ),
-            
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildStatColumn('Puan', _formatNumber(widget.profile.totalScore), Icons.star_rounded, Colors.amber),
-                _buildStatColumn('Oynanan', '${widget.profile.gamesPlayed}', Icons.sports_esports_rounded, const Color(0xFF00CEC9)),
-                // YENİ: Seviye İlerlemesi yerine Rekor gösteriliyor
-                _buildStatColumn('Tek Maç Rekoru', _formatNumber(widget.profile.highestSingleMatchScore), Icons.local_fire_department_rounded, Colors.deepOrange),
-              ],
-            ),
-
-            // YENİ: XP ve Seviye Barı (Level Progress)
-            const SizedBox(height: 24),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFF131127).withOpacity(0.6),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.white.withOpacity(0.05)),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                const SizedBox(width: 8),
+                // Elmas
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: AppColors.background.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(color: AppColors.accent.withValues(alpha: 0.4)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.military_tech_rounded, color: Colors.amber, size: 16),
-                          const SizedBox(width: 4),
-                          Text('Seviye ${widget.profile.level}', style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 13)),
-                        ],
-                      ),
-                      Text(
-                        '${widget.profile.currentLevelXp} / ${widget.profile.nextLevelXp} XP', 
-                        style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11, fontWeight: FontWeight.bold)
-                      ),
+                      const Icon(Icons.diamond_rounded, color: AppColors.accent, size: 16),
+                      const SizedBox(width: 4),
+                      Text('${p.gems}', style: AppText.counter(fontSize: 14)),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: LinearProgressIndicator(
-                      value: widget.profile.levelProgress,
-                      backgroundColor: Colors.black26,
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.amber),
-                      minHeight: 8,
-                    ),
-                  ),
-                ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            // Seviye ve XP çubuğu
+            Row(
+              children: [
+                const Icon(Icons.military_tech_rounded, color: Colors.amber, size: 16),
+                const SizedBox(width: 4),
+                Text('Seviye ${p.level}', style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.w800, fontSize: 12)),
+                const Spacer(),
+                Text('${p.currentLevelXp} / ${p.nextLevelXp} XP', style: AppText.counter(color: Colors.white54, fontSize: 11)),
+              ],
+            ),
+            const SizedBox(height: 6),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: LinearProgressIndicator(
+                value: p.levelProgress,
+                backgroundColor: Colors.black26,
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.amber),
+                minHeight: 6,
               ),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildStatColumn(String label, String value, IconData icon, Color color) {
-    return Column(
-      children: [
-        Icon(icon, color: color, size: 20),
-        const SizedBox(height: 8),
-        Text(value, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 4),
-        Text(label, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11, fontWeight: FontWeight.w600)),
-      ],
     );
   }
 }

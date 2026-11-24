@@ -5,6 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../services/user_service.dart';
 import '../services/audio_service.dart'; 
 import '../screens/auth_screen.dart';
+import 'text_controller_scope.dart';
+import '../theme/app_colors.dart';
+import 'ui/game_sheet.dart';
 
 void showSettingsBottomSheet(BuildContext context, VoidCallback onProfileUpdated) {
   showModalBottomSheet(
@@ -109,7 +112,7 @@ class _SettingsSheetState extends State<_SettingsSheet> {
       bool? confirm = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          backgroundColor: const Color(0xFF1D1B36),
+          backgroundColor: AppColors.surface,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: const Text('İsim Değiştir', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           content: const Text('İsmini değiştirmek 1000 Cevher karşılığında yapılacaktır. Onaylıyor musun?', style: TextStyle(color: Colors.white70)),
@@ -119,7 +122,7 @@ class _SettingsSheetState extends State<_SettingsSheet> {
               child: const Text('Hayır', style: TextStyle(color: Colors.white54, fontWeight: FontWeight.bold)),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF00CEC9), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.accent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
               onPressed: () => Navigator.pop(context, true),
               child: const Text('Evet, Değiştir', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             ),
@@ -154,20 +157,20 @@ class _SettingsSheetState extends State<_SettingsSheet> {
   void _copyUid() {
     if (_currentUid.isNotEmpty) {
       Clipboard.setData(ClipboardData(text: _currentUid));
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Oyuncu Kimliği kopyalandı!'), backgroundColor: Color(0xFF00CEC9), behavior: SnackBarBehavior.floating, duration: Duration(seconds: 2)));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Oyuncu Kimliği kopyalandı!'), backgroundColor: AppColors.accent, behavior: SnackBarBehavior.floating, duration: Duration(seconds: 2)));
     }
   }
 
   void _showDeleteAccountDialog() {
-    final passwordController = TextEditingController();
     bool isLoading = false;
 
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => StatefulBuilder(
+      builder: (context) => TextControllerScope(
+        builder: (context, passwordController) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          backgroundColor: const Color(0xFF1D1B36),
+          backgroundColor: AppColors.surface,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: const Row(
             children: [
@@ -192,9 +195,9 @@ class _SettingsSheetState extends State<_SettingsSheet> {
                   obscureText: true,
                   decoration: InputDecoration(
                     hintText: 'Şifreniz',
-                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                    hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
                     filled: true,
-                    fillColor: const Color(0xFF131127),
+                    fillColor: AppColors.background,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                   ),
                 ),
@@ -225,14 +228,14 @@ class _SettingsSheetState extends State<_SettingsSheet> {
                     try {
                       await UserService.instance.deleteAccount(password: passwordController.text.trim());
                       
-                      if (mounted) {
+                      if (mounted && context.mounted) {
                         Navigator.pop(context); 
                         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Hesabın silindi. Uygulama yeniden başlatılıyor...'), backgroundColor: Colors.green));
                         Navigator.of(context).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
                       }
                     } catch (e) {
                       setDialogState(() => isLoading = false);
-                      if (mounted) {
+                      if (mounted && context.mounted) {
                         String errorMsg = 'Bir hata oluştu.';
                         if (e.toString().contains('wrong-password') || e.toString().contains('invalid-credential')) {
                           errorMsg = 'Hatalı şifre girdiniz.';
@@ -246,6 +249,7 @@ class _SettingsSheetState extends State<_SettingsSheet> {
           ],
         ),
       ),
+      ),
     );
   }
 
@@ -253,7 +257,7 @@ class _SettingsSheetState extends State<_SettingsSheet> {
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        backgroundColor: const Color(0xFF1D1B36),
+        backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         child: Column(
@@ -261,7 +265,7 @@ class _SettingsSheetState extends State<_SettingsSheet> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: const BoxDecoration(
-                color: Color(0xFF131127),
+                color: AppColors.background,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
               ),
               child: const Row(
@@ -275,9 +279,9 @@ class _SettingsSheetState extends State<_SettingsSheet> {
             Expanded(
               child: Container(
                 padding: const EdgeInsets.all(16),
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  child: const Text(
+                child: const SingleChildScrollView(
+                  physics: BouncingScrollPhysics(),
+                  child: Text(
                     'SayıSözlük oyununa hoş geldiniz!\n\n'
                     'Bu uygulama, Türkiye Cumhuriyeti Kişisel Verilerin Korunması Kanunu (KVKK) '
                     've uluslararası standartlara uygun olarak tasarlanmıştır.\n\n'
@@ -297,7 +301,7 @@ class _SettingsSheetState extends State<_SettingsSheet> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: const BoxDecoration(
-                color: Color(0xFF131127),
+                color: AppColors.background,
                 borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
               ),
               child: SizedBox(
@@ -320,17 +324,19 @@ class _SettingsSheetState extends State<_SettingsSheet> {
   }
 
   @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      decoration: const BoxDecoration(color: Color(0xFF131127), borderRadius: BorderRadius.vertical(top: Radius.circular(32))),
+    return GameSheet(
+      color: AppColors.background,
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 12),
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(2))),
-            const SizedBox(height: 24),
             const Text('Ayarlar', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 24),
             
@@ -340,17 +346,17 @@ class _SettingsSheetState extends State<_SettingsSheet> {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(color: const Color(0xFF1D1B36), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withOpacity(0.05))),
+                    decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withValues(alpha: 0.05))),
                     child: Row(
                       children: [
-                        Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: const Color(0xFF7C5CFC).withOpacity(0.2), borderRadius: BorderRadius.circular(12)), child: const Icon(Icons.person_rounded, color: Color(0xFFA78BFA))),
+                        Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)), child: const Icon(Icons.person_rounded, color: AppColors.lavender)),
                         const SizedBox(width: 16),
                         Expanded(
                           child: _isEditingName
-                              ? TextField(controller: _nameController, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold), decoration: InputDecoration(isDense: true, contentPadding: const EdgeInsets.symmetric(vertical: 8), hintText: 'Yeni Adınız', hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)), border: InputBorder.none), autofocus: true, onSubmitted: (_) => _attemptSaveName())
-                              : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(_currentName, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)), const SizedBox(height: 2), Text(_hasUsedFreeNameChange ? 'Bedel: 1000 Cevher' : '1 Ücretsiz Hak', style: TextStyle(color: _hasUsedFreeNameChange ? const Color(0xFFFD79A8) : const Color(0xFF00CEC9), fontSize: 11, fontWeight: FontWeight.w600))]),
+                              ? TextField(controller: _nameController, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold), decoration: InputDecoration(isDense: true, contentPadding: const EdgeInsets.symmetric(vertical: 8), hintText: 'Yeni Adınız', hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)), border: InputBorder.none), autofocus: true, onSubmitted: (_) => _attemptSaveName())
+                              : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(_currentName, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)), const SizedBox(height: 2), Text(_hasUsedFreeNameChange ? 'Bedel: 1000 Cevher' : '1 Ücretsiz Hak', style: TextStyle(color: _hasUsedFreeNameChange ? AppColors.rose : AppColors.accent, fontSize: 11, fontWeight: FontWeight.w600))]),
                         ),
-                        if (_isEditingName) IconButton(onPressed: _attemptSaveName, icon: const Icon(Icons.check_circle_rounded, color: Color(0xFF00CEC9)))
+                        if (_isEditingName) IconButton(onPressed: _attemptSaveName, icon: const Icon(Icons.check_circle_rounded, color: AppColors.accent))
                         else IconButton(onPressed: () => setState(() => _isEditingName = true), icon: const Icon(Icons.edit_rounded, color: Colors.white54)),
                       ],
                     ),
@@ -365,9 +371,9 @@ class _SettingsSheetState extends State<_SettingsSheet> {
                         if (!_isEmailVerified) {
                           try {
                             await FirebaseAuth.instance.currentUser?.sendEmailVerification();
-                            if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Doğrulama e-postası gönderildi. Lütfen e-postanızı kontrol edin.'), backgroundColor: Colors.green));
+                            if (mounted && context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Doğrulama e-postası gönderildi. Lütfen e-postanızı kontrol edin.'), backgroundColor: Colors.green));
                           } catch (e) {
-                            if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('E-posta gönderilirken bir hata oluştu.'), backgroundColor: Colors.orange));
+                            if (mounted && context.mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('E-posta gönderilirken bir hata oluştu.'), backgroundColor: Colors.orange));
                           }
                         } else {
                            if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Hesabınız başarıyla güvence altına alınmış durumda!'), backgroundColor: Colors.green));
@@ -390,13 +396,13 @@ class _SettingsSheetState extends State<_SettingsSheet> {
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: _isAnonymous 
-                            ? Colors.redAccent.withOpacity(0.1) 
-                            : (_isEmailVerified ? Colors.green.withOpacity(0.1) : Colors.orangeAccent.withOpacity(0.1)),
+                            ? Colors.redAccent.withValues(alpha: 0.1) 
+                            : (_isEmailVerified ? Colors.green.withValues(alpha: 0.1) : Colors.orangeAccent.withValues(alpha: 0.1)),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: _isAnonymous 
-                              ? Colors.redAccent.withOpacity(0.3) 
-                              : (_isEmailVerified ? Colors.green.withOpacity(0.3) : Colors.orangeAccent.withOpacity(0.3))
+                              ? Colors.redAccent.withValues(alpha: 0.3) 
+                              : (_isEmailVerified ? Colors.green.withValues(alpha: 0.3) : Colors.orangeAccent.withValues(alpha: 0.3))
                         ),
                       ),
                       child: Row(
@@ -405,8 +411,8 @@ class _SettingsSheetState extends State<_SettingsSheet> {
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
                               color: _isAnonymous 
-                                  ? Colors.redAccent.withOpacity(0.2) 
-                                  : (_isEmailVerified ? Colors.green.withOpacity(0.2) : Colors.orangeAccent.withOpacity(0.2)),
+                                  ? Colors.redAccent.withValues(alpha: 0.2) 
+                                  : (_isEmailVerified ? Colors.green.withValues(alpha: 0.2) : Colors.orangeAccent.withValues(alpha: 0.2)),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Icon(
@@ -443,13 +449,13 @@ class _SettingsSheetState extends State<_SettingsSheet> {
 
                   Container(
                     padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(color: const Color(0xFF1D1B36), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withOpacity(0.05))),
+                    decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withValues(alpha: 0.05))),
                     child: Column(
                       children: [
-                        _buildSettingRow(icon: Icons.volume_up_rounded, color: const Color(0xFF00CEC9), title: 'Ses Efektleri', value: isSoundEnabled, onChanged: _toggleSound),
-                        Divider(color: Colors.white.withOpacity(0.05), height: 24),
-                        _buildSettingRow(icon: Icons.vibration_rounded, color: const Color(0xFFFD79A8), title: 'Titreşim (Haptic)', value: isVibrationEnabled, onChanged: _toggleVibration),
-                        Divider(color: Colors.white.withOpacity(0.05), height: 24),
+                        _buildSettingRow(icon: Icons.volume_up_rounded, color: AppColors.accent, title: 'Ses Efektleri', value: isSoundEnabled, onChanged: _toggleSound),
+                        Divider(color: Colors.white.withValues(alpha: 0.05), height: 24),
+                        _buildSettingRow(icon: Icons.vibration_rounded, color: AppColors.rose, title: 'Titreşim (Haptic)', value: isVibrationEnabled, onChanged: _toggleVibration),
+                        Divider(color: Colors.white.withValues(alpha: 0.05), height: 24),
                         // YENİ: İstatistikleri Gizleme Butonu
                         _buildSettingRow(
                           icon: Icons.lock_rounded, 
@@ -471,13 +477,13 @@ class _SettingsSheetState extends State<_SettingsSheet> {
                     onTap: _copyUid, 
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(color: const Color(0xFF1D1B36), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withOpacity(0.05))),
+                      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withValues(alpha: 0.05))),
                       child: Row(
                         children: [
                           const Icon(Icons.fingerprint_rounded, color: Colors.white54, size: 20),
                           const SizedBox(width: 12),
                           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('Oyuncu Kimliği (ID)', style: TextStyle(color: Colors.white54, fontSize: 11, fontWeight: FontWeight.bold)), const SizedBox(height: 2), Text(_currentUid, style: const TextStyle(color: Colors.white, fontSize: 12, fontFamily: 'Courier'), maxLines: 1, overflow: TextOverflow.ellipsis)])),
-                          const Icon(Icons.copy_rounded, color: Color(0xFF7C5CFC), size: 18),
+                          const Icon(Icons.copy_rounded, color: AppColors.primary, size: 18),
                         ],
                       ),
                     ),
@@ -486,7 +492,7 @@ class _SettingsSheetState extends State<_SettingsSheet> {
                   const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(color: const Color(0xFF1D1B36), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withOpacity(0.05))),
+                    decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withValues(alpha: 0.05))),
                     child: Column(
                       children: [
                         _buildActionRow(
@@ -495,7 +501,7 @@ class _SettingsSheetState extends State<_SettingsSheet> {
                           title: 'Gizlilik Politikası', 
                           onTap: _showPrivacyPolicyText
                         ),
-                        Divider(color: Colors.white.withOpacity(0.05), height: 24),
+                        Divider(color: Colors.white.withValues(alpha: 0.05), height: 24),
                         _buildActionRow(
                           icon: Icons.delete_forever_rounded, 
                           color: Colors.redAccent, 
@@ -519,10 +525,10 @@ class _SettingsSheetState extends State<_SettingsSheet> {
   Widget _buildSettingRow({required IconData icon, required Color color, required String title, required bool value, required ValueChanged<bool> onChanged}) {
     return Row(
       children: [
-        Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: color.withOpacity(0.2), borderRadius: BorderRadius.circular(12)), child: Icon(icon, color: color, size: 20)),
+        Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: color.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)), child: Icon(icon, color: color, size: 20)),
         const SizedBox(width: 16),
         Expanded(child: Text(title, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600))),
-        Switch(value: value, onChanged: onChanged, activeColor: color, activeTrackColor: color.withOpacity(0.3), inactiveThumbColor: Colors.white54, inactiveTrackColor: Colors.white.withOpacity(0.1)),
+        Switch(value: value, onChanged: onChanged, activeThumbColor: color, activeTrackColor: color.withValues(alpha: 0.3), inactiveThumbColor: Colors.white54, inactiveTrackColor: Colors.white.withValues(alpha: 0.1)),
       ],
     );
   }
@@ -533,10 +539,10 @@ class _SettingsSheetState extends State<_SettingsSheet> {
       borderRadius: BorderRadius.circular(12),
       child: Row(
         children: [
-          Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: color.withOpacity(0.2), borderRadius: BorderRadius.circular(12)), child: Icon(icon, color: color, size: 20)),
+          Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: color.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)), child: Icon(icon, color: color, size: 20)),
           const SizedBox(width: 16),
           Expanded(child: Text(title, style: TextStyle(color: isDestructive ? Colors.redAccent : Colors.white, fontSize: 15, fontWeight: FontWeight.bold))),
-          Icon(Icons.arrow_forward_ios_rounded, color: Colors.white.withOpacity(0.3), size: 16),
+          Icon(Icons.arrow_forward_ios_rounded, color: Colors.white.withValues(alpha: 0.3), size: 16),
         ],
       ),
     );
