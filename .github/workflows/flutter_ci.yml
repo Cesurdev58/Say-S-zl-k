@@ -1,0 +1,42 @@
+name: Flutter CI
+
+on:
+  push:
+  pull_request:
+
+# Aynı dal için eski çalışmaları iptal et
+concurrency:
+  group: flutter-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  analyze-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Depoyu al
+        uses: actions/checkout@v4
+
+      - name: Flutter kur
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.44.9
+          cache: true
+
+      # `.env` gizli bilgi içerdiği için git'te yoktur, ancak pubspec.yaml'da asset
+      # olarak tanımlıdır. Testler gerçek değerlere ihtiyaç duymaz; boş dosya yeterlidir.
+      - name: Boş .env oluştur
+        run: touch .env
+
+      - name: Bağımlılıkları indir
+        run: flutter pub get
+
+      - name: Statik analiz
+        run: flutter analyze lib test
+
+      - name: Testler
+        run: flutter test
