@@ -6,6 +6,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../widgets/ui/game_card.dart';
 import '../widgets/ui/game_tile.dart';
+import '../widgets/game_background.dart';
 
 class SoloModeSelectScreen extends StatefulWidget {
   const SoloModeSelectScreen({super.key});
@@ -20,8 +21,8 @@ class _SoloModeSelectScreenState extends State<SoloModeSelectScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
+    return GameBackground(child: Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -163,7 +164,7 @@ class _SoloModeSelectScreenState extends State<SoloModeSelectScreen> {
           ),
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildMainModeCard({required String title, required String subtitle, required IconData icon, required bool isSelected, required VoidCallback onTap}) {

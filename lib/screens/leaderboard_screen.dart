@@ -6,6 +6,7 @@ import '../services/user_service.dart';
 import '../models/user_profile.dart'; 
 import '../screens/statistics_screen.dart';
 import '../theme/app_colors.dart';
+import '../widgets/game_background.dart';
 
 class LeaderboardScreen extends StatefulWidget {
   const LeaderboardScreen({super.key});
@@ -19,8 +20,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
+    return GameBackground(child: Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -172,6 +173,6 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
           );
         },
       ),
-    );
+    ));
   }
 }

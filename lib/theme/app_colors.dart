@@ -30,7 +30,12 @@ abstract final class AppColors {
   static const Color correct = Color(0xFF34D399);
   static const Color wrong = Color(0xFFF87171);
 
-  // Oyun arka plan gradyanı
+  // Atmosferik arka plan: derin gece lacivertinden koyu mora
+  static const Color atmosphereTop = Color(0xFF070B22);
+  static const Color atmosphereMid = Color(0xFF141044);
+  static const Color atmosphereBottom = Color(0xFF2B1760);
+
+  // Eski oyun arka plan gradyanı
   static const Color gradientTop = Color(0xFF0F172A);
   static const Color gradientMid = Color(0xFF1E1B4B);
   static const Color gradientBottom = Color(0xFF312E81);

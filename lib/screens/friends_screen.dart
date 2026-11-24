@@ -6,6 +6,7 @@ import '../services/audio_service.dart';
 import '../services/user_service.dart';
 import '../widgets/text_controller_scope.dart';
 import '../theme/app_colors.dart';
+import '../widgets/game_background.dart';
 
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({super.key});
@@ -420,8 +421,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
-      child: Scaffold(
-        backgroundColor: AppColors.background,
+      child: GameBackground(child: Scaffold(
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: AppColors.surface,
           elevation: 0,
@@ -467,7 +468,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
             );
           },
         ),
-      ),
+      )),
     );
   }
 

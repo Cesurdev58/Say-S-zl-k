@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../services/audio_service.dart';
 import '../services/user_service.dart';
 import '../theme/app_colors.dart';
+import '../widgets/game_background.dart';
 
 class AuthScreen extends StatefulWidget {
   final VoidCallback onProfileUpdated;
@@ -106,8 +107,8 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
+    return GameBackground(child: Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -128,7 +129,7 @@ class _AuthScreenState extends State<AuthScreen> {
           child: _isVerificationPending ? _buildVerificationUI() : _buildAuthUI(),
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildVerificationUI() {

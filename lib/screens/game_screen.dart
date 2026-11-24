@@ -25,6 +25,7 @@ import '../widgets/ui/game_dialog.dart';
 import '../widgets/ui/count_up_text.dart';
 import '../widgets/ui/game_hud.dart';
 import '../widgets/ui/motion.dart';
+import '../widgets/game_background.dart';
 
 class GameScreen extends StatefulWidget {
   final bool isTimed;
@@ -681,8 +682,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           if (mounted) navigator.pop();
         }
       },
-      child: Scaffold(
-        backgroundColor: AppColors.background,
+      child: GameBackground(child: Scaffold(
+        backgroundColor: Colors.transparent,
         body: Stack(
           children: [
             SafeArea(
@@ -812,7 +813,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 

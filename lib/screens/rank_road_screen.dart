@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/user_profile.dart';
 import '../theme/app_colors.dart';
+import '../widgets/game_background.dart';
 
 class RankRoadScreen extends StatelessWidget {
   final UserProfile profile;
@@ -21,8 +22,8 @@ class RankRoadScreen extends StatelessWidget {
     final int currentScore = profile.totalScore;
     final int currentLevel = profile.rankLevel;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
+    return GameBackground(child: Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -189,6 +190,6 @@ class RankRoadScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ));
   }
 }

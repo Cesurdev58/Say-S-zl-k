@@ -33,6 +33,8 @@ import '../widgets/ui/game_hud.dart';
 import '../widgets/ui/game_tile.dart';
 import '../widgets/ui/motion.dart';
 import '../widgets/ui/recessed_slot.dart';
+import '../widgets/ui/target_core.dart';
+import '../widgets/game_background.dart';
 
 class MultiplayerGameScreen extends StatefulWidget {
   final String matchId;
@@ -940,10 +942,10 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
           if (mounted) navigator.pop();
         }
       },
-      child: Scaffold(
-        backgroundColor: AppColors.background,
+      child: GameBackground(child: Scaffold(
+        backgroundColor: Colors.transparent,
         body: currentRoundType == 'loading' ? _buildLoading() : _buildGameUI(),
-      ),
+      )),
     );
   }
 
@@ -1202,14 +1204,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
     // 6 sayıyla en fazla 5 işlem adımı yapılabilir.
     final int stepSlots = historySteps.length > 5 ? historySteps.length : 5;
     return Column(children: [
-      Text('HEDEF SAYI', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12, fontWeight: FontWeight.bold)),
-      // Yeni tur: hedef sayı 0'dan hedefe sayarak belirir.
-      CountUpText(
-        key: ValueKey('target-$targetNumber'),
-        value: targetNumber,
-        fromZero: true,
-        style: AppText.counter(fontSize: 40, fontWeight: FontWeight.w900),
-      ),
+      TargetCore(value: targetNumber, numberSize: 42),
       const SizedBox(height: 12),
       ErrorShake(
         trigger: _errorSignal,

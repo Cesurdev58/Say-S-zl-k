@@ -6,6 +6,7 @@ import '../services/match_service.dart';
 import '../services/audio_service.dart';
 import 'multiplayer_game_screen.dart';
 import '../theme/app_colors.dart';
+import '../widgets/game_background.dart';
 
 class MatchmakingScreen extends StatefulWidget {
   const MatchmakingScreen({super.key});
@@ -186,8 +187,8 @@ class _MatchmakingScreenState extends State<MatchmakingScreen> with SingleTicker
   Widget build(BuildContext context) {
     final String? myUid = FirebaseAuth.instance.currentUser?.uid;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
+    return GameBackground(child: Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -296,6 +297,6 @@ class _MatchmakingScreenState extends State<MatchmakingScreen> with SingleTicker
           ],
         ),
       ),
-    );
+    ));
   }
 }

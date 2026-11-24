@@ -4,6 +4,7 @@ import '../models/user_profile.dart';
 import '../services/user_service.dart';
 import '../services/audio_service.dart';
 import '../theme/app_colors.dart';
+import '../widgets/game_background.dart';
 
 class QuestsScreen extends StatefulWidget {
   const QuestsScreen({super.key});
@@ -113,8 +114,8 @@ class _QuestsScreenState extends State<QuestsScreen> {
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
-      child: Scaffold(
-        backgroundColor: AppColors.background,
+      child: GameBackground(child: Scaffold(
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -161,7 +162,7 @@ class _QuestsScreenState extends State<QuestsScreen> {
                   ),
                 ],
               ),
-      ),
+      )),
     );
   }
 

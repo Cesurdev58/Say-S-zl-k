@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import 'ui/animated_slot.dart';
-import 'ui/count_up_text.dart';
+import 'ui/target_core.dart';
 import 'ui/error_shake.dart';
 import 'ui/game_tile.dart';
 import 'ui/motion.dart';
@@ -80,29 +80,7 @@ class MathGameBoard extends StatelessWidget {
 
     return Column(
       children: [
-        SizedBox(
-          width: double.infinity,
-          child: GameTile(
-            color: context.gameColors.target,
-            radius: AppRadius.lg,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              child: Column(
-                children: [
-                  Text('HEDEF SAYI', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
-                  const SizedBox(height: 2),
-                  // Yeni tur: hedef sayı 0'dan hedefe sayarak belirir.
-                  CountUpText(
-                    key: ValueKey('target-$targetNumber'),
-                    value: targetNumber,
-                    fromZero: true,
-                    style: AppText.counter(fontSize: 34, fontWeight: FontWeight.w900),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+        TargetCore(value: targetNumber),
         const SizedBox(height: 14),
         history,
         const SizedBox(height: 16),

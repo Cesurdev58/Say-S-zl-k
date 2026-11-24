@@ -9,6 +9,7 @@ import '../services/audio_service.dart';
 import '../services/user_service.dart';
 import 'multiplayer_game_screen.dart';
 import '../theme/app_colors.dart';
+import '../widgets/game_background.dart';
 
 class PrivateRoomScreen extends StatefulWidget {
   final String? initialRoomCode;
@@ -499,8 +500,8 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
           if (mounted) navigator.pop();
         }
       },
-      child: Scaffold(
-        backgroundColor: AppColors.background,
+      child: GameBackground(child: Scaffold(
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -538,7 +539,7 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
                   ? _buildLobbyView()
                   : _buildSelectionView(),
         ),
-      ),
+      )),
     );
   }
 

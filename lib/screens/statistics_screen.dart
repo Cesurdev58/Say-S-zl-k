@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/user_profile.dart';
 import '../theme/app_colors.dart';
+import '../widgets/game_background.dart';
 
 class StatisticsScreen extends StatelessWidget {
   final UserProfile profile;
@@ -18,8 +19,8 @@ class StatisticsScreen extends StatelessWidget {
     // YENİ: Başkasının profiliyse VE gizliyse detayları sakla
     final bool isHidden = !isMe && profile.isStatsHidden;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
+    return GameBackground(child: Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -226,7 +227,7 @@ class StatisticsScreen extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildSectionTitle(String title) {
