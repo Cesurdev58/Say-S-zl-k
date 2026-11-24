@@ -1223,8 +1223,10 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
           flex: 2,
           child: GameButton(
             label: 'Sil',
+            icon: Icons.backspace_rounded,
+            stacked: true,
             variant: GameButtonVariant.secondary,
-            fontSize: 12,
+            fontSize: 11,
             onPressed: isLocked ? null : _undoLastAction,
           ),
         ),
@@ -1232,8 +1234,10 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
           flex: 2,
           child: GameButton(
             label: 'Temizle',
+            icon: Icons.delete_sweep_rounded,
+            stacked: true,
             variant: GameButtonVariant.secondary,
-            fontSize: 12,
+            fontSize: 11,
             onPressed: isLocked
                       ? null
                       : () {
@@ -1257,14 +1261,20 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
           flex: 2,
           child: GameButton(
             label: 'Pas ($remainingPasses)',
+            icon: Icons.skip_next_rounded,
+            stacked: true,
+            fontSize: 11,
             variant: GameButtonVariant.warning,
             onPressed: (remainingPasses > 0 && !isLocked) ? _passQuestion : null,
           ),
         ),
         GameBarItem(
-          flex: 3,
+          flex: 4,
           child: GameButton(
             label: 'Gönder',
+            icon: Icons.send_rounded,
+            emphasized: true,
+            fontSize: 14,
             variant: GameButtonVariant.accent,
             onPressed: isLocked ? null : (currentRoundType == 'word' ? _submitWord : _submitMath),
           ),

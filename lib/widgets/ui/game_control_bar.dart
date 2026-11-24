@@ -8,21 +8,38 @@ class GameBarItem {
   final int flex;
 }
 
-/// Oyun ekranlarının alt kontrol çubuğu: eylemler yan yana, aralarında sabit boşluk.
+/// Oyun ekranlarının alt kontrol çubuğu: üstte ince ayırıcı ışık çizgisi, altında
+/// aynı yükseklikte (ergonomik 56dp) eylemler; aralarında sabit boşluk.
 class GameControlBar extends StatelessWidget {
-  const GameControlBar({super.key, required this.items, this.spacing = 6});
+  const GameControlBar({super.key, required this.items, this.spacing = 8, this.itemHeight = 56});
 
   final List<GameBarItem> items;
   final double spacing;
 
+  /// Tüm eylemlerin ortak yüksekliği (en az 48dp dokunma alanı).
+  final double itemHeight;
+
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        for (int i = 0; i < items.length; i++) ...[
-          if (i > 0) SizedBox(width: spacing),
-          Expanded(flex: items[i].flex, child: items[i].child),
-        ],
+        // Üstten ince ayırıcı ışık çizgisi
+        Container(
+          height: 1,
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: [Colors.transparent, Colors.white.withValues(alpha: 0.22), Colors.transparent]),
+          ),
+        ),
+        Row(
+          children: [
+            for (int i = 0; i < items.length; i++) ...[
+              if (i > 0) SizedBox(width: spacing),
+              Expanded(flex: items[i].flex, child: SizedBox(height: itemHeight, child: items[i].child)),
+            ],
+          ],
+        ),
       ],
     );
   }

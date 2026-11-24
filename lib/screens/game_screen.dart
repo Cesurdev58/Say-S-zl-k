@@ -825,8 +825,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           flex: 2,
           child: GameButton(
             label: 'Sil',
+            icon: Icons.backspace_rounded,
+            stacked: true,
             variant: GameButtonVariant.secondary,
-            fontSize: 12,
+            fontSize: 11,
             onPressed: isLocked
                   ? null
                   : () {
@@ -858,8 +860,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           flex: 2,
           child: GameButton(
             label: currentRoundType == 'word' ? 'Temizle' : 'Sıfırla',
+            icon: currentRoundType == 'word' ? Icons.delete_sweep_rounded : Icons.restart_alt_rounded,
+            stacked: true,
             variant: GameButtonVariant.secondary,
-            fontSize: 12,
+            fontSize: 11,
             onPressed: isLocked
                   ? null
                   : () {
@@ -883,15 +887,20 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             flex: 3,
             child: GameButton(
               label: 'Cevabı Göster',
+              icon: Icons.lightbulb_rounded,
+              stacked: true,
               variant: GameButtonVariant.accent,
               fontSize: 11,
               onPressed: isLocked ? null : _showTimelessSolution,
             ),
           ),
         GameBarItem(
-          flex: 3,
+          flex: 4,
           child: GameButton(
             label: currentRoundType == 'word' ? 'Onayla' : 'Tamamla',
+            icon: Icons.check_rounded,
+            emphasized: true,
+            fontSize: 14,
             onPressed: isLocked
                 ? null
                 : () {

@@ -16,6 +16,8 @@ class GameButton extends StatelessWidget {
     this.icon,
     this.fontSize = 13,
     this.semanticLabel,
+    this.stacked = false,
+    this.emphasized = false,
   });
 
   /// Dokunma alanı alt sınırı (Material erişilebilirlik yönergesi).
@@ -29,6 +31,12 @@ class GameButton extends StatelessWidget {
   final IconData? icon;
   final double fontSize;
   final String? semanticLabel;
+
+  /// true ise ikon etiketin üstünde, dikey yerleşimle gösterilir (dar butonlar için).
+  final bool stacked;
+
+  /// true ise buton belirgin vurgulanır: daha güçlü parlama, kalın kenarlık ve yazı.
+  final bool emphasized;
 
   Color _base() {
     switch (variant) {
@@ -81,7 +89,10 @@ class GameButton extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: radius,
                 boxShadow: (enabled && !isSecondary)
-                    ? [BoxShadow(color: base.withValues(alpha: 0.35), blurRadius: 12, offset: const Offset(0, 5))]
+                    ? [
+                        BoxShadow(color: base.withValues(alpha: emphasized ? 0.6 : 0.35), blurRadius: emphasized ? 20 : 12, offset: Offset(0, emphasized ? 7 : 5)),
+                        if (emphasized) BoxShadow(color: base.withValues(alpha: 0.3), blurRadius: 32, spreadRadius: 1),
+                      ]
                     : null,
               ),
               child: Material(
@@ -90,33 +101,14 @@ class GameButton extends StatelessWidget {
                   decoration: BoxDecoration(
                     borderRadius: radius,
                     gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [top, base]),
-                    border: Border.all(color: _border(), width: 1.2),
+                    border: Border.all(color: emphasized ? Colors.white.withValues(alpha: 0.55) : _border(), width: emphasized ? 1.6 : 1.2),
                   ),
                   child: InkWell(
                     onTap: onPressed,
                     borderRadius: radius,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                      child: Center(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (icon != null) ...[
-                              Icon(icon, color: Colors.white, size: fontSize + 5),
-                              const SizedBox(width: 6),
-                            ],
-                            Flexible(
-                              child: Text(
-                                label,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: fontSize),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      padding: EdgeInsets.symmetric(horizontal: stacked ? 4 : 8, vertical: stacked ? 4 : 10),
+                      child: Center(child: stacked && icon != null ? _stackedContent() : _rowContent()),
                     ),
                   ),
                 ),
@@ -124,6 +116,36 @@ class GameButton extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  TextStyle get _labelStyle => TextStyle(color: Colors.white, fontWeight: emphasized ? FontWeight.w800 : FontWeight.bold, fontSize: fontSize);
+
+  Widget _rowContent() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (icon != null) ...[
+          Icon(icon, color: Colors.white, size: fontSize + 5),
+          const SizedBox(width: 6),
+        ],
+        Flexible(child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center, style: _labelStyle)),
+      ],
+    );
+  }
+
+  // Büyük yazı boyutlarında içerik taşmak yerine kademeli küçülür.
+  Widget _stackedContent() {
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: Colors.white, size: 20),
+          const SizedBox(height: 2),
+          Text(label, maxLines: 1, textAlign: TextAlign.center, style: _labelStyle),
+        ],
       ),
     );
   }
