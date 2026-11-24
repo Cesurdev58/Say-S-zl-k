@@ -26,6 +26,8 @@ import '../widgets/ui/count_up_text.dart';
 import '../widgets/ui/game_hud.dart';
 import '../widgets/ui/motion.dart';
 import '../widgets/game_background.dart';
+import '../widgets/ui/game_confetti.dart';
+import '../widgets/ui/praise_overlay.dart';
 
 class GameScreen extends StatefulWidget {
   final bool isTimed;
@@ -87,15 +89,13 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   List<Map<String, dynamic>> missedSolutions = [];
   final Set<String> _usedMathSignatures = {};
 
-  final Random _random = Random();
 
   late ConfettiController _confettiController;
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
 
-  String _praiseText = "";
-  double _praiseBottom = 0;
-  double _praiseOpacity = 0.0;
+  // Övgü yazısı bu sinyal arttığında bir kez oynar.
+  final ValueNotifier<int> _praiseSignal = ValueNotifier<int>(0);
 
   bool _isPausedForAnimation = false;
   bool _isPausedForDialog = false;
@@ -129,8 +129,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       remainingSeconds = 40;
     }
 
-    _confettiController = ConfettiController(duration: const Duration(seconds: 1));
-    _praiseBottom = 250;
+    _confettiController = GameConfetti.newController();
 
     _pulseController = AnimationController(
       vsync: this,
@@ -154,6 +153,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     _pulseController.dispose();
     _remainingNotifier.dispose();
     _errorSignal.dispose();
+    _praiseSignal.dispose();
     super.dispose();
   }
 
@@ -179,33 +179,22 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     return exit ?? false;
   }
 
-  void _showPraiseAnimation() {
-    final words = ['MÜKEMMEL!', 'HARİKA!', 'ZEKİCE!', 'EFSANE!', 'ZAFER!'];
-
-    setState(() {
-      _praiseText = words[_random.nextInt(words.length)];
-      _praiseBottom = MediaQuery.of(context).size.height * 0.4;
-      _praiseOpacity = 0.0;
-      _isPausedForAnimation = true;
-    });
-
-    Future.delayed(const Duration(milliseconds: 50), () {
-      if (mounted && !_isGameOver) {
-        setState(() {
-          _praiseBottom = MediaQuery.of(context).size.height * 0.6;
-          _praiseOpacity = 1.0;
-        });
-      }
-    });
-
+  /// Doğru cevap efektleri (ses, titreşim, konfeti, övgü) tahta güncellemesiyle aynı
+  /// karede değil, bir sonraki karede tetiklenir; böylece tek karede darboğaz oluşmaz.
+  /// Övgü süresince (1 sn) tahta kilitli kalır.
+  void _celebrate({bool exact = false}) {
+    setState(() => _isPausedForAnimation = true);
     Future.delayed(const Duration(milliseconds: 1000), () {
       if (mounted && !_isGameOver) {
-        setState(() {
-          _praiseOpacity = 0.0;
-          _praiseBottom = MediaQuery.of(context).size.height * 0.65;
-          _isPausedForAnimation = false;
-        });
+        setState(() => _isPausedForAnimation = false);
       }
+    });
+    Motion.afterFrame(() {
+      if (!mounted) return;
+      AudioService.instance.playSuccess(haptic: false);
+      Haptics.success(exact: exact);
+      _playConfetti();
+      _praiseSignal.value++;
     });
   }
 
@@ -299,10 +288,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     WordValidationResult result = WordService.instance.validateWord(word, availableLetters);
 
     if (result == WordValidationResult.valid) {
-      AudioService.instance.playSuccess(haptic: false);
-      Haptics.success();
-      _playConfetti();
-      _showPraiseAnimation();
+      _celebrate();
 
       if (word.length > currentLongestUserWord.length) {
         currentLongestUserWord = word;
@@ -438,10 +424,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
     if (minDiff <= 10) {
       _isSubmittingAnswer = true;
-      AudioService.instance.playSuccess(haptic: false);
-      Haptics.success(exact: minDiff == 0);
-      _playConfetti();
-      _showPraiseAnimation();
+      _celebrate(exact: minDiff == 0);
 
       if (minDiff == 0) exactMathCount++;
 
@@ -756,61 +739,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 );
               },
             ),
-            AnimatedPositioned(
-              duration: const Duration(milliseconds: 700),
-              curve: Curves.easeOutBack,
-              bottom: _praiseBottom,
-              left: 0,
-              right: 0,
-              child: RepaintBoundary(
-                child: IgnorePointer(
-                  child: AnimatedOpacity(
-                    duration: const Duration(milliseconds: 400),
-                    opacity: _praiseOpacity,
-                    child: Text(
-                      _praiseText,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Colors.amber,
-                        fontSize: 48,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 2,
-                        shadows: [
-                          Shadow(color: AppColors.primary, blurRadius: 20, offset: Offset(0, 0)),
-                          Shadow(color: Colors.black, blurRadius: 10, offset: Offset(2, 2))
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: RepaintBoundary(child: ConfettiWidget(
-                confettiController: _confettiController,
-                blastDirection: -pi / 6,
-                maxBlastForce: 25,
-                minBlastForce: 15,
-                emissionFrequency: 0.02,
-                numberOfParticles: 15,
-                gravity: 0.3,
-                colors: const [Colors.green, Colors.blue, Colors.pink, Colors.orange, Colors.purple],
-              )),
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: RepaintBoundary(child: ConfettiWidget(
-                confettiController: _confettiController,
-                blastDirection: -5 * pi / 6,
-                maxBlastForce: 25,
-                minBlastForce: 15,
-                emissionFrequency: 0.02,
-                numberOfParticles: 15,
-                gravity: 0.3,
-                colors: const [Colors.green, Colors.blue, Colors.pink, Colors.orange, Colors.purple],
-              )),
-            ),
+            PraiseOverlay(trigger: _praiseSignal),
+            GameConfetti(controller: _confettiController, alignment: Alignment.centerLeft, blastDirection: -pi / 6, numberOfParticles: 10),
+            GameConfetti(controller: _confettiController, alignment: Alignment.centerRight, blastDirection: -5 * pi / 6, numberOfParticles: 10),
           ],
         ),
       )),

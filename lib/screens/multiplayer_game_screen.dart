@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -35,6 +34,9 @@ import '../widgets/ui/motion.dart';
 import '../widgets/ui/recessed_slot.dart';
 import '../widgets/ui/target_core.dart';
 import '../widgets/game_background.dart';
+import '../widgets/ui/game_sheet.dart';
+import '../widgets/ui/game_confetti.dart';
+import '../widgets/ui/praise_overlay.dart';
 
 class MultiplayerGameScreen extends StatefulWidget {
   final String matchId;
@@ -110,9 +112,8 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
   late ConfettiController _confettiController;
   late AnimationController _pulseController;
 
-  String _praiseText = "";
-  double _praiseBottom = 0;
-  double _praiseOpacity = 0.0;
+  // Övgü yazısı bu sinyal arttığında bir kez oynar.
+  final ValueNotifier<int> _praiseSignal = ValueNotifier<int>(0);
 
   int _lastMessageTime = 0;
   String? _floatingEmojiText;
@@ -127,9 +128,8 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
     super.initState();
     UserService.instance.updateUserStatus('oyunda');
 
-    _confettiController = ConfettiController(duration: const Duration(seconds: 1));
+    _confettiController = GameConfetti.newController();
     _pulseController = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
-    _praiseBottom = 250;
 
     _loadMyFriendsAndRequests();
     _initMatchSync();
@@ -196,17 +196,11 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-        ),
+      builder: (context) => GameSheet(
+        padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(2))),
-            const SizedBox(height: 24),
             const Text('Hızlı Mesaj', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             Wrap(
@@ -254,32 +248,15 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
     });
   }
 
-  void _showPraiseAnimation() {
-    final random = Random();
-    final words = ['MÜKEMMEL!', 'HARİKA!', 'ZEKİCE!', 'EFSANE!', 'ZAFER!'];
-
-    setState(() {
-      _praiseText = words[random.nextInt(words.length)];
-      _praiseBottom = MediaQuery.of(context).size.height * 0.4;
-      _praiseOpacity = 0.0;
-    });
-
-    Future.microtask(() {
-      if (mounted) {
-        setState(() {
-          _praiseBottom = MediaQuery.of(context).size.height * 0.6;
-          _praiseOpacity = 1.0;
-        });
-      }
-    });
-
-    Future.delayed(const Duration(milliseconds: 1200), () {
-      if (mounted) {
-        setState(() {
-          _praiseOpacity = 0.0;
-          _praiseBottom = MediaQuery.of(context).size.height * 0.65;
-        });
-      }
+  /// Doğru cevap efektleri (ses, titreşim, konfeti, övgü) soru değişimiyle aynı karede
+  /// değil, bir sonraki karede tetiklenir; böylece tek karede darboğaz oluşmaz.
+  void _celebrate({bool exact = false}) {
+    Motion.afterFrame(() {
+      if (!mounted) return;
+      AudioService.instance.playSuccess(haptic: false);
+      Haptics.success(exact: exact);
+      _playConfetti();
+      _praiseSignal.value++;
     });
   }
 
@@ -759,10 +736,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
     _isSubmittingAnswer = true;
     var result = WordService.instance.validateWord(word, availableLetters);
     if (result == WordValidationResult.valid) {
-      AudioService.instance.playSuccess(haptic: false);
-      Haptics.success();
-      _playConfetti();
-      _showPraiseAnimation();
+      _celebrate();
       int earned = ScoreCalculator.multiWordScore(word.length);
       _updateMyScore(earned);
       _nextQuestion();
@@ -789,10 +763,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
     }
     if (minDiff <= 10) {
       _isSubmittingAnswer = true;
-      AudioService.instance.playSuccess(haptic: false);
-      Haptics.success(exact: minDiff == 0);
-      _playConfetti();
-      _showPraiseAnimation();
+      _celebrate(exact: minDiff == 0);
       int earned = ScoreCalculator.mathScore(minDiff, currentNumbers.length);
       _updateMyScore(earned);
       _nextQuestion();
@@ -928,6 +899,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
     _pulseController.dispose();
     _remainingNotifier.dispose();
     _errorSignal.dispose();
+    _praiseSignal.dispose();
     super.dispose();
   }
 
@@ -1004,34 +976,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
               ),
             ],
           ),
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 700),
-            curve: Curves.easeOutBack,
-            bottom: _praiseBottom,
-            left: 0,
-            right: 0,
-            child: RepaintBoundary(
-              child: IgnorePointer(
-                child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 400),
-                  opacity: _praiseOpacity,
-                  child: Text(
-                    _praiseText,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        color: Colors.amber,
-                        fontSize: 48,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 2,
-                        shadows: [
-                          Shadow(color: AppColors.primary, blurRadius: 20, offset: Offset(0, 0)),
-                          Shadow(color: Colors.black, blurRadius: 10, offset: Offset(2, 2))
-                        ]),
-                  ),
-                ),
-              ),
-            ),
-          ),
+          PraiseOverlay(trigger: _praiseSignal),
           Align(
             alignment: Alignment.topCenter,
             child: Padding(
@@ -1066,16 +1011,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
               ),
             ),
           ),
-          RepaintBoundary(child: IgnorePointer(
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: ConfettiWidget(
-                  confettiController: _confettiController,
-                  blastDirectionality: BlastDirectionality.explosive,
-                  shouldLoop: false,
-                  colors: const [Colors.green, Colors.blue, Colors.pink, Colors.orange, Colors.purple]),
-            ),
-          )),
+          GameConfetti(controller: _confettiController, alignment: Alignment.topCenter, numberOfParticles: 12),
         ],
       ),
     );

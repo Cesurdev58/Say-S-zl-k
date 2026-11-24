@@ -7,6 +7,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import 'ui/game_card.dart';
 import 'ui/pressable.dart';
+import 'ui/game_sheet.dart';
 
 class ProfileCard extends StatefulWidget {
   final UserProfile profile;
@@ -33,17 +34,11 @@ class _ProfileCardState extends State<ProfileCard> {
       isScrollControlled: true,
       builder: (context) => DefaultTabController(
         length: 2,
-        child: Container(
-          height: MediaQuery.of(context).size.height * 0.6,
-          decoration: const BoxDecoration(
-            color: AppColors.background,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-          ),
+        child: GameSheet(
+          heightFactor: 0.6,
+          color: AppColors.background,
           child: Column(
             children: [
-              const SizedBox(height: 12),
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(2))),
-              const SizedBox(height: 16),
               const Text('Profilini Özelleştir', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
               
               const TabBar(

@@ -7,6 +7,7 @@ import '../services/audio_service.dart';
 import '../screens/auth_screen.dart';
 import 'text_controller_scope.dart';
 import '../theme/app_colors.dart';
+import 'ui/game_sheet.dart';
 
 void showSettingsBottomSheet(BuildContext context, VoidCallback onProfileUpdated) {
   showModalBottomSheet(
@@ -330,16 +331,12 @@ class _SettingsSheetState extends State<_SettingsSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      decoration: const BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.vertical(top: Radius.circular(32))),
+    return GameSheet(
+      color: AppColors.background,
       child: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 12),
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(2))),
-            const SizedBox(height: 24),
             const Text('Ayarlar', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 24),
             

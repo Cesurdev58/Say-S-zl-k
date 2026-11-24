@@ -10,6 +10,7 @@ import '../services/user_service.dart';
 import 'multiplayer_game_screen.dart';
 import '../theme/app_colors.dart';
 import '../widgets/game_background.dart';
+import '../widgets/ui/game_sheet.dart';
 
 class PrivateRoomScreen extends StatefulWidget {
   final String? initialRoomCode;
@@ -372,16 +373,12 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.6,
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
+      builder: (context) => GameSheet(
+        heightFactor: 0.6,
         child: Column(
           children: [
             const Padding(
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: Text('Arkadaş Davet Et', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
             ),
             const Divider(color: Colors.white12, height: 1),
