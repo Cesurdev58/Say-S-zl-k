@@ -9,6 +9,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'firebase_options.dart';
 
 import 'screens/splash_screen.dart';
+import 'theme/app_theme.dart';
 import 'services/user_service.dart';
 import 'services/audio_service.dart';
 import 'services/ad_service.dart';
@@ -91,10 +92,7 @@ class _SayiSozlukAppState extends State<SayiSozlukApp> with WidgetsBindingObserv
       title: 'SayıSözlük',
       debugShowCheckedModeBanner: false,
       navigatorKey: navigatorKey, // Cihaz çakışması anında ana menüye atmak için bağlandı
-      theme: ThemeData(
-        fontFamily: 'Nunito',
-        primaryColor: const Color(0xFF7C5CFC),
-      ),
+      theme: AppTheme.dark(),
       home: const SplashScreen(),
     );
   }

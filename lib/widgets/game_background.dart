@@ -23,14 +23,3 @@ class GameBackground extends StatelessWidget {
     return Container(decoration: decoration, child: child);
   }
 }
-
-/// Oyun ekranları için ortak renk sabitleri.
-abstract final class GameColors {
-  static const primary = Color(0xFF7C5CFC);
-  static const primaryDark = Color(0xFF4F46E5);
-  static const accent = Color(0xFFA78BFA);
-  static const cardGradientStart = Color(0xFF5B3FD9);
-  static const cardGradientEnd = Color(0xFF1E3A8A);
-  static const success = Color(0xFF34D399);
-  static const error = Color(0xFFF87171);
-}
