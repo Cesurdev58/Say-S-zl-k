@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../services/user_service.dart';
 import '../services/audio_service.dart'; 
 import '../screens/auth_screen.dart';
+import 'text_controller_scope.dart';
 
 void showSettingsBottomSheet(BuildContext context, VoidCallback onProfileUpdated) {
   showModalBottomSheet(
@@ -159,13 +160,13 @@ class _SettingsSheetState extends State<_SettingsSheet> {
   }
 
   void _showDeleteAccountDialog() {
-    final passwordController = TextEditingController();
     bool isLoading = false;
 
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => StatefulBuilder(
+      builder: (context) => TextControllerScope(
+        builder: (context, passwordController) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           backgroundColor: const Color(0xFF1D1B36),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -246,6 +247,7 @@ class _SettingsSheetState extends State<_SettingsSheet> {
           ],
         ),
       ),
+      ),
     );
   }
 
@@ -317,6 +319,12 @@ class _SettingsSheetState extends State<_SettingsSheet> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
   }
 
   @override

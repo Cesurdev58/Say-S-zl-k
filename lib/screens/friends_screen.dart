@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/audio_service.dart';
 import '../services/user_service.dart';
+import '../widgets/text_controller_scope.dart';
 
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({super.key});
@@ -89,12 +90,12 @@ class _FriendsScreenState extends State<FriendsScreen> {
       return;
     }
 
-    final TextEditingController idController = TextEditingController();
     bool isSubmitting = false;
 
     showDialog(
       context: context,
-      builder: (dialogContext) => StatefulBuilder(
+      builder: (dialogContext) => TextControllerScope(
+        builder: (context, idController) => StatefulBuilder(
         builder: (context, setDialogState) {
           return Dialog(
             backgroundColor: const Color(0xFF1D1B36),
@@ -255,6 +256,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
             ),
           );
         },
+        ),
       ),
     );
   }
