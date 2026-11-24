@@ -10,6 +10,8 @@ import '../services/number_solver_service.dart';
 import '../services/user_service.dart';
 import '../services/audio_service.dart';
 import '../widgets/game_over_dialog.dart';
+import '../widgets/joker_picker_dialog.dart';
+import '../widgets/solution_dialog.dart';
 import '../widgets/timer_chip.dart';
 import '../widgets/word_game_board.dart';
 import '../widgets/math_game_board.dart';
@@ -75,11 +77,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   final Set<String> _usedMathSignatures = {};
 
   final Random _random = Random();
-  final List<String> _alphabet = [
-    'A', 'B', 'C', 'Ç', 'D', 'E', 'F', 'G', 'Ğ', 'H',
-    'I', 'İ', 'J', 'K', 'L', 'M', 'N', 'O', 'Ö', 'P',
-    'R', 'S', 'Ş', 'T', 'U', 'Ü', 'V', 'Y', 'Z'
-  ];
 
   late ConfettiController _confettiController;
   late AnimationController _pulseController;
@@ -544,7 +541,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     AudioService.instance.playClick();
 
     bool isWord = currentRoundType == 'word';
-    String title = isWord ? 'Olası En Uzun Kelime' : 'Adım Adım Tam Çözüm';
     _isResolvingSolution = true;
     final String bestWord;
     final List<String> mathSteps;
@@ -558,79 +554,15 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
     showDialog(
       context: context,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Container(
-          padding: const EdgeInsets.all(22),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1D1B36),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: const Color(0xFF7C5CFC).withValues(alpha: 0.5), width: 1.5),
-            boxShadow: [
-              BoxShadow(color: const Color(0xFF131127).withValues(alpha: 0.8), blurRadius: 20, spreadRadius: 5)
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
-              if (isWord) ...[
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(color: const Color(0xFF131127), borderRadius: BorderRadius.circular(16)),
-                  child: Text(
-                    bestWord == "SÖZLÜKTE KELİME BULUNAMADI"
-                        ? "Bu harflerle sözlükte eşleşen kelime bulunamadı."
-                        : "$bestWord (${bestWord.length} Harf)",
-                    style: const TextStyle(color: Color(0xFF00CEC9), fontSize: 16, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ] else ...[
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(color: const Color(0xFF131127), borderRadius: BorderRadius.circular(16)),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: mathSteps.map((step) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.check_circle_outline_rounded, color: Color(0xFF00CEC9), size: 16),
-                            const SizedBox(width: 8),
-                            Text(step, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ],
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF6C5CE7),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  ),
-                  onPressed: () {
-                    AudioService.instance.playClick();
-                    Navigator.pop(context);
-                    _nextTurn();
-                  },
-                  child: const Text('Sonraki Soruya Geç', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-                ),
-              ),
-            ],
-          ),
-        ),
+      builder: (dialogContext) => SolutionDialog(
+        isWord: isWord,
+        bestWord: bestWord,
+        mathSteps: mathSteps,
+        onNext: () {
+          AudioService.instance.playClick();
+          Navigator.pop(dialogContext);
+          _nextTurn();
+        },
       ),
     );
   }
@@ -711,61 +643,15 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     _isJokerDialogOpen = true;
     AudioService.instance.playClick();
 
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return Dialog(
-          backgroundColor: const Color(0xFF1D1B36),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('Joker Harf Seçin', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 16),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 300),
-                  child: SingleChildScrollView(
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      alignment: WrapAlignment.center,
-                      children: _alphabet.map((char) {
-                        return InkWell(
-                          onTap: () {
-                            AudioService.instance.playClick();
-                            if (_isJokerDialogOpen) {
-                              _isJokerDialogOpen = false;
-                              Navigator.of(dialogContext).pop();
-                            }
-                            if (!_isGameOver && (!widget.isTimed || remainingSeconds > 0)) {
-                              setState(() {
-                                selectedIndices.add(index);
-                                selectedLetters.add(char);
-                              });
-                            }
-                          },
-                          child: Container(
-                            width: 42,
-                            height: 42,
-                            decoration: BoxDecoration(color: const Color(0xFFFF9F43), borderRadius: BorderRadius.circular(10)),
-                            child: Center(
-                              child: Text(char, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    ).then((_) {
+    JokerPickerDialog.show(context).then((char) {
       _isJokerDialogOpen = false;
+      if (char == null || !mounted) return;
+      if (!_isGameOver && (!widget.isTimed || remainingSeconds > 0)) {
+        setState(() {
+          selectedIndices.add(index);
+          selectedLetters.add(char);
+        });
+      }
     });
   }
 

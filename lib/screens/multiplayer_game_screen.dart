@@ -12,6 +12,7 @@ import '../services/audio_service.dart';
 import '../services/user_service.dart';
 import '../services/ad_service.dart';
 import '../services/match_service.dart';
+import '../widgets/joker_picker_dialog.dart';
 import '../widgets/timer_chip.dart';
 import 'private_room_screen.dart';
 import 'matchmaking_screen.dart';
@@ -74,11 +75,6 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
   int? firstNumValue;
   String? selectedOp;
 
-  final List<String> _alphabet = [
-    'A', 'B', 'C', 'Ç', 'D', 'E', 'F', 'G', 'Ğ', 'H',
-    'I', 'İ', 'J', 'K', 'L', 'M', 'N', 'O', 'Ö', 'P',
-    'R', 'S', 'Ş', 'T', 'U', 'Ü', 'V', 'Y', 'Z'
-  ];
 
   late ConfettiController _confettiController;
   late AnimationController _pulseController;
@@ -876,47 +872,15 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
     _isDialogShowing = true;
     AudioService.instance.playClick();
 
-    showDialog(
-        context: context,
-        builder: (context) {
-          return Dialog(
-              backgroundColor: const Color(0xFF1D1B36),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-              child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    const Text('Joker Harf Seçin', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 16),
-                    ConstrainedBox(
-                        constraints: const BoxConstraints(maxHeight: 300),
-                        child: SingleChildScrollView(
-                            child: Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                alignment: WrapAlignment.center,
-                                children: _alphabet
-                                    .map((char) => InkWell(
-                                        onTap: () {
-                                          AudioService.instance.playClick();
-                                          Navigator.pop(context);
-                                          if (!isGameOver && remainingSeconds > 0) {
-                                            setState(() {
-                                              selectedIndices.add(index);
-                                              selectedLetters.add(char);
-                                            });
-                                          }
-                                        },
-                                        child: Container(
-                                            width: 42,
-                                            height: 42,
-                                            decoration: BoxDecoration(color: const Color(0xFFFF9F43), borderRadius: BorderRadius.circular(10)),
-                                            child: Center(
-                                                child: Text(char,
-                                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15))))))
-                                    .toList())))
-                  ])));
-        }).then((_) {
+    JokerPickerDialog.show(context).then((char) {
       _isDialogShowing = false;
+      if (char == null || !mounted) return;
+      if (!isGameOver && remainingSeconds > 0) {
+        setState(() {
+          selectedIndices.add(index);
+          selectedLetters.add(char);
+        });
+      }
     });
   }
 
