@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import '../widgets/game_intro_dialog.dart'; // Bilgilendirme ve Geri Sayım Pop-up'ı
 import 'game_screen.dart'; // Oyun Ekranı
 import '../theme/app_colors.dart';
+import '../theme/app_theme.dart';
+import '../widgets/ui/game_card.dart';
+import '../widgets/ui/game_tile.dart';
 
 class SoloModeSelectScreen extends StatefulWidget {
   const SoloModeSelectScreen({super.key});
@@ -166,23 +169,23 @@ class _SoloModeSelectScreenState extends State<SoloModeSelectScreen> {
   Widget _buildMainModeCard({required String title, required String subtitle, required IconData icon, required bool isSelected, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
-      child: AnimatedContainer(
+      child: GameTile(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryDeep : AppColors.surfaceHigh,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: isSelected ? AppColors.primaryBright : Colors.transparent, width: 2),
-          boxShadow: isSelected ? [BoxShadow(color: AppColors.primaryDeep.withValues(alpha: 0.4), blurRadius: 12, offset: const Offset(0, 4))] : [],
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: Colors.white, size: 28),
-            const SizedBox(height: 8),
-            Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
-            const SizedBox(height: 4),
-            Text(subtitle, style: TextStyle(color: isSelected ? Colors.white.withValues(alpha: 0.8) : Colors.white.withValues(alpha: 0.38), fontSize: 11)),
-          ],
+        radius: AppRadius.lg,
+        flat: !isSelected,
+        color: isSelected ? AppColors.primaryDeep : AppColors.surfaceHigh,
+        borderColor: isSelected ? AppColors.primaryBright : Colors.white.withValues(alpha: 0.05),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Icon(icon, color: Colors.white, size: 28),
+              const SizedBox(height: 8),
+              Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+              const SizedBox(height: 4),
+              Text(subtitle, style: TextStyle(color: isSelected ? Colors.white.withValues(alpha: 0.8) : Colors.white.withValues(alpha: 0.38), fontSize: 11)),
+            ],
+          ),
         ),
       ),
     );
@@ -192,13 +195,10 @@ class _SoloModeSelectScreenState extends State<SoloModeSelectScreen> {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
-      child: Container(
+      child: GameCard(
+        radius: 20,
+        color: AppColors.surfaceHigh,
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceHigh,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.05), width: 1),
-        ),
         child: Row(
           children: [
             Container(width: 52, height: 52, decoration: BoxDecoration(color: iconBgColor.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(14)), child: Icon(icon, color: iconBgColor, size: 26)),
