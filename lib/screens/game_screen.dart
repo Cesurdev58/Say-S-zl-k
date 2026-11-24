@@ -9,6 +9,7 @@ import '../services/math_service.dart';
 import '../services/number_solver_service.dart';
 import '../services/user_service.dart';
 import '../services/audio_service.dart';
+import '../services/haptics.dart';
 import '../widgets/game_over_dialog.dart';
 import '../widgets/joker_picker_dialog.dart';
 import '../widgets/solution_dialog.dart';
@@ -21,7 +22,9 @@ import '../widgets/ui/game_button.dart';
 import '../widgets/ui/game_card.dart';
 import '../widgets/ui/game_control_bar.dart';
 import '../widgets/ui/game_dialog.dart';
+import '../widgets/ui/count_up_text.dart';
 import '../widgets/ui/game_hud.dart';
+import '../widgets/ui/motion.dart';
 
 class GameScreen extends StatefulWidget {
   final bool isTimed;
@@ -99,6 +102,17 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   bool _isGameOver = false;
   bool _isSubmittingAnswer = false;
   bool _isResolvingSolution = false;
+  // Yanlış kelime / geçersiz işlemde cevap alanını sallamak için artırılır.
+  final ValueNotifier<int> _errorSignal = ValueNotifier<int>(0);
+
+  void _signalError() {
+    Haptics.error();
+    _errorSignal.value++;
+  }
+
+  void _playConfetti() {
+    if (!Motion.reduced(context)) _confettiController.play();
+  }
   Future<List<String>>? _mathStepsFuture;
 
   @override
@@ -138,6 +152,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     _confettiController.dispose();
     _pulseController.dispose();
     _remainingNotifier.dispose();
+    _errorSignal.dispose();
     super.dispose();
   }
 
@@ -202,6 +217,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       if (remainingSeconds > 1) {
         // Yalnızca ValueNotifier güncellenir; setState yok (tüm ekran yeniden çizilmez).
         remainingSeconds--;
+        if (remainingSeconds <= 5) Haptics.tick();
         if (remainingSeconds <= 5 && !_pulseController.isAnimating) {
           _pulseController.repeat(reverse: true);
         } else if (remainingSeconds > 5 && _pulseController.isAnimating) {
@@ -266,7 +282,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     if (word.isEmpty) return;
 
     if (word.length == 1) {
-      AudioService.instance.playError();
+      AudioService.instance.playError(haptic: false);
+      _signalError();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('En az 2 harfli bir kelime girmelisiniz!'),
@@ -281,8 +298,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     WordValidationResult result = WordService.instance.validateWord(word, availableLetters);
 
     if (result == WordValidationResult.valid) {
-      AudioService.instance.playSuccess();
-      _confettiController.play();
+      AudioService.instance.playSuccess(haptic: false);
+      Haptics.success();
+      _playConfetti();
       _showPraiseAnimation();
 
       if (word.length > currentLongestUserWord.length) {
@@ -313,7 +331,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       });
     } else {
       _isSubmittingAnswer = false;
-      AudioService.instance.playError();
+      AudioService.instance.playError(haptic: false);
+      _signalError();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(result.message),
@@ -327,7 +346,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   void _onNumberTap(int index, int num) {
     if (_isSubmittingAnswer || _isPausedForAnimation || _isPausedForDialog || _isGameOver) return;
     if (widget.isTimed && remainingSeconds <= 0) return;
-    AudioService.instance.playClick();
+    AudioService.instance.playClick(haptic: false);
+    Haptics.selection();
 
     if (firstNumIndex == null) {
       setState(() {
@@ -344,6 +364,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         if (firstNumValue! - secondNum > 0) {
           result = firstNumValue! - secondNum;
         } else {
+          _signalError();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Çıkarma sonucu pozitif bir tam sayı olmalıdır!'),
@@ -358,6 +379,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         if (secondNum > 0 && firstNumValue! % secondNum == 0) {
           result = firstNumValue! ~/ secondNum;
         } else {
+          _signalError();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Bölme işlemi kalansız olmalıdır!'),
@@ -415,8 +437,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
 
     if (minDiff <= 10) {
       _isSubmittingAnswer = true;
-      AudioService.instance.playSuccess();
-      _confettiController.play();
+      AudioService.instance.playSuccess(haptic: false);
+      Haptics.success(exact: minDiff == 0);
+      _playConfetti();
       _showPraiseAnimation();
 
       if (minDiff == 0) exactMathCount++;
@@ -444,7 +467,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         if (mounted && !_isGameOver) _nextTurn();
       });
     } else {
-      AudioService.instance.playError();
+      AudioService.instance.playError(haptic: false);
+      _signalError();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Hedefe en fazla 10 yaklaşmalısınız!'),
@@ -631,6 +655,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       _isJokerDialogOpen = false;
       if (char == null || !mounted) return;
       if (!_isGameOver && (!widget.isTimed || remainingSeconds > 0)) {
+        Haptics.selection();
         setState(() {
           selectedIndices.add(index);
           selectedLetters.add(char);
@@ -677,9 +702,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                               selectedIndices: selectedIndices,
                               selectedLetters: selectedLetters,
                               isPaused: isBoardPaused,
+                              errorSignal: _errorSignal,
                               onLetterTap: (index, char) {
                                 if (isBoardPaused) return;
-                                AudioService.instance.playClick();
+                                AudioService.instance.playClick(haptic: false);
+                                Haptics.selection();
                                 setState(() {
                                   selectedIndices.add(index);
                                   selectedLetters.add(char);
@@ -696,9 +723,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                               selectedOp: selectedOp,
                               isPaused: isBoardPaused,
                               onNumberTap: _onNumberTap,
+                              errorSignal: _errorSignal,
                               onOperatorTap: (op) {
                                 if (isBoardPaused) return;
-                                AudioService.instance.playClick();
+                                AudioService.instance.playClick(haptic: false);
+                                Haptics.selection();
                                 setState(() => selectedOp = op);
                               },
                             ),
@@ -732,22 +761,24 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               bottom: _praiseBottom,
               left: 0,
               right: 0,
-              child: IgnorePointer(
-                child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 400),
-                  opacity: _praiseOpacity,
-                  child: Text(
-                    _praiseText,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.amber,
-                      fontSize: 48,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 2,
-                      shadows: [
-                        Shadow(color: AppColors.primary, blurRadius: 20, offset: Offset(0, 0)),
-                        Shadow(color: Colors.black, blurRadius: 10, offset: Offset(2, 2))
-                      ],
+              child: RepaintBoundary(
+                child: IgnorePointer(
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 400),
+                    opacity: _praiseOpacity,
+                    child: Text(
+                      _praiseText,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.amber,
+                        fontSize: 48,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 2,
+                        shadows: [
+                          Shadow(color: AppColors.primary, blurRadius: 20, offset: Offset(0, 0)),
+                          Shadow(color: Colors.black, blurRadius: 10, offset: Offset(2, 2))
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -755,7 +786,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             ),
             Align(
               alignment: Alignment.centerLeft,
-              child: ConfettiWidget(
+              child: RepaintBoundary(child: ConfettiWidget(
                 confettiController: _confettiController,
                 blastDirection: -pi / 6,
                 maxBlastForce: 25,
@@ -764,11 +795,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 numberOfParticles: 15,
                 gravity: 0.3,
                 colors: const [Colors.green, Colors.blue, Colors.pink, Colors.orange, Colors.purple],
-              ),
+              )),
             ),
             Align(
               alignment: Alignment.centerRight,
-              child: ConfettiWidget(
+              child: RepaintBoundary(child: ConfettiWidget(
                 confettiController: _confettiController,
                 blastDirection: -5 * pi / 6,
                 maxBlastForce: 25,
@@ -777,7 +808,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 numberOfParticles: 15,
                 gravity: 0.3,
                 colors: const [Colors.green, Colors.blue, Colors.pink, Colors.orange, Colors.purple],
-              ),
+              )),
             ),
           ],
         ),
@@ -835,7 +866,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   currentRoundType == 'word' ? 'Kelime Puanı' : 'Toplanan Puan',
                   style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13, fontWeight: FontWeight.w500),
                 ),
-                Text('$score', style: AppText.counter(fontSize: 22, fontWeight: FontWeight.w900)),
+                CountUpText(value: score, style: AppText.counter(fontSize: 22, fontWeight: FontWeight.w900)),
               ],
             ),
             if (showDelta && scoreDeltaText != null)
@@ -867,7 +898,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             onPressed: isLocked
                   ? null
                   : () {
-                      AudioService.instance.playClick();
+                      AudioService.instance.playClick(haptic: false);
+                      Haptics.selection();
                       setState(() {
                         if (currentRoundType == 'word') {
                           if (selectedLetters.isNotEmpty) {
@@ -899,7 +931,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             onPressed: isLocked
                   ? null
                   : () {
-                      AudioService.instance.playClick();
+                      AudioService.instance.playClick(haptic: false);
+                      Haptics.selection();
                       setState(() {
                         selectedLetters.clear();
                         selectedIndices.clear();
