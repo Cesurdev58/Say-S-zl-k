@@ -5,6 +5,8 @@ import '../services/user_service.dart';
 import '../services/audio_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/game_background.dart';
+import '../widgets/ui/game_confetti.dart';
+import '../widgets/ui/motion.dart';
 
 class QuestsScreen extends StatefulWidget {
   const QuestsScreen({super.key});
@@ -44,7 +46,7 @@ class _QuestsScreenState extends State<QuestsScreen> {
   @override
   void initState() {
     super.initState();
-    _confettiController = ConfettiController(duration: const Duration(seconds: 2));
+    _confettiController = GameConfetti.newController();
     _loadProfile();
   }
 
@@ -84,8 +86,13 @@ class _QuestsScreenState extends State<QuestsScreen> {
       if (!mounted) return;
 
       if (success) {
-        AudioService.instance.playSuccess();
-        _confettiController.play();
+        // Ses ve konfeti, profil yenileme/liste güncellemesiyle aynı karede değil,
+        // bir sonraki karede tetiklenir (tek karede darboğaz oluşmasın).
+        Motion.afterFrame(() {
+          if (!mounted) return;
+          AudioService.instance.playSuccess();
+          if (!Motion.reduced(context)) _confettiController.play();
+        });
         await _loadProfile();
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -147,19 +154,7 @@ class _QuestsScreenState extends State<QuestsScreen> {
                       _buildQuestList(_achievements),
                     ],
                   ),
-                  Align(
-                    alignment: Alignment.topCenter,
-                    child: ConfettiWidget(
-                      confettiController: _confettiController,
-                      blastDirectionality: BlastDirectionality.explosive,
-                      maxBlastForce: 20,
-                      minBlastForce: 8,
-                      emissionFrequency: 0.05,
-                      numberOfParticles: 20,
-                      gravity: 0.1,
-                      colors: const [Colors.green, Colors.blue, Colors.pink, Colors.orange, Colors.purple],
-                    ),
-                  ),
+                  GameConfetti(controller: _confettiController, alignment: Alignment.topCenter, numberOfParticles: 12),
                 ],
               ),
       )),
