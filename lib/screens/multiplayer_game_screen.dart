@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:confetti/confetti.dart';
 
+import '../services/score_calculator.dart';
 import '../services/word_service.dart';
 import '../services/number_solver_service.dart';
 import '../services/audio_service.dart';
@@ -185,7 +186,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(2))),
+            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(2))),
             const SizedBox(height: 24),
             const Text('Hızlı Mesaj', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
@@ -205,7 +206,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                   .toList(),
             ),
             const SizedBox(height: 16),
-            Divider(color: Colors.white.withOpacity(0.1)),
+            Divider(color: Colors.white.withValues(alpha: 0.1)),
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
@@ -217,9 +218,9 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                           decoration: BoxDecoration(
-                              color: const Color(0xFF7C5CFC).withOpacity(0.2),
+                              color: const Color(0xFF7C5CFC).withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: const Color(0xFF7C5CFC).withOpacity(0.5))),
+                              border: Border.all(color: const Color(0xFF7C5CFC).withValues(alpha: 0.5))),
                           child: Text(text, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                         ),
                       ))
@@ -578,7 +579,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                             margin: const EdgeInsets.only(bottom: 8),
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                                color: isMe ? const Color(0xFF7C5CFC).withOpacity(0.3) : Colors.transparent,
+                                color: isMe ? const Color(0xFF7C5CFC).withValues(alpha: 0.3) : Colors.transparent,
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(color: isMe ? const Color(0xFF7C5CFC) : Colors.transparent)),
                             child: Row(
@@ -633,12 +634,12 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                                 color: const Color(0xFF131127), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white12)),
                             child: isWord
                                 ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                    Text('Harfler: ${sol['letters']}', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)),
+                                    Text('Harfler: ${sol['letters']}', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12)),
                                     Text('${sol['bestWord']} (${sol['bestWord'].length} Harf)',
                                         style: const TextStyle(color: Color(0xFF00CEC9), fontSize: 14, fontWeight: FontWeight.bold))
                                   ])
                                 : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                    Text('Hedef: ${sol['target']}', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12)),
+                                    Text('Hedef: ${sol['target']}', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12)),
                                     ...(sol['mathSteps'] as List<String>).map((step) =>
                                         Text(step, style: const TextStyle(color: Color(0xFF00CEC9), fontSize: 12, fontWeight: FontWeight.bold)))
                                   ]),
@@ -697,7 +698,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                             height: 48,
                             child: OutlinedButton(
                               style: OutlinedButton.styleFrom(
-                                  side: BorderSide(color: Colors.white.withOpacity(0.2)),
+                                  side: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                               onPressed: _exitToMainMenu,
                               child: const Text('Ana Menü', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
@@ -793,7 +794,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
       AudioService.instance.playSuccess();
       _confettiController.play();
       _showPraiseAnimation();
-      int earned = word.length >= 7 ? word.length + 5 : word.length;
+      int earned = ScoreCalculator.multiWordScore(word.length);
       _updateMyScore(earned);
       _nextQuestion();
     } else {
@@ -821,7 +822,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
       AudioService.instance.playSuccess();
       _confettiController.play();
       _showPraiseAnimation();
-      int earned = (10 - minDiff) + (currentNumbers.length * 2);
+      int earned = ScoreCalculator.mathScore(minDiff, currentNumbers.length);
       _updateMyScore(earned);
       _nextQuestion();
     } else {
@@ -985,8 +986,15 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final navigator = Navigator.of(context);
+        if (await _onWillPop()) {
+          if (mounted) navigator.pop();
+        }
+      },
       child: Scaffold(
         backgroundColor: const Color(0xFF131127),
         body: currentRoundType == 'loading' ? _buildLoading() : _buildGameUI(),
@@ -1088,11 +1096,11 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                       : Container(
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF131127).withOpacity(0.95),
+                            color: const Color(0xFF131127).withValues(alpha: 0.95),
                             borderRadius: BorderRadius.circular(30),
-                            border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+                            border: Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
                             boxShadow: [
-                              BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 10, offset: const Offset(0, 4)),
+                              BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 10, offset: const Offset(0, 4)),
                             ],
                           ),
                           child: Row(
@@ -1148,7 +1156,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
               duration: const Duration(milliseconds: 300),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               decoration: BoxDecoration(
-                  color: remainingSeconds <= 10 ? Colors.redAccent.withOpacity(0.3) : const Color(0xFF232042),
+                  color: remainingSeconds <= 10 ? Colors.redAccent.withValues(alpha: 0.3) : const Color(0xFF232042),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(color: remainingSeconds <= 10 ? Colors.redAccent : const Color(0xFF7C5CFC))),
               child: Text('${remainingSeconds}s',
@@ -1172,7 +1180,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
           bool isMe = p.key == myUid;
           int rank = index + 1;
 
-          Color bgColor = isMe ? const Color(0xFF00CEC9).withOpacity(0.2) : const Color(0xFF232042);
+          Color bgColor = isMe ? const Color(0xFF00CEC9).withValues(alpha: 0.2) : const Color(0xFF232042);
           Color borderColor = isMe ? const Color(0xFF00CEC9) : Colors.white12;
           Color rankColor = rank == 1 ? Colors.amber : (rank == 2 ? Colors.grey[400]! : (rank == 3 ? Colors.brown[300]! : Colors.white54));
 
@@ -1209,7 +1217,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
           decoration: BoxDecoration(
               color: const Color(0xFF1D1B36),
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: const Color(0xFF5A4FCF).withOpacity(0.4))),
+              border: Border.all(color: const Color(0xFF5A4FCF).withValues(alpha: 0.4))),
           child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: selectedLetters
@@ -1246,7 +1254,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                       },
                 child: Container(
                     decoration: BoxDecoration(
-                        color: isUsed ? const Color(0xFF1D1B36).withOpacity(0.4) : (char == 'JOKER' ? const Color(0xFFFF9F43) : const Color(0xFF5A4FCF)),
+                        color: isUsed ? const Color(0xFF1D1B36).withValues(alpha: 0.4) : (char == 'JOKER' ? const Color(0xFFFF9F43) : const Color(0xFF5A4FCF)),
                         borderRadius: BorderRadius.circular(16)),
                     child: Center(
                         child: Text(char,
@@ -1259,7 +1267,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
   Widget _buildMathArea() {
     final bool isLocked = _isSubmittingAnswer || isGameOver || remainingSeconds <= 0;
     return Column(children: [
-      Text('HEDEF SAYI', style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 12, fontWeight: FontWeight.bold)),
+      Text('HEDEF SAYI', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12, fontWeight: FontWeight.bold)),
       Text('$targetNumber', style: const TextStyle(color: Colors.white, fontSize: 40, fontWeight: FontWeight.w900)),
       const SizedBox(height: 20),
       Wrap(
@@ -1309,7 +1317,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
               child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
                       padding: EdgeInsets.zero,
-                      side: BorderSide(color: Colors.white.withOpacity(0.15)),
+                      side: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                   onPressed: isLocked ? null : _undoLastAction,
                   child: const Text('Sil', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12))))),
@@ -1321,7 +1329,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
               child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
                       padding: EdgeInsets.zero,
-                      side: BorderSide(color: Colors.white.withOpacity(0.15)),
+                      side: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                   onPressed: isLocked
                       ? null
@@ -1346,7 +1354,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
               child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.zero,
-                      backgroundColor: (remainingPasses > 0 && !isLocked) ? Colors.orangeAccent : Colors.grey.withOpacity(0.5),
+                      backgroundColor: (remainingPasses > 0 && !isLocked) ? Colors.orangeAccent : Colors.grey.withValues(alpha: 0.5),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                   onPressed: (remainingPasses > 0 && !isLocked) ? _passQuestion : null,
                   child: Text('Pas ($remainingPasses)',

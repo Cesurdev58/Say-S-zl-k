@@ -109,14 +109,14 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: isMe ? const Color(0xFF7C5CFC).withOpacity(0.15) : const Color(0xFF1D1B36),
+                    color: isMe ? const Color(0xFF7C5CFC).withValues(alpha: 0.15) : const Color(0xFF1D1B36),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: isMe ? const Color(0xFF7C5CFC) : (rankColor?.withOpacity(0.5) ?? Colors.white.withOpacity(0.05)),
+                      color: isMe ? const Color(0xFF7C5CFC) : (rankColor?.withValues(alpha: 0.5) ?? Colors.white.withValues(alpha: 0.05)),
                       width: isMe || index < 3 ? 2 : 1,
                     ),
                     boxShadow: index < 3
-                        ? [BoxShadow(color: rankColor!.withOpacity(0.2), blurRadius: 10, spreadRadius: 1)]
+                        ? [BoxShadow(color: rankColor!.withValues(alpha: 0.2), blurRadius: 10, spreadRadius: 1)]
                         : [],
                   ),
                   child: Row(
@@ -148,7 +148,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                           children: [
                             Text(username, style: TextStyle(color: isMe ? const Color(0xFFA78BFA) : Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                             const SizedBox(height: 4),
-                            Text(rankName, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                            Text(rankName, style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12)),
                           ],
                         ),
                       ),

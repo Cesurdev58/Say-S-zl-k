@@ -310,7 +310,7 @@ class _AuthScreenState extends State<AuthScreen> {
           keyboardType: TextInputType.emailAddress,
           decoration: InputDecoration(
             hintText: 'E-posta Adresi',
-            hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+            hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
             filled: true,
             fillColor: const Color(0xFF1D1B36),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
@@ -327,7 +327,7 @@ class _AuthScreenState extends State<AuthScreen> {
           },
           decoration: InputDecoration(
             hintText: 'Şifre',
-            hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+            hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
             filled: true,
             fillColor: const Color(0xFF1D1B36),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
@@ -427,9 +427,9 @@ class _AuthScreenState extends State<AuthScreen> {
           duration: const Duration(milliseconds: 300),
           height: 6,
           decoration: BoxDecoration(
-            color: isMet ? Colors.greenAccent : Colors.white.withOpacity(0.1),
+            color: isMet ? Colors.greenAccent : Colors.white.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(3),
-            boxShadow: isMet ? [BoxShadow(color: Colors.greenAccent.withOpacity(0.5), blurRadius: 4)] : [],
+            boxShadow: isMet ? [BoxShadow(color: Colors.greenAccent.withValues(alpha: 0.5), blurRadius: 4)] : [],
           ),
         ),
         const SizedBox(height: 6),

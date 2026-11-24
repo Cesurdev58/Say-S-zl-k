@@ -41,8 +41,8 @@ class RankRoadScreen extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: const LinearGradient(colors: [Color(0xFF2D2A59), Color(0xFF1A1836)]),
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: const Color(0xFF7C5CFC).withOpacity(0.3), width: 1.5),
-              boxShadow: [BoxShadow(color: const Color(0xFF7C5CFC).withOpacity(0.15), blurRadius: 20)],
+              border: Border.all(color: const Color(0xFF7C5CFC).withValues(alpha: 0.3), width: 1.5),
+              boxShadow: [BoxShadow(color: const Color(0xFF7C5CFC).withValues(alpha: 0.15), blurRadius: 20)],
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -58,7 +58,7 @@ class RankRoadScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: ranks[currentLevel]['color'].withOpacity(0.2),
+                    color: ranks[currentLevel]['color'].withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -111,13 +111,13 @@ class RankRoadScreen extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: isUnlocked ? rank['color'].withOpacity(0.2) : const Color(0xFF1D1B36),
+                          color: isUnlocked ? rank['color'].withValues(alpha: 0.2) : const Color(0xFF1D1B36),
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: isCurrent ? rank['color'] : (isUnlocked ? rank['color'].withOpacity(0.5) : Colors.white12),
+                            color: isCurrent ? rank['color'] : (isUnlocked ? rank['color'].withValues(alpha: 0.5) : Colors.white12),
                             width: isCurrent ? 3 : 1,
                           ),
-                          boxShadow: isCurrent ? [BoxShadow(color: rank['color'].withOpacity(0.3), blurRadius: 15)] : [],
+                          boxShadow: isCurrent ? [BoxShadow(color: rank['color'].withValues(alpha: 0.3), blurRadius: 15)] : [],
                         ),
                         child: Icon(
                           isUnlocked ? rank['icon'] : Icons.lock_rounded, 
@@ -156,7 +156,7 @@ class RankRoadScreen extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: const Color(0xFF1D1B36),
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.white.withOpacity(0.05)),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
                             ),
                           ),
                           AnimatedContainer(
@@ -169,12 +169,12 @@ class RankRoadScreen extends StatelessWidget {
                                 begin: Alignment.bottomCenter,
                                 end: Alignment.topCenter,
                                 colors: [
-                                  rank['color'].withOpacity(0.5),
+                                  rank['color'].withValues(alpha: 0.5),
                                   rank['color'],
                                 ],
                               ),
                               borderRadius: BorderRadius.circular(16),
-                              boxShadow: isCurrent ? [BoxShadow(color: rank['color'].withOpacity(0.4), blurRadius: 10)] : [],
+                              boxShadow: isCurrent ? [BoxShadow(color: rank['color'].withValues(alpha: 0.4), blurRadius: 10)] : [],
                             ),
                           ),
                         ],

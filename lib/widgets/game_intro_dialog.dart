@@ -64,7 +64,7 @@ class _GameIntroDialogState extends State<GameIntroDialog> {
       width: double.infinity,
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: const Color(0xFF131127).withOpacity(0.95),
+        color: const Color(0xFF131127).withValues(alpha: 0.95),
         borderRadius: BorderRadius.circular(28),
         border: Border.all(color: const Color(0xFF7C5CFC), width: 2),
       ),
@@ -109,7 +109,7 @@ class _GameIntroDialogState extends State<GameIntroDialog> {
       decoration: BoxDecoration(
         color: const Color(0xFF1D1B36),
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -120,7 +120,7 @@ class _GameIntroDialogState extends State<GameIntroDialog> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF7C5CFC).withOpacity(0.2),
+                  color: const Color(0xFF7C5CFC).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(

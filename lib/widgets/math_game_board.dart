@@ -31,7 +31,7 @@ class MathGameBoard extends StatelessWidget {
           decoration: BoxDecoration(color: const Color(0xFF5A4FCF), borderRadius: BorderRadius.circular(18)),
           child: Column(
             children: [
-              Text('HEDEF SAYI', style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+              Text('HEDEF SAYI', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
               const SizedBox(height: 2),
               Text('$targetNumber', style: const TextStyle(color: Colors.white, fontSize: 34, fontWeight: FontWeight.w900)),
             ],
@@ -42,7 +42,7 @@ class MathGameBoard extends StatelessWidget {
           width: double.infinity, height: 40, padding: const EdgeInsets.symmetric(horizontal: 10),
           decoration: BoxDecoration(color: const Color(0xFF1D1B36), borderRadius: BorderRadius.circular(12)),
           child: historySteps.isEmpty
-              ? Center(child: Text('İşlem adımları burada görünecek', style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 11)))
+              ? Center(child: Text('İşlem adımları burada görünecek', style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 11)))
               : ListView(
                   scrollDirection: Axis.horizontal,
                   children: historySteps.map((step) => Container(

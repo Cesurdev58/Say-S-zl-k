@@ -38,7 +38,7 @@ class _ProfileCardState extends State<ProfileCard> {
           child: Column(
             children: [
               const SizedBox(height: 12),
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(2))),
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(2))),
               const SizedBox(height: 16),
               const Text('Profilini Özelleştir', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
               
@@ -74,10 +74,10 @@ class _ProfileCardState extends State<ProfileCard> {
                           },
                           child: Container(
                             decoration: BoxDecoration(
-                              color: isSelected ? const Color(0xFF7C5CFC).withOpacity(0.3) : const Color(0xFF1D1B36),
+                              color: isSelected ? const Color(0xFF7C5CFC).withValues(alpha: 0.3) : const Color(0xFF1D1B36),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: isSelected ? const Color(0xFF7C5CFC) : Colors.white.withOpacity(0.05),
+                                color: isSelected ? const Color(0xFF7C5CFC) : Colors.white.withValues(alpha: 0.05),
                                 width: isSelected ? 2 : 1,
                               ),
                             ),
@@ -95,7 +95,7 @@ class _ProfileCardState extends State<ProfileCard> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.shield_outlined, color: Colors.white.withOpacity(0.2), size: 48),
+                            Icon(Icons.shield_outlined, color: Colors.white.withValues(alpha: 0.2), size: 48),
                             const SizedBox(height: 16),
                             const Text('Henüz çerçeven yok.\nMağazadan satın alabilirsin.', textAlign: TextAlign.center, style: TextStyle(color: Colors.white54)),
                           ],
@@ -118,7 +118,7 @@ class _ProfileCardState extends State<ProfileCard> {
                               },
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: isNoneSelected ? const Color(0xFF00CEC9).withOpacity(0.3) : const Color(0xFF1D1B36),
+                                  color: isNoneSelected ? const Color(0xFF00CEC9).withValues(alpha: 0.3) : const Color(0xFF1D1B36),
                                   borderRadius: BorderRadius.circular(16),
                                   border: Border.all(color: isNoneSelected ? const Color(0xFF00CEC9) : Colors.white12, width: isNoneSelected ? 2 : 1),
                                 ),
@@ -138,10 +138,10 @@ class _ProfileCardState extends State<ProfileCard> {
                             },
                             child: Container(
                               decoration: BoxDecoration(
-                                color: isSelected ? const Color(0xFF00CEC9).withOpacity(0.3) : const Color(0xFF1D1B36),
+                                color: isSelected ? const Color(0xFF00CEC9).withValues(alpha: 0.3) : const Color(0xFF1D1B36),
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: isSelected ? const Color(0xFF00CEC9) : Colors.white.withOpacity(0.05),
+                                  color: isSelected ? const Color(0xFF00CEC9) : Colors.white.withValues(alpha: 0.05),
                                   width: isSelected ? 2 : 1,
                                 ),
                               ),
@@ -176,9 +176,9 @@ class _ProfileCardState extends State<ProfileCard> {
         decoration: BoxDecoration(
           color: const Color(0xFF1D1B36),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.white.withOpacity(0.08)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
           boxShadow: [
-            BoxShadow(color: const Color(0xFF7C5CFC).withOpacity(0.15), blurRadius: 20, offset: const Offset(0, 10)),
+            BoxShadow(color: const Color(0xFF7C5CFC).withValues(alpha: 0.15), blurRadius: 20, offset: const Offset(0, 10)),
           ],
         ),
         child: Column(
@@ -232,9 +232,9 @@ class _ProfileCardState extends State<ProfileCard> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF7C5CFC).withOpacity(0.2), 
+                            color: const Color(0xFF7C5CFC).withValues(alpha: 0.2), 
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFF7C5CFC).withOpacity(0.5)),
+                            border: Border.all(color: const Color(0xFF7C5CFC).withValues(alpha: 0.5)),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -249,7 +249,7 @@ class _ProfileCardState extends State<ProfileCard> {
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right_rounded, color: Colors.white.withOpacity(0.3), size: 28),
+                Icon(Icons.chevron_right_rounded, color: Colors.white.withValues(alpha: 0.3), size: 28),
               ],
             ),
             
@@ -269,9 +269,9 @@ class _ProfileCardState extends State<ProfileCard> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFF131127).withOpacity(0.6),
+                color: const Color(0xFF131127).withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.white.withOpacity(0.05)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
               ),
               child: Column(
                 children: [
@@ -287,7 +287,7 @@ class _ProfileCardState extends State<ProfileCard> {
                       ),
                       Text(
                         '${widget.profile.currentLevelXp} / ${widget.profile.nextLevelXp} XP', 
-                        style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11, fontWeight: FontWeight.bold)
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 11, fontWeight: FontWeight.bold)
                       ),
                     ],
                   ),
@@ -317,7 +317,7 @@ class _ProfileCardState extends State<ProfileCard> {
         const SizedBox(height: 8),
         Text(value, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
-        Text(label, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11, fontWeight: FontWeight.w600)),
+        Text(label, style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 11, fontWeight: FontWeight.w600)),
       ],
     );
   }

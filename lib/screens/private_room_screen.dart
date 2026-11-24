@@ -411,7 +411,7 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
                           alignment: Alignment.bottomRight,
                           children: [
                             CircleAvatar(
-                              backgroundColor: const Color(0xFF7C5CFC).withOpacity(0.2),
+                              backgroundColor: const Color(0xFF7C5CFC).withValues(alpha: 0.2),
                               child: const Icon(Icons.person, color: Color(0xFF7C5CFC)),
                             ),
                             Container(
@@ -489,8 +489,15 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final navigator = Navigator.of(context);
+        if (await _onWillPop()) {
+          if (mounted) navigator.pop();
+        }
+      },
       child: Scaffold(
         backgroundColor: const Color(0xFF131127),
         appBar: AppBar(
@@ -583,7 +590,7 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
                 decoration: InputDecoration(
                   counterText: "",
                   hintText: "KOD GİR",
-                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.2), fontSize: 24, letterSpacing: 4),
+                  hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.2), fontSize: 24, letterSpacing: 4),
                   filled: true,
                   fillColor: const Color(0xFF131127),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -652,7 +659,7 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
           height: 48,
           child: ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF00CEC9).withOpacity(0.2),
+              backgroundColor: const Color(0xFF00CEC9).withValues(alpha: 0.2),
               side: const BorderSide(color: Color(0xFF00CEC9)),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
@@ -777,7 +784,7 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
                   margin: const EdgeInsets.only(bottom: 8),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
-                    color: isMe ? const Color(0xFF7C5CFC).withOpacity(0.2) : const Color(0xFF1D1B36),
+                    color: isMe ? const Color(0xFF7C5CFC).withValues(alpha: 0.2) : const Color(0xFF1D1B36),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: isMe ? const Color(0xFF7C5CFC) : Colors.white12),
                   ),
@@ -785,7 +792,7 @@ class _PrivateRoomScreenState extends State<PrivateRoomScreen> {
                     children: [
                       CircleAvatar(
                         radius: 16,
-                        backgroundColor: isHostPlayer ? Colors.amber.withOpacity(0.2) : const Color(0xFF00CEC9).withOpacity(0.2),
+                        backgroundColor: isHostPlayer ? Colors.amber.withValues(alpha: 0.2) : const Color(0xFF00CEC9).withValues(alpha: 0.2),
                         child: Icon(
                           isHostPlayer ? Icons.star_rounded : Icons.person,
                           size: 16,

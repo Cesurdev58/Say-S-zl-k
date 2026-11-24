@@ -36,7 +36,6 @@ class _HomeScreenState extends State<HomeScreen> {
   StreamSubscription<User?>? _authSub; 
   
   // YENİ: Cihaz çakışması dinleyicisi
-  StreamSubscription<DocumentSnapshot>? _deviceSessionSub;
 
   @override
   void initState() {
@@ -56,79 +55,13 @@ class _HomeScreenState extends State<HomeScreen> {
       if (user == null) {
         _requestSub?.cancel();
         _inviteSub?.cancel();
-        _deviceSessionSub?.cancel(); 
         _requestSub = null;
         _inviteSub = null;
-        _deviceSessionSub = null;
         if (mounted) setState(() => _hasPendingRequests = false);
       } else if (mounted) {
         await _loadProfile();
       }
     });
-  }
-
-  // YENİ: Başka cihazdan girişi anında tespit eden fonksiyon
-  void _listenForDeviceSession() {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null && !user.isAnonymous) {
-      _deviceSessionSub?.cancel();
-      _deviceSessionSub = FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .snapshots()
-          .listen((doc) {
-        if (doc.exists && mounted) {
-          final activeId = doc.data()?['activeDeviceId'];
-          final myId = UserService.instance.localDeviceId;
-          
-          if (activeId != null && activeId.toString().isNotEmpty && activeId != myId) {
-            _deviceSessionSub?.cancel();
-            _showDuplicateSessionDialog();
-          }
-        }
-      }, onError: (e) => debugPrint("Device Session Error: $e"));
-    }
-  }
-
-  void _showDuplicateSessionDialog() {
-    AudioService.instance.playError();
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => WillPopScope(
-        onWillPop: () async => false, // Dialogun dışarı tıklanarak kapanmasını engeller
-        child: AlertDialog(
-          backgroundColor: const Color(0xFF1D1B36),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Row(
-            children: [
-              Icon(Icons.warning_amber_rounded, color: Colors.orangeAccent),
-              SizedBox(width: 8),
-              Text('Oturum Kapatıldı', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-            ],
-          ),
-          content: const Text(
-            'Hesabınıza başka bir cihazdan giriş yapıldı. Güvenliğiniz için bu cihazdaki oturumunuz sonlandırıldı.',
-            style: TextStyle(color: Colors.white70),
-          ),
-          actions: [
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orangeAccent,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-              onPressed: () async {
-                await UserService.instance.forceSignOutAndMakeAnon();
-                if (mounted) {
-                  Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
-                }
-              },
-              child: const Text('Anladım', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   Future<void> _checkPrivacyPolicy() async {
@@ -142,8 +75,8 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => WillPopScope(
-        onWillPop: () async => false,
+      builder: (context) => PopScope(
+        canPop: false,
         child: Dialog(
           backgroundColor: const Color(0xFF1D1B36),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -368,7 +301,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _authSub?.cancel(); 
     _requestSub?.cancel();
     _inviteSub?.cancel(); 
-    _deviceSessionSub?.cancel(); 
     super.dispose();
   }
 
@@ -440,7 +372,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -503,7 +435,7 @@ class _HomeScreenState extends State<HomeScreen> {
       decoration: BoxDecoration(
         color: const Color(0xFF1D1B36),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -555,7 +487,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: 110,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1D1B36).withOpacity(0.6),
+                          color: const Color(0xFF1D1B36).withValues(alpha: 0.6),
                           borderRadius: BorderRadius.circular(24),
                         ),
                         child: const Center(
@@ -578,7 +510,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Text(
                   'Oyun Modları',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         fontWeight: FontWeight.w600,
                         letterSpacing: 0.5,
                       ),
@@ -689,7 +621,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         );
                       },
-                      icon: Icon(Icons.people_alt_rounded, color: Colors.white.withOpacity(0.9), size: 28),
+                      icon: Icon(Icons.people_alt_rounded, color: Colors.white.withValues(alpha: 0.9), size: 28),
                     ),
                     if (_hasPendingRequests)
                       Positioned(
@@ -728,7 +660,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                         _loadProfile();
                       },
-                      icon: Icon(Icons.track_changes_rounded, color: Colors.white.withOpacity(0.9), size: 28),
+                      icon: Icon(Icons.track_changes_rounded, color: Colors.white.withValues(alpha: 0.9), size: 28),
                     ),
                     if (_hasUnclaimedRewards())
                       Positioned(
@@ -750,7 +682,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   decoration: BoxDecoration(
                     color: const Color(0xFF1D1B36),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFF00CEC9).withOpacity(0.3)),
+                    border: Border.all(color: const Color(0xFF00CEC9).withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     children: [
@@ -765,7 +697,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 IconButton(
                   onPressed: () => showSettingsBottomSheet(context, _loadProfile),
-                  icon: Icon(Icons.settings_rounded, color: Colors.white.withOpacity(0.8), size: 28),
+                  icon: Icon(Icons.settings_rounded, color: Colors.white.withValues(alpha: 0.8), size: 28),
                 ),
               ],
             ),

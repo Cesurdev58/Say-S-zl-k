@@ -57,7 +57,7 @@ class StatisticsScreen extends StatelessWidget {
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(color: const Color(0xFF7C5CFC).withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
+              decoration: BoxDecoration(color: const Color(0xFF7C5CFC).withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
               child: Text(profile.rankName, style: const TextStyle(color: Color(0xFFA78BFA), fontSize: 14, fontWeight: FontWeight.bold)),
             ),
             const SizedBox(height: 32),
@@ -71,7 +71,7 @@ class StatisticsScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: const Color(0xFF1D1B36),
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: Colors.white.withOpacity(0.05)),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
                 ),
                 child: Column(
                   children: [
@@ -82,7 +82,7 @@ class StatisticsScreen extends StatelessWidget {
                     Text(
                       'Bu oyuncu istatistiklerini diğer oyunculara gizlemeyi tercih etmiş.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 14, height: 1.5),
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 14, height: 1.5),
                     ),
                   ],
                 ),
@@ -96,8 +96,8 @@ class StatisticsScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(colors: [Color(0xFF2D2A59), Color(0xFF1A1836)]),
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: const Color(0xFF7C5CFC).withOpacity(0.3), width: 1.5),
-                  boxShadow: [BoxShadow(color: const Color(0xFF7C5CFC).withOpacity(0.1), blurRadius: 20)],
+                  border: Border.all(color: const Color(0xFF7C5CFC).withValues(alpha: 0.3), width: 1.5),
+                  boxShadow: [BoxShadow(color: const Color(0xFF7C5CFC).withValues(alpha: 0.1), blurRadius: 20)],
                 ),
                 child: Column(
                   children: [
@@ -233,7 +233,7 @@ class StatisticsScreen extends StatelessWidget {
       alignment: Alignment.centerLeft,
       child: Text(
         title,
-        style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 16, fontWeight: FontWeight.bold),
+        style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 16, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -244,7 +244,7 @@ class StatisticsScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF1D1B36),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -252,7 +252,7 @@ class StatisticsScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: color, size: 20),
@@ -267,7 +267,7 @@ class StatisticsScreen extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             title,
-            style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12, fontWeight: FontWeight.w600),
+            style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12, fontWeight: FontWeight.w600),
           ),
         ],
       ),

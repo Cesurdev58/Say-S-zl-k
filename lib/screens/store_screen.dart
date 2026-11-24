@@ -339,7 +339,7 @@ class _StoreScreenState extends State<StoreScreen> {
                 decoration: BoxDecoration(
                   color: const Color(0xFF1D1B36),
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFF00CEC9).withOpacity(0.3)),
+                  border: Border.all(color: const Color(0xFF00CEC9).withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
@@ -391,7 +391,7 @@ class _StoreScreenState extends State<StoreScreen> {
         gradient: const LinearGradient(colors: [Color(0xFF6C5CE7), Color(0xFF00CEC9)]),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: const Color(0xFF00CEC9).withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 4)),
+          BoxShadow(color: const Color(0xFF00CEC9).withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4)),
         ],
       ),
       child: Row(
@@ -405,7 +405,7 @@ class _StoreScreenState extends State<StoreScreen> {
                 const Text('Ücretsiz Cevher', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                 const SizedBox(height: 2),
                 Text(canWatch ? 'Reklam izle, 25 cevher kazan!' : _getRemainingTimeText(),
-                    style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 13)),
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 13)),
                 const SizedBox(height: 4),
                 Text('İzlenen: $_adCount/2', style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 12)),
               ],
@@ -483,7 +483,7 @@ class _StoreScreenState extends State<StoreScreen> {
             padding: const EdgeInsets.only(bottom: 16),
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent.withOpacity(0.2),
+                backgroundColor: Colors.redAccent.withValues(alpha: 0.2),
                 foregroundColor: Colors.redAccent,
                 elevation: 0,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: Colors.redAccent)),
@@ -573,9 +573,9 @@ class _StoreScreenState extends State<StoreScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isEquipped ? const Color(0xFF00CEC9).withOpacity(0.1) : const Color(0xFF1D1B36),
+          color: isEquipped ? const Color(0xFF00CEC9).withValues(alpha: 0.1) : const Color(0xFF1D1B36),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: isEquipped ? const Color(0xFF00CEC9) : Colors.white.withOpacity(0.05), width: isEquipped ? 2 : 1),
+          border: Border.all(color: isEquipped ? const Color(0xFF00CEC9) : Colors.white.withValues(alpha: 0.05), width: isEquipped ? 2 : 1),
         ),
         child: isHorizontal ? Row(children: content) : Column(mainAxisAlignment: MainAxisAlignment.center, children: content),
       ),

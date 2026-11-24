@@ -266,8 +266,8 @@ class UserService {
           showDialog(
             context: navigatorKey.currentContext!,
             barrierDismissible: false,
-            builder: (context) => WillPopScope(
-              onWillPop: () async => false,
+            builder: (context) => PopScope(
+              canPop: false,
               child: AlertDialog(
                 backgroundColor: const Color(0xFF1D1B36),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),

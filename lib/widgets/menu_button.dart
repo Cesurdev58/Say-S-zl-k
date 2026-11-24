@@ -33,16 +33,16 @@ class MenuButton extends StatelessWidget {
                     colors: [Color(0xFF7C5CFC), Color(0xFF4F46E5)],
                   )
                 : null,
-            color: isPrimary ? null : Colors.white.withOpacity( 0.08),
+            color: isPrimary ? null : Colors.white.withValues(alpha:  0.08),
             border: Border.all(
               color: isPrimary
                   ? Colors.transparent
-                  : Colors.white.withOpacity( 0.12),
+                  : Colors.white.withValues(alpha:  0.12),
             ),
             boxShadow: isPrimary
                 ? [
                     BoxShadow(
-                      color: const Color(0xFF7C5CFC).withOpacity( 0.4),
+                      color: const Color(0xFF7C5CFC).withValues(alpha:  0.4),
                       blurRadius: 16,
                       offset: const Offset(0, 8),
                     ),
@@ -58,8 +58,8 @@ class MenuButton extends StatelessWidget {
                   height: 48,
                   decoration: BoxDecoration(
                     color: isPrimary
-                        ? Colors.white.withOpacity( 0.2)
-                        : const Color(0xFF5B3FD9).withOpacity( 0.25),
+                        ? Colors.white.withValues(alpha:  0.2)
+                        : const Color(0xFF5B3FD9).withValues(alpha:  0.25),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Icon(icon, color: Colors.white, size: 26),
@@ -80,7 +80,7 @@ class MenuButton extends StatelessWidget {
                       Text(
                         subtitle,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withOpacity( 0.7),
+                          color: Colors.white.withValues(alpha:  0.7),
                         ),
                       ),
                     ],
@@ -88,7 +88,7 @@ class MenuButton extends StatelessWidget {
                 ),
                 Icon(
                   Icons.arrow_forward_ios_rounded,
-                  color: Colors.white.withOpacity( 0.6),
+                  color: Colors.white.withValues(alpha:  0.6),
                   size: 16,
                 ),
               ],

@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
 
+import '../services/score_calculator.dart';
 import '../services/word_service.dart';
 import '../services/math_service.dart';
 import '../services/number_solver_service.dart';
@@ -305,8 +306,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       wordCorrectAnswers++;
 
       int len = word.length;
-      int earned = len >= 7 ? (len * 2) + 5 : len;
-      int bonusSeconds = len >= 7 ? (len * 2) + 5 : len;
+      int earned = ScoreCalculator.soloWordScore(len);
+      int bonusSeconds = ScoreCalculator.soloWordBonusSeconds(len);
 
       _triggerDeltas(earned, bonusSeconds);
       setState(() {
@@ -437,12 +438,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       mathCorrectAnswers++;
 
       int remainingNumberCount = currentNumbers.length;
-      int earned = (10 - minDiff) + (remainingNumberCount * 2);
-      int bonusSeconds = 0;
-
-      if (minDiff == 0) {
-        bonusSeconds = 5 + (remainingNumberCount * 2);
-      }
+      int earned = ScoreCalculator.mathScore(minDiff, remainingNumberCount);
+      int bonusSeconds = ScoreCalculator.soloMathBonusSeconds(minDiff, remainingNumberCount);
 
       _triggerDeltas(earned, bonusSeconds);
       setState(() {
@@ -544,9 +541,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           decoration: BoxDecoration(
             color: const Color(0xFF1D1B36),
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: const Color(0xFF7C5CFC).withOpacity(0.5), width: 1.5),
+            border: Border.all(color: const Color(0xFF7C5CFC).withValues(alpha: 0.5), width: 1.5),
             boxShadow: [
-              BoxShadow(color: const Color(0xFF131127).withOpacity(0.8), blurRadius: 20, spreadRadius: 5)
+              BoxShadow(color: const Color(0xFF131127).withValues(alpha: 0.8), blurRadius: 20, spreadRadius: 5)
             ],
           ),
           child: Column(
@@ -755,8 +752,15 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         _isGameOver ||
         (widget.isTimed && remainingSeconds <= 0);
 
-    return WillPopScope(
-      onWillPop: _onWillPop,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final navigator = Navigator.of(context);
+        if (await _onWillPop()) {
+          if (mounted) navigator.pop();
+        }
+      },
       child: Scaffold(
         backgroundColor: const Color(0xFF131127),
         body: Stack(
@@ -819,7 +823,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   child: Container(
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: Colors.redAccent.withOpacity(_pulseAnimation.value),
+                        color: Colors.redAccent.withValues(alpha: _pulseAnimation.value),
                         width: _pulseAnimation.value * 20,
                       ),
                     ),
@@ -928,7 +932,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     duration: const Duration(milliseconds: 300),
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: remainingSeconds <= 5 ? Colors.redAccent.withOpacity(0.3) : const Color(0xFF232042),
+                      color: remainingSeconds <= 5 ? Colors.redAccent.withValues(alpha: 0.3) : const Color(0xFF232042),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: remainingSeconds <= 5 ? Colors.redAccent : const Color(0xFF7C5CFC)),
                     ),
@@ -956,7 +960,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       decoration: BoxDecoration(
         color: const Color(0xFF1D1B36),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       child: Column(
         children: [
@@ -965,7 +969,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             children: [
               Text(
                 currentRoundType == 'word' ? 'Kelime Puanı' : 'Toplanan Puan',
-                style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13, fontWeight: FontWeight.w500),
+                style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13, fontWeight: FontWeight.w500),
               ),
               Text('$score', style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900)),
             ],
@@ -996,7 +1000,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             child: OutlinedButton(
               style: OutlinedButton.styleFrom(
                 padding: EdgeInsets.zero,
-                side: BorderSide(color: Colors.white.withOpacity(0.15)),
+                side: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
               onPressed: isLocked
@@ -1035,7 +1039,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             child: OutlinedButton(
               style: OutlinedButton.styleFrom(
                 padding: EdgeInsets.zero,
-                side: BorderSide(color: Colors.white.withOpacity(0.15)),
+                side: BorderSide(color: Colors.white.withValues(alpha: 0.15)),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
               onPressed: isLocked

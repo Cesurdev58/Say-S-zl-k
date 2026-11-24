@@ -37,9 +37,9 @@ class _GameOverDialogState extends State<GameOverDialog> {
     bool hasSolutions = widget.missedSolutions.isNotEmpty;
 
     // --- HİLEYİ ÖNLEYEN DÜZELTME ---
-    // WillPopScope ile sistemin (telefonun) geri tuşunu tamamen kilitliyoruz.
-    return WillPopScope(
-      onWillPop: () async => false, // false döndürmek geri tuşunu etkisiz kılar
+    // PopScope ile sistemin (telefonun) geri tuşunu tamamen kilitliyoruz.
+    return PopScope(
+      canPop: false, // geri tuşunu etkisiz kılar
       child: Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
@@ -48,7 +48,7 @@ class _GameOverDialogState extends State<GameOverDialog> {
           decoration: BoxDecoration(
             color: const Color(0xFF1D1B36),
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: const Color(0xFF7C5CFC).withOpacity(0.4), width: 1.5),
+            border: Border.all(color: const Color(0xFF7C5CFC).withValues(alpha: 0.4), width: 1.5),
           ),
           child: SingleChildScrollView(
             child: Column(
@@ -56,7 +56,7 @@ class _GameOverDialogState extends State<GameOverDialog> {
               children: [
                 Container(
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: const Color(0xFFFF9F43).withOpacity(0.15), shape: BoxShape.circle),
+                  decoration: BoxDecoration(color: const Color(0xFFFF9F43).withValues(alpha: 0.15), shape: BoxShape.circle),
                   child: const Icon(Icons.notifications_off_rounded, color: Color(0xFFFF9F43), size: 38),
                 ),
                 const SizedBox(height: 12),
@@ -126,7 +126,7 @@ class _GameOverDialogState extends State<GameOverDialog> {
                       child: SizedBox(
                         height: 48,
                         child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(side: BorderSide(color: Colors.white.withOpacity(0.2)), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                          style: OutlinedButton.styleFrom(side: BorderSide(color: Colors.white.withValues(alpha: 0.2)), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                           onPressed: () { Navigator.pop(context); widget.onHome(); },
                           child: const Text('Ana Menü', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
                         ),
@@ -169,7 +169,7 @@ class _GameOverDialogState extends State<GameOverDialog> {
             ],
           ),
           const SizedBox(height: 10),
-          Text('Harfler: $letters', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 11)),
+          Text('Harfler: $letters', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 11)),
           const SizedBox(height: 6),
           Text(
             bestWord == "SÖZLÜKTE KELİME BULUNAMADI" ? bestWord : '$bestWord (${bestWord.length} Harf)',
@@ -224,7 +224,7 @@ class _ScoreRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13)),
+        Text(label, style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13)),
         Text(value, style: TextStyle(color: isAccent ? const Color(0xFF00CEC9) : Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
       ],
     );

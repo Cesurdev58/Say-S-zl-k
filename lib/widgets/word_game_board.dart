@@ -28,12 +28,12 @@ class WordGameBoard extends StatelessWidget {
           decoration: BoxDecoration(
             color: const Color(0xFF1D1B36),
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: const Color(0xFF5A4FCF).withOpacity(0.4)),
+            border: Border.all(color: const Color(0xFF5A4FCF).withValues(alpha: 0.4)),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: selectedLetters.isEmpty
-                ? [Text('Harflere Dokunarak Kelime Oluştur', style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 12))]
+                ? [Text('Harflere Dokunarak Kelime Oluştur', style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 12))]
                 : selectedLetters.map((char) => Container(
                       margin: const EdgeInsets.symmetric(horizontal: 3),
                       width: 36, height: 42,
@@ -70,7 +70,7 @@ class WordGameBoard extends StatelessWidget {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
                 decoration: BoxDecoration(
-                  color: isUsed ? const Color(0xFF1D1B36).withOpacity(0.4) : (char == 'JOKER' ? const Color(0xFFFF9F43) : const Color(0xFF5A4FCF)),
+                  color: isUsed ? const Color(0xFF1D1B36).withValues(alpha: 0.4) : (char == 'JOKER' ? const Color(0xFFFF9F43) : const Color(0xFF5A4FCF)),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Center(child: Text(char, style: TextStyle(color: isUsed ? Colors.white24 : Colors.white, fontSize: char == 'JOKER' ? 11 : 20, fontWeight: FontWeight.bold))),

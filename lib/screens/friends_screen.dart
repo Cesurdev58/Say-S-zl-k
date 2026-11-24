@@ -111,7 +111,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                     decoration: BoxDecoration(
                       color: const Color(0xFF131127),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFF7C5CFC).withOpacity(0.3)),
+                      border: Border.all(color: const Color(0xFF7C5CFC).withValues(alpha: 0.3)),
                     ),
                     child: Row(
                       children: [
@@ -146,7 +146,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: "Arkadaşının ID'sini gir",
-                      hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                      hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
                       filled: true,
                       fillColor: const Color(0xFF131127),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -271,7 +271,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
         const SizedBox(height: 8),
         Text(value, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
-        Text(label, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11, fontWeight: FontWeight.w600)),
+        Text(label, style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 11, fontWeight: FontWeight.w600)),
       ],
     );
   }
@@ -304,9 +304,9 @@ class _FriendsScreenState extends State<FriendsScreen> {
           decoration: BoxDecoration(
             color: const Color(0xFF1D1B36),
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: const Color(0xFF00CEC9).withOpacity(0.3), width: 2),
+            border: Border.all(color: const Color(0xFF00CEC9).withValues(alpha: 0.3), width: 2),
             boxShadow: [
-              BoxShadow(color: const Color(0xFF00CEC9).withOpacity(0.15), blurRadius: 20, offset: const Offset(0, 10)),
+              BoxShadow(color: const Color(0xFF00CEC9).withValues(alpha: 0.15), blurRadius: 20, offset: const Offset(0, 10)),
             ],
           ),
           child: Column(
@@ -344,9 +344,9 @@ class _FriendsScreenState extends State<FriendsScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF7C5CFC).withOpacity(0.2),
+                  color: const Color(0xFF7C5CFC).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFF7C5CFC).withOpacity(0.5)),
+                  border: Border.all(color: const Color(0xFF7C5CFC).withValues(alpha: 0.5)),
                 ),
                 child: Text(rankName, style: const TextStyle(color: Color(0xFFA78BFA), fontSize: 14, fontWeight: FontWeight.bold)),
               ),
@@ -474,9 +474,9 @@ class _FriendsScreenState extends State<FriendsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.group_off_rounded, color: Colors.white.withOpacity(0.2), size: 64),
+            Icon(Icons.group_off_rounded, color: Colors.white.withValues(alpha: 0.2), size: 64),
             const SizedBox(height: 16),
-            Text('Henüz hiç arkadaşın yok.\n(0/50)', textAlign: TextAlign.center, style: TextStyle(color: Colors.white.withOpacity(0.5))),
+            Text('Henüz hiç arkadaşın yok.\n(0/50)', textAlign: TextAlign.center, style: TextStyle(color: Colors.white.withValues(alpha: 0.5))),
           ],
         ),
       );
@@ -524,7 +524,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                             children: [
                               CircleAvatar(
                                 radius: 20,
-                                backgroundColor: const Color(0xFF00CEC9).withOpacity(0.2),
+                                backgroundColor: const Color(0xFF00CEC9).withValues(alpha: 0.2),
                                 backgroundImage: AssetImage('assets/avatars/${friend['avatar'] ?? 'boy'}.png'),
                               ),
                               if (border != 'none')
@@ -586,9 +586,9 @@ class _FriendsScreenState extends State<FriendsScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.mail_outline_rounded, color: Colors.white.withOpacity(0.2), size: 64),
+                Icon(Icons.mail_outline_rounded, color: Colors.white.withValues(alpha: 0.2), size: 64),
                 const SizedBox(height: 16),
-                Text('Bekleyen arkadaşlık isteği yok.', style: TextStyle(color: Colors.white.withOpacity(0.5))),
+                Text('Bekleyen arkadaşlık isteği yok.', style: TextStyle(color: Colors.white.withValues(alpha: 0.5))),
               ],
             ),
           );
@@ -613,7 +613,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
               child: Row(
                 children: [
                   CircleAvatar(
-                    backgroundColor: const Color(0xFF7C5CFC).withOpacity(0.2),
+                    backgroundColor: const Color(0xFF7C5CFC).withValues(alpha: 0.2),
                     child: const Icon(Icons.person, color: Color(0xFF7C5CFC)),
                   ),
                   const SizedBox(width: 16),

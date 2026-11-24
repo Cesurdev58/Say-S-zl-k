@@ -172,7 +172,7 @@ class _SoloModeSelectScreenState extends State<SoloModeSelectScreen> {
           color: isSelected ? const Color(0xFF5A4FCF) : const Color(0xFF232042),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(color: isSelected ? const Color(0xFF8C7CFF) : Colors.transparent, width: 2),
-          boxShadow: isSelected ? [BoxShadow(color: const Color(0xFF5A4FCF).withOpacity(0.4), blurRadius: 12, offset: const Offset(0, 4))] : [],
+          boxShadow: isSelected ? [BoxShadow(color: const Color(0xFF5A4FCF).withValues(alpha: 0.4), blurRadius: 12, offset: const Offset(0, 4))] : [],
         ),
         child: Column(
           children: [
@@ -180,7 +180,7 @@ class _SoloModeSelectScreenState extends State<SoloModeSelectScreen> {
             const SizedBox(height: 8),
             Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
             const SizedBox(height: 4),
-            Text(subtitle, style: TextStyle(color: isSelected ? Colors.white.withOpacity(0.8) : Colors.white.withOpacity(0.38), fontSize: 11)),
+            Text(subtitle, style: TextStyle(color: isSelected ? Colors.white.withValues(alpha: 0.8) : Colors.white.withValues(alpha: 0.38), fontSize: 11)),
           ],
         ),
       ),
@@ -196,11 +196,11 @@ class _SoloModeSelectScreenState extends State<SoloModeSelectScreen> {
         decoration: BoxDecoration(
           color: const Color(0xFF232042),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.05), width: 1),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.05), width: 1),
         ),
         child: Row(
           children: [
-            Container(width: 52, height: 52, decoration: BoxDecoration(color: iconBgColor.withOpacity(0.2), borderRadius: BorderRadius.circular(14)), child: Icon(icon, color: iconBgColor, size: 26)),
+            Container(width: 52, height: 52, decoration: BoxDecoration(color: iconBgColor.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(14)), child: Icon(icon, color: iconBgColor, size: 26)),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -209,12 +209,12 @@ class _SoloModeSelectScreenState extends State<SoloModeSelectScreen> {
                 children: [
                   Text(title, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
-                  Text(description, style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 11, height: 1.3), maxLines: 2, overflow: TextOverflow.ellipsis),
+                  Text(description, style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 11, height: 1.3), maxLines: 2, overflow: TextOverflow.ellipsis),
                 ],
               ),
             ),
             const SizedBox(width: 8),
-            Icon(Icons.arrow_forward_ios_rounded, color: Colors.white.withOpacity(0.3), size: 16),
+            Icon(Icons.arrow_forward_ios_rounded, color: Colors.white.withValues(alpha: 0.3), size: 16),
           ],
         ),
       ),

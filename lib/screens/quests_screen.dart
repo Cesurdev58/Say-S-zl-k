@@ -187,7 +187,7 @@ class _QuestsScreenState extends State<QuestsScreen> {
           decoration: BoxDecoration(
             color: const Color(0xFF1D1B36),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: isCompleted && !isClaimed ? color : Colors.white.withOpacity(0.05)),
+            border: Border.all(color: isCompleted && !isClaimed ? color : Colors.white.withValues(alpha: 0.05)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,7 +196,7 @@ class _QuestsScreenState extends State<QuestsScreen> {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: color.withOpacity(0.2), borderRadius: BorderRadius.circular(14)),
+                    decoration: BoxDecoration(color: color.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(14)),
                     child: Icon(quest['icon'], color: color, size: 28),
                   ),
                   const SizedBox(width: 16),
@@ -206,7 +206,7 @@ class _QuestsScreenState extends State<QuestsScreen> {
                       children: [
                         Text(quest['title'], style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 4),
-                        Text(quest['desc'], style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13)),
+                        Text(quest['desc'], style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13)),
                       ],
                     ),
                   ),

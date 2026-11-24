@@ -211,8 +211,8 @@ class _MatchmakingScreenState extends State<MatchmakingScreen> with SingleTicker
                 height: 140,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFF7C5CFC).withOpacity(0.5), width: 2),
-                  gradient: RadialGradient(colors: [const Color(0xFF7C5CFC).withOpacity(0.2), Colors.transparent]),
+                  border: Border.all(color: const Color(0xFF7C5CFC).withValues(alpha: 0.5), width: 2),
+                  gradient: RadialGradient(colors: [const Color(0xFF7C5CFC).withValues(alpha: 0.2), Colors.transparent]),
                 ),
                 child: const Center(child: Icon(Icons.radar_rounded, color: Color(0xFF7C5CFC), size: 64)),
               ),
@@ -260,7 +260,7 @@ class _MatchmakingScreenState extends State<MatchmakingScreen> with SingleTicker
                     return Column(
                       children: [
                         CircleAvatar(
-                          backgroundColor: Colors.white.withOpacity(0.1),
+                          backgroundColor: Colors.white.withValues(alpha: 0.1),
                           radius: 24,
                           child: const Icon(Icons.person, color: Colors.white24),
                         ),

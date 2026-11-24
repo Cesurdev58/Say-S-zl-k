@@ -192,7 +192,7 @@ class _SettingsSheetState extends State<_SettingsSheet> {
                   obscureText: true,
                   decoration: InputDecoration(
                     hintText: 'Şifreniz',
-                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+                    hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
                     filled: true,
                     fillColor: const Color(0xFF131127),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
@@ -329,7 +329,7 @@ class _SettingsSheetState extends State<_SettingsSheet> {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 12),
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(2))),
+            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(2))),
             const SizedBox(height: 24),
             const Text('Ayarlar', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 24),
@@ -340,14 +340,14 @@ class _SettingsSheetState extends State<_SettingsSheet> {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(color: const Color(0xFF1D1B36), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withOpacity(0.05))),
+                    decoration: BoxDecoration(color: const Color(0xFF1D1B36), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withValues(alpha: 0.05))),
                     child: Row(
                       children: [
-                        Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: const Color(0xFF7C5CFC).withOpacity(0.2), borderRadius: BorderRadius.circular(12)), child: const Icon(Icons.person_rounded, color: Color(0xFFA78BFA))),
+                        Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: const Color(0xFF7C5CFC).withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)), child: const Icon(Icons.person_rounded, color: Color(0xFFA78BFA))),
                         const SizedBox(width: 16),
                         Expanded(
                           child: _isEditingName
-                              ? TextField(controller: _nameController, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold), decoration: InputDecoration(isDense: true, contentPadding: const EdgeInsets.symmetric(vertical: 8), hintText: 'Yeni Adınız', hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)), border: InputBorder.none), autofocus: true, onSubmitted: (_) => _attemptSaveName())
+                              ? TextField(controller: _nameController, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold), decoration: InputDecoration(isDense: true, contentPadding: const EdgeInsets.symmetric(vertical: 8), hintText: 'Yeni Adınız', hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)), border: InputBorder.none), autofocus: true, onSubmitted: (_) => _attemptSaveName())
                               : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(_currentName, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)), const SizedBox(height: 2), Text(_hasUsedFreeNameChange ? 'Bedel: 1000 Cevher' : '1 Ücretsiz Hak', style: TextStyle(color: _hasUsedFreeNameChange ? const Color(0xFFFD79A8) : const Color(0xFF00CEC9), fontSize: 11, fontWeight: FontWeight.w600))]),
                         ),
                         if (_isEditingName) IconButton(onPressed: _attemptSaveName, icon: const Icon(Icons.check_circle_rounded, color: Color(0xFF00CEC9)))
@@ -390,13 +390,13 @@ class _SettingsSheetState extends State<_SettingsSheet> {
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: _isAnonymous 
-                            ? Colors.redAccent.withOpacity(0.1) 
-                            : (_isEmailVerified ? Colors.green.withOpacity(0.1) : Colors.orangeAccent.withOpacity(0.1)),
+                            ? Colors.redAccent.withValues(alpha: 0.1) 
+                            : (_isEmailVerified ? Colors.green.withValues(alpha: 0.1) : Colors.orangeAccent.withValues(alpha: 0.1)),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: _isAnonymous 
-                              ? Colors.redAccent.withOpacity(0.3) 
-                              : (_isEmailVerified ? Colors.green.withOpacity(0.3) : Colors.orangeAccent.withOpacity(0.3))
+                              ? Colors.redAccent.withValues(alpha: 0.3) 
+                              : (_isEmailVerified ? Colors.green.withValues(alpha: 0.3) : Colors.orangeAccent.withValues(alpha: 0.3))
                         ),
                       ),
                       child: Row(
@@ -405,8 +405,8 @@ class _SettingsSheetState extends State<_SettingsSheet> {
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
                               color: _isAnonymous 
-                                  ? Colors.redAccent.withOpacity(0.2) 
-                                  : (_isEmailVerified ? Colors.green.withOpacity(0.2) : Colors.orangeAccent.withOpacity(0.2)),
+                                  ? Colors.redAccent.withValues(alpha: 0.2) 
+                                  : (_isEmailVerified ? Colors.green.withValues(alpha: 0.2) : Colors.orangeAccent.withValues(alpha: 0.2)),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Icon(
@@ -443,13 +443,13 @@ class _SettingsSheetState extends State<_SettingsSheet> {
 
                   Container(
                     padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(color: const Color(0xFF1D1B36), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withOpacity(0.05))),
+                    decoration: BoxDecoration(color: const Color(0xFF1D1B36), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withValues(alpha: 0.05))),
                     child: Column(
                       children: [
                         _buildSettingRow(icon: Icons.volume_up_rounded, color: const Color(0xFF00CEC9), title: 'Ses Efektleri', value: isSoundEnabled, onChanged: _toggleSound),
-                        Divider(color: Colors.white.withOpacity(0.05), height: 24),
+                        Divider(color: Colors.white.withValues(alpha: 0.05), height: 24),
                         _buildSettingRow(icon: Icons.vibration_rounded, color: const Color(0xFFFD79A8), title: 'Titreşim (Haptic)', value: isVibrationEnabled, onChanged: _toggleVibration),
-                        Divider(color: Colors.white.withOpacity(0.05), height: 24),
+                        Divider(color: Colors.white.withValues(alpha: 0.05), height: 24),
                         // YENİ: İstatistikleri Gizleme Butonu
                         _buildSettingRow(
                           icon: Icons.lock_rounded, 
@@ -471,7 +471,7 @@ class _SettingsSheetState extends State<_SettingsSheet> {
                     onTap: _copyUid, 
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(color: const Color(0xFF1D1B36), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withOpacity(0.05))),
+                      decoration: BoxDecoration(color: const Color(0xFF1D1B36), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white.withValues(alpha: 0.05))),
                       child: Row(
                         children: [
                           const Icon(Icons.fingerprint_rounded, color: Colors.white54, size: 20),
@@ -486,7 +486,7 @@ class _SettingsSheetState extends State<_SettingsSheet> {
                   const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(color: const Color(0xFF1D1B36), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withOpacity(0.05))),
+                    decoration: BoxDecoration(color: const Color(0xFF1D1B36), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.white.withValues(alpha: 0.05))),
                     child: Column(
                       children: [
                         _buildActionRow(
@@ -495,7 +495,7 @@ class _SettingsSheetState extends State<_SettingsSheet> {
                           title: 'Gizlilik Politikası', 
                           onTap: _showPrivacyPolicyText
                         ),
-                        Divider(color: Colors.white.withOpacity(0.05), height: 24),
+                        Divider(color: Colors.white.withValues(alpha: 0.05), height: 24),
                         _buildActionRow(
                           icon: Icons.delete_forever_rounded, 
                           color: Colors.redAccent, 
@@ -519,10 +519,10 @@ class _SettingsSheetState extends State<_SettingsSheet> {
   Widget _buildSettingRow({required IconData icon, required Color color, required String title, required bool value, required ValueChanged<bool> onChanged}) {
     return Row(
       children: [
-        Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: color.withOpacity(0.2), borderRadius: BorderRadius.circular(12)), child: Icon(icon, color: color, size: 20)),
+        Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: color.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)), child: Icon(icon, color: color, size: 20)),
         const SizedBox(width: 16),
         Expanded(child: Text(title, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600))),
-        Switch(value: value, onChanged: onChanged, activeColor: color, activeTrackColor: color.withOpacity(0.3), inactiveThumbColor: Colors.white54, inactiveTrackColor: Colors.white.withOpacity(0.1)),
+        Switch(value: value, onChanged: onChanged, activeThumbColor: color, activeTrackColor: color.withValues(alpha: 0.3), inactiveThumbColor: Colors.white54, inactiveTrackColor: Colors.white.withValues(alpha: 0.1)),
       ],
     );
   }
@@ -533,10 +533,10 @@ class _SettingsSheetState extends State<_SettingsSheet> {
       borderRadius: BorderRadius.circular(12),
       child: Row(
         children: [
-          Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: color.withOpacity(0.2), borderRadius: BorderRadius.circular(12)), child: Icon(icon, color: color, size: 20)),
+          Container(padding: const EdgeInsets.all(10), decoration: BoxDecoration(color: color.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)), child: Icon(icon, color: color, size: 20)),
           const SizedBox(width: 16),
           Expanded(child: Text(title, style: TextStyle(color: isDestructive ? Colors.redAccent : Colors.white, fontSize: 15, fontWeight: FontWeight.bold))),
-          Icon(Icons.arrow_forward_ios_rounded, color: Colors.white.withOpacity(0.3), size: 16),
+          Icon(Icons.arrow_forward_ios_rounded, color: Colors.white.withValues(alpha: 0.3), size: 16),
         ],
       ),
     );
