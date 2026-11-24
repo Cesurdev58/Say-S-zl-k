@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/user_profile.dart';
+import '../theme/app_colors.dart';
 
 class StatisticsScreen extends StatelessWidget {
   final UserProfile profile;
@@ -18,7 +19,7 @@ class StatisticsScreen extends StatelessWidget {
     final bool isHidden = !isMe && profile.isStatsHidden;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF131127),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -47,7 +48,7 @@ class StatisticsScreen extends StatelessWidget {
                   ),
                 CircleAvatar(
                   radius: 46,
-                  backgroundColor: const Color(0xFF131127),
+                  backgroundColor: AppColors.background,
                   backgroundImage: AssetImage('assets/avatars/${profile.avatar}.png'),
                 ),
               ],
@@ -57,8 +58,8 @@ class StatisticsScreen extends StatelessWidget {
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(color: const Color(0xFF7C5CFC).withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
-              child: Text(profile.rankName, style: const TextStyle(color: Color(0xFFA78BFA), fontSize: 14, fontWeight: FontWeight.bold)),
+              decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
+              child: Text(profile.rankName, style: const TextStyle(color: AppColors.lavender, fontSize: 14, fontWeight: FontWeight.bold)),
             ),
             const SizedBox(height: 32),
 
@@ -69,7 +70,7 @@ class StatisticsScreen extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(40),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1D1B36),
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
                 ),
@@ -94,23 +95,23 @@ class StatisticsScreen extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(colors: [Color(0xFF2D2A59), Color(0xFF1A1836)]),
+                  gradient: const LinearGradient(colors: [AppColors.surfaceGradientTop, AppColors.surfaceGradientBottom]),
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: const Color(0xFF7C5CFC).withValues(alpha: 0.3), width: 1.5),
-                  boxShadow: [BoxShadow(color: const Color(0xFF7C5CFC).withValues(alpha: 0.1), blurRadius: 20)],
+                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 1.5),
+                  boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.1), blurRadius: 20)],
                 ),
                 child: Column(
                   children: [
                     const Text('Baskın Zeka Türü', style: TextStyle(color: Colors.white54, fontSize: 13, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 8),
-                    Text(profile.dominantIntelligence, style: const TextStyle(color: Color(0xFF00CEC9), fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                    Text(profile.dominantIntelligence, style: const TextStyle(color: AppColors.accent, fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: 1)),
                     const SizedBox(height: 20),
                     
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('%$wPercent Sözel', style: const TextStyle(color: Color(0xFFA78BFA), fontWeight: FontWeight.bold, fontSize: 13)),
-                        Text('%$mPercent Sayısal', style: const TextStyle(color: Color(0xFFFD79A8), fontWeight: FontWeight.bold, fontSize: 13)),
+                        Text('%$wPercent Sözel', style: const TextStyle(color: AppColors.lavender, fontWeight: FontWeight.bold, fontSize: 13)),
+                        Text('%$mPercent Sayısal', style: const TextStyle(color: AppColors.rose, fontWeight: FontWeight.bold, fontSize: 13)),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -122,12 +123,12 @@ class StatisticsScreen extends StatelessWidget {
                           if (wPercent > 0)
                             Expanded(
                               flex: wPercent,
-                              child: Container(height: 12, color: const Color(0xFF7C5CFC)),
+                              child: Container(height: 12, color: AppColors.primary),
                             ),
                           if (mPercent > 0)
                             Expanded(
                               flex: mPercent,
-                              child: Container(height: 12, color: const Color(0xFFFD79A8)),
+                              child: Container(height: 12, color: AppColors.rose),
                             ),
                         ],
                       ),
@@ -142,7 +143,7 @@ class StatisticsScreen extends StatelessWidget {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  Expanded(child: _buildStatCard('Oynanan', '${profile.gamesPlayed}', Icons.sports_esports_rounded, const Color(0xFF00CEC9))),
+                  Expanded(child: _buildStatCard('Oynanan', '${profile.gamesPlayed}', Icons.sports_esports_rounded, AppColors.accent)),
                   const SizedBox(width: 16),
                   // YENİ: TEK MAÇLIK REKOR KARTI EKLENDİ
                   Expanded(child: _buildStatCard('Tek Maçlık Rekor', '${profile.highestSingleMatchScore}', Icons.local_fire_department_rounded, Colors.deepOrange)),
@@ -161,7 +162,7 @@ class StatisticsScreen extends StatelessWidget {
                 children: [
                   Expanded(child: _buildStatCard('Toplam Soru', '${profile.totalQuestionsSeen}', Icons.psychology_rounded, const Color(0xFF00B894))),
                   const SizedBox(width: 16),
-                  Expanded(child: _buildStatCard('Bugünkü Puan', '${profile.dailyScore}', Icons.today_rounded, const Color(0xFF74B9FF))),
+                  Expanded(child: _buildStatCard('Bugünkü Puan', '${profile.dailyScore}', Icons.today_rounded, AppColors.sky)),
                 ],
               ),
               const SizedBox(height: 24),
@@ -171,15 +172,15 @@ class StatisticsScreen extends StatelessWidget {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  Expanded(child: _buildStatCard('En Uzun', profile.longestWord.isEmpty ? '-' : profile.longestWord, Icons.text_fields_rounded, const Color(0xFF7C5CFC))),
+                  Expanded(child: _buildStatCard('En Uzun', profile.longestWord.isEmpty ? '-' : profile.longestWord, Icons.text_fields_rounded, AppColors.primary)),
                   const SizedBox(width: 16),
-                  Expanded(child: _buildStatCard('Başarı Oranı', '%${profile.wordSuccessRate.toStringAsFixed(1)}', Icons.check_circle_outline_rounded, const Color(0xFF7C5CFC))),
+                  Expanded(child: _buildStatCard('Başarı Oranı', '%${profile.wordSuccessRate.toStringAsFixed(1)}', Icons.check_circle_outline_rounded, AppColors.primary)),
                 ],
               ),
               const SizedBox(height: 16),
               Row(
                 children: [
-                  Expanded(child: _buildStatCard('Sözel Puan', '${profile.totalWordScore}', Icons.score_rounded, const Color(0xFF7C5CFC))),
+                  Expanded(child: _buildStatCard('Sözel Puan', '${profile.totalWordScore}', Icons.score_rounded, AppColors.primary)),
                   const SizedBox(width: 16),
                   Expanded(child: _buildStatCard('Pas Geçme', '%${profile.wordPassRate.toStringAsFixed(1)}', Icons.skip_next_rounded, Colors.redAccent)),
                 ],
@@ -187,9 +188,9 @@ class StatisticsScreen extends StatelessWidget {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  Expanded(child: _buildStatCard('Görülen Soru', '${profile.wordQuestionsSeen}', Icons.visibility_rounded, const Color(0xFF74B9FF))),
+                  Expanded(child: _buildStatCard('Görülen Soru', '${profile.wordQuestionsSeen}', Icons.visibility_rounded, AppColors.sky)),
                   const SizedBox(width: 16),
-                  Expanded(child: _buildStatCard('Doğru Cevap', '${profile.wordCorrectAnswers}', Icons.task_alt_rounded, const Color(0xFF55EFC4))),
+                  Expanded(child: _buildStatCard('Doğru Cevap', '${profile.wordCorrectAnswers}', Icons.task_alt_rounded, AppColors.mint)),
                 ],
               ),
               const SizedBox(height: 24),
@@ -199,15 +200,15 @@ class StatisticsScreen extends StatelessWidget {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  Expanded(child: _buildStatCard('Tam İsabet', '${profile.exactMathMatches}', Icons.calculate_rounded, const Color(0xFFFD79A8))),
+                  Expanded(child: _buildStatCard('Tam İsabet', '${profile.exactMathMatches}', Icons.calculate_rounded, AppColors.rose)),
                   const SizedBox(width: 16),
-                  Expanded(child: _buildStatCard('Başarı Oranı', '%${profile.mathSuccessRate.toStringAsFixed(1)}', Icons.check_circle_outline_rounded, const Color(0xFFFD79A8))),
+                  Expanded(child: _buildStatCard('Başarı Oranı', '%${profile.mathSuccessRate.toStringAsFixed(1)}', Icons.check_circle_outline_rounded, AppColors.rose)),
                 ],
               ),
               const SizedBox(height: 16),
               Row(
                 children: [
-                  Expanded(child: _buildStatCard('Sayısal Puan', '${profile.totalMathScore}', Icons.functions_rounded, const Color(0xFFFD79A8))),
+                  Expanded(child: _buildStatCard('Sayısal Puan', '${profile.totalMathScore}', Icons.functions_rounded, AppColors.rose)),
                   const SizedBox(width: 16),
                   Expanded(child: _buildStatCard('Pas Geçme', '%${profile.mathPassRate.toStringAsFixed(1)}', Icons.skip_next_rounded, Colors.redAccent)),
                 ],
@@ -215,9 +216,9 @@ class StatisticsScreen extends StatelessWidget {
               const SizedBox(height: 16),
               Row(
                 children: [
-                  Expanded(child: _buildStatCard('Görülen Soru', '${profile.mathQuestionsSeen}', Icons.visibility_rounded, const Color(0xFF74B9FF))),
+                  Expanded(child: _buildStatCard('Görülen Soru', '${profile.mathQuestionsSeen}', Icons.visibility_rounded, AppColors.sky)),
                   const SizedBox(width: 16),
-                  Expanded(child: _buildStatCard('Doğru Cevap', '${profile.mathCorrectAnswers}', Icons.task_alt_rounded, const Color(0xFF55EFC4))),
+                  Expanded(child: _buildStatCard('Doğru Cevap', '${profile.mathCorrectAnswers}', Icons.task_alt_rounded, AppColors.mint)),
                 ],
               ),
               const SizedBox(height: 24),
@@ -242,7 +243,7 @@ class StatisticsScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1D1B36),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),

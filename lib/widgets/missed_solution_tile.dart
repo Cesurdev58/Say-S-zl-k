@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 
 /// Oyun sonunda "Kaçırılan Çözümler" listesindeki tek bir kart.
 ///
@@ -17,17 +18,17 @@ class MissedSolutionTile extends StatelessWidget {
                             margin: const EdgeInsets.only(bottom: 8),
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                                color: const Color(0xFF131127), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white12)),
+                                color: AppColors.background, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white12)),
                             child: isWord
                                 ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                                     Text('Harfler: ${sol['letters']}', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12)),
                                     Text('${sol['bestWord']} (${sol['bestWord'].length} Harf)',
-                                        style: const TextStyle(color: Color(0xFF00CEC9), fontSize: 14, fontWeight: FontWeight.bold))
+                                        style: const TextStyle(color: AppColors.accent, fontSize: 14, fontWeight: FontWeight.bold))
                                   ])
                                 : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                                     Text('Hedef: ${sol['target']}', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12)),
                                     ...(sol['mathSteps'] as List<String>).map((step) =>
-                                        Text(step, style: const TextStyle(color: Color(0xFF00CEC9), fontSize: 12, fontWeight: FontWeight.bold)))
+                                        Text(step, style: const TextStyle(color: AppColors.accent, fontSize: 12, fontWeight: FontWeight.bold)))
                                   ]),
                           );
   }

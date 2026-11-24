@@ -3,6 +3,7 @@ import '../models/user_profile.dart';
 import '../screens/statistics_screen.dart';
 import '../screens/rank_road_screen.dart'; 
 import '../services/user_service.dart';
+import '../theme/app_colors.dart';
 
 class ProfileCard extends StatefulWidget {
   final UserProfile profile;
@@ -32,7 +33,7 @@ class _ProfileCardState extends State<ProfileCard> {
         child: Container(
           height: MediaQuery.of(context).size.height * 0.6,
           decoration: const BoxDecoration(
-            color: Color(0xFF131127),
+            color: AppColors.background,
             borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
           ),
           child: Column(
@@ -43,8 +44,8 @@ class _ProfileCardState extends State<ProfileCard> {
               const Text('Profilini Özelleştir', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
               
               const TabBar(
-                indicatorColor: Color(0xFF00CEC9),
-                labelColor: Color(0xFF00CEC9),
+                indicatorColor: AppColors.accent,
+                labelColor: AppColors.accent,
                 unselectedLabelColor: Colors.white54,
                 tabs: [
                   Tab(text: 'Karakterler', icon: Icon(Icons.person)),
@@ -74,10 +75,10 @@ class _ProfileCardState extends State<ProfileCard> {
                           },
                           child: Container(
                             decoration: BoxDecoration(
-                              color: isSelected ? const Color(0xFF7C5CFC).withValues(alpha: 0.3) : const Color(0xFF1D1B36),
+                              color: isSelected ? AppColors.primary.withValues(alpha: 0.3) : AppColors.surface,
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: isSelected ? const Color(0xFF7C5CFC) : Colors.white.withValues(alpha: 0.05),
+                                color: isSelected ? AppColors.primary : Colors.white.withValues(alpha: 0.05),
                                 width: isSelected ? 2 : 1,
                               ),
                             ),
@@ -118,9 +119,9 @@ class _ProfileCardState extends State<ProfileCard> {
                               },
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: isNoneSelected ? const Color(0xFF00CEC9).withValues(alpha: 0.3) : const Color(0xFF1D1B36),
+                                  color: isNoneSelected ? AppColors.accent.withValues(alpha: 0.3) : AppColors.surface,
                                   borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: isNoneSelected ? const Color(0xFF00CEC9) : Colors.white12, width: isNoneSelected ? 2 : 1),
+                                  border: Border.all(color: isNoneSelected ? AppColors.accent : Colors.white12, width: isNoneSelected ? 2 : 1),
                                 ),
                                 child: const Center(child: Icon(Icons.block, color: Colors.white54, size: 32)),
                               ),
@@ -138,10 +139,10 @@ class _ProfileCardState extends State<ProfileCard> {
                             },
                             child: Container(
                               decoration: BoxDecoration(
-                                color: isSelected ? const Color(0xFF00CEC9).withValues(alpha: 0.3) : const Color(0xFF1D1B36),
+                                color: isSelected ? AppColors.accent.withValues(alpha: 0.3) : AppColors.surface,
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: isSelected ? const Color(0xFF00CEC9) : Colors.white.withValues(alpha: 0.05),
+                                  color: isSelected ? AppColors.accent : Colors.white.withValues(alpha: 0.05),
                                   width: isSelected ? 2 : 1,
                                 ),
                               ),
@@ -174,11 +175,11 @@ class _ProfileCardState extends State<ProfileCard> {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: const Color(0xFF1D1B36),
+          color: AppColors.surface,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
           boxShadow: [
-            BoxShadow(color: const Color(0xFF7C5CFC).withValues(alpha: 0.15), blurRadius: 20, offset: const Offset(0, 10)),
+            BoxShadow(color: AppColors.primary.withValues(alpha: 0.15), blurRadius: 20, offset: const Offset(0, 10)),
           ],
         ),
         child: Column(
@@ -202,14 +203,14 @@ class _ProfileCardState extends State<ProfileCard> {
                             ),
                           CircleAvatar(
                             radius: 34,
-                            backgroundColor: const Color(0xFF131127),
+                            backgroundColor: AppColors.background,
                             backgroundImage: AssetImage('assets/avatars/${widget.profile.avatar}.png'),
                           ),
                         ],
                       ),
                       Container(
                         padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(color: const Color(0xFF00CEC9), shape: BoxShape.circle, border: Border.all(color: const Color(0xFF1D1B36), width: 2)),
+                        decoration: BoxDecoration(color: AppColors.accent, shape: BoxShape.circle, border: Border.all(color: AppColors.surface, width: 2)),
                         child: const Icon(Icons.edit_rounded, color: Colors.white, size: 12),
                       ),
                     ],
@@ -232,16 +233,16 @@ class _ProfileCardState extends State<ProfileCard> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF7C5CFC).withValues(alpha: 0.2), 
+                            color: AppColors.primary.withValues(alpha: 0.2), 
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: const Color(0xFF7C5CFC).withValues(alpha: 0.5)),
+                            border: Border.all(color: AppColors.primary.withValues(alpha: 0.5)),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(widget.profile.rankName, style: const TextStyle(color: Color(0xFFA78BFA), fontSize: 12, fontWeight: FontWeight.bold)),
+                              Text(widget.profile.rankName, style: const TextStyle(color: AppColors.lavender, fontSize: 12, fontWeight: FontWeight.bold)),
                               const SizedBox(width: 4),
-                              const Icon(Icons.info_outline_rounded, color: Color(0xFFA78BFA), size: 12),
+                              const Icon(Icons.info_outline_rounded, color: AppColors.lavender, size: 12),
                             ],
                           ),
                         ),
@@ -258,7 +259,7 @@ class _ProfileCardState extends State<ProfileCard> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildStatColumn('Puan', _formatNumber(widget.profile.totalScore), Icons.star_rounded, Colors.amber),
-                _buildStatColumn('Oynanan', '${widget.profile.gamesPlayed}', Icons.sports_esports_rounded, const Color(0xFF00CEC9)),
+                _buildStatColumn('Oynanan', '${widget.profile.gamesPlayed}', Icons.sports_esports_rounded, AppColors.accent),
                 // YENİ: Seviye İlerlemesi yerine Rekor gösteriliyor
                 _buildStatColumn('Tek Maç Rekoru', _formatNumber(widget.profile.highestSingleMatchScore), Icons.local_fire_department_rounded, Colors.deepOrange),
               ],
@@ -269,7 +270,7 @@ class _ProfileCardState extends State<ProfileCard> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFF131127).withValues(alpha: 0.6),
+                color: AppColors.background.withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
               ),

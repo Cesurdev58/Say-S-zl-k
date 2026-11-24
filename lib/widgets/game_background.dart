@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 
 /// Oyun ekranlarında kullanılan mor-lacivert gradient arka plan.
 class GameBackground extends StatelessWidget {
@@ -11,9 +12,9 @@ class GameBackground extends StatelessWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Color(0xFF0F172A),
-            Color(0xFF1E1B4B),
-            Color(0xFF312E81),
+            AppColors.gradientTop,
+            AppColors.gradientMid,
+            AppColors.gradientBottom,
           ],
         ),
       );

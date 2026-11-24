@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 
 class MenuButton extends StatelessWidget {
   const MenuButton({
@@ -30,7 +31,7 @@ class MenuButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             gradient: isPrimary
                 ? const LinearGradient(
-                    colors: [Color(0xFF7C5CFC), Color(0xFF4F46E5)],
+                    colors: [AppColors.primary, AppColors.indigo],
                   )
                 : null,
             color: isPrimary ? null : Colors.white.withValues(alpha:  0.08),
@@ -42,7 +43,7 @@ class MenuButton extends StatelessWidget {
             boxShadow: isPrimary
                 ? [
                     BoxShadow(
-                      color: const Color(0xFF7C5CFC).withValues(alpha:  0.4),
+                      color: AppColors.primary.withValues(alpha:  0.4),
                       blurRadius: 16,
                       offset: const Offset(0, 8),
                     ),
@@ -59,7 +60,7 @@ class MenuButton extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: isPrimary
                         ? Colors.white.withValues(alpha:  0.2)
-                        : const Color(0xFF5B3FD9).withValues(alpha:  0.25),
+                        : AppColors.violet.withValues(alpha:  0.25),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Icon(icon, color: Colors.white, size: 26),

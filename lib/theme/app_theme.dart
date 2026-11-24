@@ -1,5 +1,3 @@
-import 'dart:ui' show FontFeature;
-
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
@@ -195,7 +193,7 @@ abstract final class AppTheme {
       primaryColor: AppColors.primary,
       scaffoldBackgroundColor: AppColors.background,
       canvasColor: AppColors.background,
-      dialogBackgroundColor: AppColors.surface,
+      dialogTheme: const DialogThemeData(backgroundColor: AppColors.surface),
       textTheme: textTheme,
       // Açık temadaki varsayılan SnackBar görünümü korunur (rengi verilmeyenler için).
       snackBarTheme: const SnackBarThemeData(

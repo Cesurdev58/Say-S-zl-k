@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 
 /// Çok oyunculu maç sonu sıralama listesi (arkadaş ekleme düğmesiyle).
 class MatchRankingList extends StatelessWidget {
@@ -21,7 +22,7 @@ class MatchRankingList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-                      decoration: BoxDecoration(color: const Color(0xFF131127), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white12)),
+                      decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white12)),
                       child: ListView.builder(
                         padding: const EdgeInsets.all(12),
                         itemCount: sortedPlayers.length,
@@ -40,9 +41,9 @@ class MatchRankingList extends StatelessWidget {
                             margin: const EdgeInsets.only(bottom: 8),
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                                color: isMe ? const Color(0xFF7C5CFC).withValues(alpha: 0.3) : Colors.transparent,
+                                color: isMe ? AppColors.primary.withValues(alpha: 0.3) : Colors.transparent,
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: isMe ? const Color(0xFF7C5CFC) : Colors.transparent)),
+                                border: Border.all(color: isMe ? AppColors.primary : Colors.transparent)),
                             child: Row(
                               children: [
                                 Text('${index + 1}.', style: TextStyle(color: rankColor, fontSize: 20, fontWeight: FontWeight.bold)),
@@ -61,7 +62,7 @@ class MatchRankingList extends StatelessWidget {
                                         : () => onAddFriend(p.key, p.value['name'].toString()),
                                     icon: Icon(
                                       isPending ? Icons.check_circle_rounded : Icons.person_add_alt_1_rounded,
-                                      color: isPending ? Colors.greenAccent : const Color(0xFF00CEC9),
+                                      color: isPending ? Colors.greenAccent : AppColors.accent,
                                       size: 24,
                                     ),
                                   )

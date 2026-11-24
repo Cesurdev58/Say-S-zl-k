@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/audio_service.dart';
+import '../theme/app_colors.dart';
 
 /// JOKER taşı için harf seçtiren ortak diyalog (solo ve çok oyunculu).
 ///
@@ -33,7 +34,7 @@ class _JokerPickerDialogState extends State<JokerPickerDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: const Color(0xFF1D1B36),
+      backgroundColor: AppColors.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -60,7 +61,7 @@ class _JokerPickerDialogState extends State<JokerPickerDialog> {
                       child: Container(
                         width: 42,
                         height: 42,
-                        decoration: BoxDecoration(color: const Color(0xFFFF9F43), borderRadius: BorderRadius.circular(10)),
+                        decoration: BoxDecoration(color: AppColors.joker, borderRadius: BorderRadius.circular(10)),
                         child: Center(
                           child: Text(char, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
                         ),

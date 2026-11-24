@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/user_profile.dart';
+import '../theme/app_colors.dart';
 
 class RankRoadScreen extends StatelessWidget {
   final UserProfile profile;
@@ -10,18 +11,18 @@ class RankRoadScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<Map<String, dynamic>> ranks = [
       {'level': 0, 'name': 'Çaylak', 'score': 0, 'color': const Color(0xFFA0A0A0), 'height': 140.0, 'icon': Icons.egg_rounded},
-      {'level': 1, 'name': 'Amatör', 'score': 500, 'color': const Color(0xFF55EFC4), 'height': 180.0, 'icon': Icons.skateboarding_rounded},
-      {'level': 2, 'name': 'Yetenekli', 'score': 1500, 'color': const Color(0xFF74B9FF), 'height': 220.0, 'icon': Icons.color_lens_rounded},
-      {'level': 3, 'name': 'Uzman', 'score': 3000, 'color': const Color(0xFFA78BFA), 'height': 260.0, 'icon': Icons.military_tech_rounded},
-      {'level': 4, 'name': 'Usta', 'score': 6000, 'color': const Color(0xFFFF9F43), 'height': 300.0, 'icon': Icons.workspace_premium_rounded},
-      {'level': 5, 'name': 'Deha', 'score': 12000, 'color': const Color(0xFF00CEC9), 'height': 340.0, 'icon': Icons.psychology_rounded},
+      {'level': 1, 'name': 'Amatör', 'score': 500, 'color': AppColors.mint, 'height': 180.0, 'icon': Icons.skateboarding_rounded},
+      {'level': 2, 'name': 'Yetenekli', 'score': 1500, 'color': AppColors.sky, 'height': 220.0, 'icon': Icons.color_lens_rounded},
+      {'level': 3, 'name': 'Uzman', 'score': 3000, 'color': AppColors.lavender, 'height': 260.0, 'icon': Icons.military_tech_rounded},
+      {'level': 4, 'name': 'Usta', 'score': 6000, 'color': AppColors.joker, 'height': 300.0, 'icon': Icons.workspace_premium_rounded},
+      {'level': 5, 'name': 'Deha', 'score': 12000, 'color': AppColors.accent, 'height': 340.0, 'icon': Icons.psychology_rounded},
     ];
 
     final int currentScore = profile.totalScore;
     final int currentLevel = profile.rankLevel;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF131127),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -39,10 +40,10 @@ class RankRoadScreen extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 24),
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(colors: [Color(0xFF2D2A59), Color(0xFF1A1836)]),
+              gradient: const LinearGradient(colors: [AppColors.surfaceGradientTop, AppColors.surfaceGradientBottom]),
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: const Color(0xFF7C5CFC).withValues(alpha: 0.3), width: 1.5),
-              boxShadow: [BoxShadow(color: const Color(0xFF7C5CFC).withValues(alpha: 0.15), blurRadius: 20)],
+              border: Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 1.5),
+              boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.15), blurRadius: 20)],
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -111,7 +112,7 @@ class RankRoadScreen extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: isUnlocked ? rank['color'].withValues(alpha: 0.2) : const Color(0xFF1D1B36),
+                          color: isUnlocked ? rank['color'].withValues(alpha: 0.2) : AppColors.surface,
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: isCurrent ? rank['color'] : (isUnlocked ? rank['color'].withValues(alpha: 0.5) : Colors.white12),
@@ -154,7 +155,7 @@ class RankRoadScreen extends StatelessWidget {
                             width: 60,
                             height: rank['height'],
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1D1B36),
+                              color: AppColors.surface,
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
                             ),

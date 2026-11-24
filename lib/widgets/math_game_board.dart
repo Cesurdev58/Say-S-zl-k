@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 
 class MathGameBoard extends StatelessWidget {
   final int targetNumber;
@@ -28,7 +29,7 @@ class MathGameBoard extends StatelessWidget {
       children: [
         Container(
           width: double.infinity, padding: const EdgeInsets.symmetric(vertical: 14),
-          decoration: BoxDecoration(color: const Color(0xFF5A4FCF), borderRadius: BorderRadius.circular(18)),
+          decoration: BoxDecoration(color: AppColors.primaryDeep, borderRadius: BorderRadius.circular(18)),
           child: Column(
             children: [
               Text('HEDEF SAYI', style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
@@ -40,7 +41,7 @@ class MathGameBoard extends StatelessWidget {
         const SizedBox(height: 14),
         Container(
           width: double.infinity, height: 40, padding: const EdgeInsets.symmetric(horizontal: 10),
-          decoration: BoxDecoration(color: const Color(0xFF1D1B36), borderRadius: BorderRadius.circular(12)),
+          decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(12)),
           child: historySteps.isEmpty
               ? Center(child: Text('İşlem adımları burada görünecek', style: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 11)))
               : ListView(
@@ -48,7 +49,7 @@ class MathGameBoard extends StatelessWidget {
                   children: historySteps.map((step) => Container(
                         margin: const EdgeInsets.only(right: 6, top: 6, bottom: 6),
                         padding: const EdgeInsets.symmetric(horizontal: 8),
-                        decoration: BoxDecoration(color: const Color(0xFF232042), borderRadius: BorderRadius.circular(8)),
+                        decoration: BoxDecoration(color: AppColors.surfaceHigh, borderRadius: BorderRadius.circular(8)),
                         child: Center(child: Text(step, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11))),
                       )).toList(),
                 ),
@@ -65,9 +66,9 @@ class MathGameBoard extends StatelessWidget {
                 duration: const Duration(milliseconds: 150),
                 width: 52, height: 52,
                 decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFFFF9F43) : const Color(0xFF232042),
+                  color: isSelected ? AppColors.joker : AppColors.surfaceHigh,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: isSelected ? const Color(0xFFFF9F43) : Colors.white12),
+                  border: Border.all(color: isSelected ? AppColors.joker : Colors.white12),
                 ),
                 child: Center(child: Text('$num', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold))),
               ),
@@ -88,7 +89,7 @@ class MathGameBoard extends StatelessWidget {
                   opacity: firstNumIndex == null ? 0.4 : 1.0,
                   child: Container(
                     width: 46, height: 46,
-                    decoration: BoxDecoration(color: isSelected ? const Color(0xFFFF9F43) : const Color(0xFF5A4FCF), borderRadius: BorderRadius.circular(12)),
+                    decoration: BoxDecoration(color: isSelected ? AppColors.joker : AppColors.primaryDeep, borderRadius: BorderRadius.circular(12)),
                     child: Center(child: Text(op == '*' ? '×' : (op == '/' ? '÷' : op), style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold))),
                   ),
                 ),

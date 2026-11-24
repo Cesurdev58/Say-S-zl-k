@@ -15,6 +15,7 @@ import '../widgets/solution_dialog.dart';
 import '../widgets/timer_chip.dart';
 import '../widgets/word_game_board.dart';
 import '../widgets/math_game_board.dart';
+import '../theme/app_colors.dart';
 
 class GameScreen extends StatefulWidget {
   final bool isTimed;
@@ -143,7 +144,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1D1B36),
+        backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('Çıkmak Üzeresin!', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         content: const Text(
@@ -673,7 +674,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         }
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFF131127),
+        backgroundColor: AppColors.background,
         body: Stack(
           children: [
             SafeArea(
@@ -761,7 +762,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                       fontWeight: FontWeight.w900,
                       letterSpacing: 2,
                       shadows: [
-                        Shadow(color: Color(0xFF7C5CFC), blurRadius: 20, offset: Offset(0, 0)),
+                        Shadow(color: AppColors.primary, blurRadius: 20, offset: Offset(0, 0)),
                         Shadow(color: Colors.black, blurRadius: 10, offset: Offset(2, 2))
                       ],
                     ),
@@ -832,7 +833,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                     child: Text(
                       'Pas (${widget.subMode == 'mix' ? '-10s' : '-5s'})',
-                      style: const TextStyle(color: Color(0xFFFD79A8), fontWeight: FontWeight.bold, fontSize: 12),
+                      style: const TextStyle(color: AppColors.rose, fontWeight: FontWeight.bold, fontSize: 12),
                     ),
                   ),
                 ),
@@ -853,7 +854,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF1D1B36),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
@@ -872,7 +873,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           if (showDelta && scoreDeltaText != null)
             Align(
               alignment: Alignment.centerRight,
-              child: Text(scoreDeltaText!, style: const TextStyle(color: Color(0xFFFD79A8), fontSize: 11, fontWeight: FontWeight.bold)),
+              child: Text(scoreDeltaText!, style: const TextStyle(color: AppColors.rose, fontSize: 11, fontWeight: FontWeight.bold)),
             ),
         ],
       ),
@@ -968,7 +969,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.zero,
-                  backgroundColor: const Color(0xFF00CEC9),
+                  backgroundColor: AppColors.accent,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
                 onPressed: isLocked ? null : _showTimelessSolution,
@@ -985,7 +986,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.zero,
-                backgroundColor: const Color(0xFF5A4FCF),
+                backgroundColor: AppColors.primaryDeep,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
               onPressed: isLocked

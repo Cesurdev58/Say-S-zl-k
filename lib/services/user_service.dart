@@ -9,6 +9,7 @@ import '../models/user_profile.dart';
 import 'secure_storage_service.dart';
 import '../main.dart';
 import '../screens/splash_screen.dart';
+import '../theme/app_colors.dart';
 
 class UserService {
   UserService._privateConstructor();
@@ -269,7 +270,7 @@ class UserService {
             builder: (context) => PopScope(
               canPop: false,
               child: AlertDialog(
-                backgroundColor: const Color(0xFF1D1B36),
+                backgroundColor: AppColors.surface,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 title: const Row(
                   children: [
@@ -285,7 +286,7 @@ class UserService {
                 actions: [
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF7C5CFC),
+                      backgroundColor: AppColors.primary,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                     onPressed: () {

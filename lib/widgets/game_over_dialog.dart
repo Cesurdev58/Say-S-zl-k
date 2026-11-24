@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 
 class GameOverDialog extends StatefulWidget {
   final int totalScore;
@@ -46,9 +47,9 @@ class _GameOverDialogState extends State<GameOverDialog> {
         child: Container(
           padding: const EdgeInsets.all(22),
           decoration: BoxDecoration(
-            color: const Color(0xFF1D1B36),
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: const Color(0xFF7C5CFC).withValues(alpha: 0.4), width: 1.5),
+            border: Border.all(color: AppColors.primary.withValues(alpha: 0.4), width: 1.5),
           ),
           child: SingleChildScrollView(
             child: Column(
@@ -56,8 +57,8 @@ class _GameOverDialogState extends State<GameOverDialog> {
               children: [
                 Container(
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: const Color(0xFFFF9F43).withValues(alpha: 0.15), shape: BoxShape.circle),
-                  child: const Icon(Icons.notifications_off_rounded, color: Color(0xFFFF9F43), size: 38),
+                  decoration: BoxDecoration(color: AppColors.joker.withValues(alpha: 0.15), shape: BoxShape.circle),
+                  child: const Icon(Icons.notifications_off_rounded, color: AppColors.joker, size: 38),
                 ),
                 const SizedBox(height: 12),
                 const Text('Oyun Bitti!', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900)),
@@ -71,7 +72,7 @@ class _GameOverDialogState extends State<GameOverDialog> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('TOPLAM PUAN:', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 15)),
-                    Text('${widget.totalScore}', style: const TextStyle(color: Color(0xFFFF9F43), fontWeight: FontWeight.w900, fontSize: 24)),
+                    Text('${widget.totalScore}', style: const TextStyle(color: AppColors.joker, fontWeight: FontWeight.w900, fontSize: 24)),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -112,7 +113,7 @@ class _GameOverDialogState extends State<GameOverDialog> {
                           width: 8, height: 8,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: _currentPage == index ? const Color(0xFFFF9F43) : Colors.white24,
+                            color: _currentPage == index ? AppColors.joker : Colors.white24,
                           ),
                         ),
                       ),
@@ -137,7 +138,7 @@ class _GameOverDialogState extends State<GameOverDialog> {
                       child: SizedBox(
                         height: 48,
                         child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF6C5CE7), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
+                          style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryAlt, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))),
                           onPressed: () { Navigator.pop(context); widget.onReplay(); },
                           child: const Text('Tekrar Oyna', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
                         ),
@@ -157,15 +158,15 @@ class _GameOverDialogState extends State<GameOverDialog> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 2),
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: const Color(0xFF131127), borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(16)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: const [
-              Icon(Icons.spellcheck_rounded, color: Color(0xFF00CEC9), size: 16),
+              Icon(Icons.spellcheck_rounded, color: AppColors.accent, size: 16),
               SizedBox(width: 6),
-              Text('Olası En Uzun Kelime:', style: TextStyle(color: Color(0xFFFF9F43), fontWeight: FontWeight.bold, fontSize: 13)),
+              Text('Olası En Uzun Kelime:', style: TextStyle(color: AppColors.joker, fontWeight: FontWeight.bold, fontSize: 13)),
             ],
           ),
           const SizedBox(height: 10),
@@ -173,7 +174,7 @@ class _GameOverDialogState extends State<GameOverDialog> {
           const SizedBox(height: 6),
           Text(
             bestWord == "SÖZLÜKTE KELİME BULUNAMADI" ? bestWord : '$bestWord (${bestWord.length} Harf)',
-            style: const TextStyle(color: Color(0xFF00CEC9), fontWeight: FontWeight.bold, fontSize: 15),
+            style: const TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold, fontSize: 15),
           ),
         ],
       ),
@@ -184,7 +185,7 @@ class _GameOverDialogState extends State<GameOverDialog> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 2),
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: const Color(0xFF131127), borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(16)),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,7 +194,7 @@ class _GameOverDialogState extends State<GameOverDialog> {
               children: [
                 const Icon(Icons.track_changes_rounded, color: Colors.redAccent, size: 16),
                 const SizedBox(width: 6),
-                Text('Hedef: $target (Tam Çözüm)', style: const TextStyle(color: Color(0xFFFF9F43), fontWeight: FontWeight.bold, fontSize: 13)),
+                Text('Hedef: $target (Tam Çözüm)', style: const TextStyle(color: AppColors.joker, fontWeight: FontWeight.bold, fontSize: 13)),
               ],
             ),
             const SizedBox(height: 8),
@@ -201,7 +202,7 @@ class _GameOverDialogState extends State<GameOverDialog> {
                   padding: const EdgeInsets.symmetric(vertical: 3),
                   child: Row(
                     children: [
-                      const Icon(Icons.check_circle_outline_rounded, color: Color(0xFF00CEC9), size: 14),
+                      const Icon(Icons.check_circle_outline_rounded, color: AppColors.accent, size: 14),
                       const SizedBox(width: 8),
                       Text(step, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
                     ],
@@ -225,7 +226,7 @@ class _ScoreRow extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label, style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13)),
-        Text(value, style: TextStyle(color: isAccent ? const Color(0xFF00CEC9) : Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+        Text(value, style: TextStyle(color: isAccent ? AppColors.accent : Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
       ],
     );
   }

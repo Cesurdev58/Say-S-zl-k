@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_colors.dart';
 
 /// Süresiz solo modda "Çözümü Göster" diyaloğu: en uzun kelime veya adım adım işlem çözümü.
 class SolutionDialog extends StatelessWidget {
@@ -23,11 +24,11 @@ class SolutionDialog extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(22),
           decoration: BoxDecoration(
-            color: const Color(0xFF1D1B36),
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: const Color(0xFF7C5CFC).withValues(alpha: 0.5), width: 1.5),
+            border: Border.all(color: AppColors.primary.withValues(alpha: 0.5), width: 1.5),
             boxShadow: [
-              BoxShadow(color: const Color(0xFF131127).withValues(alpha: 0.8), blurRadius: 20, spreadRadius: 5)
+              BoxShadow(color: AppColors.background.withValues(alpha: 0.8), blurRadius: 20, spreadRadius: 5)
             ],
           ),
           child: Column(
@@ -39,12 +40,12 @@ class SolutionDialog extends StatelessWidget {
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(color: const Color(0xFF131127), borderRadius: BorderRadius.circular(16)),
+                  decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(16)),
                   child: Text(
                     bestWord == "SÖZLÜKTE KELİME BULUNAMADI"
                         ? "Bu harflerle sözlükte eşleşen kelime bulunamadı."
                         : "$bestWord (${bestWord.length} Harf)",
-                    style: const TextStyle(color: Color(0xFF00CEC9), fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(color: AppColors.accent, fontSize: 16, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -52,7 +53,7 @@ class SolutionDialog extends StatelessWidget {
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(color: const Color(0xFF131127), borderRadius: BorderRadius.circular(16)),
+                  decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(16)),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: mathSteps.map((step) {
@@ -60,7 +61,7 @@ class SolutionDialog extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(vertical: 4),
                         child: Row(
                           children: [
-                            const Icon(Icons.check_circle_outline_rounded, color: Color(0xFF00CEC9), size: 16),
+                            const Icon(Icons.check_circle_outline_rounded, color: AppColors.accent, size: 16),
                             const SizedBox(width: 8),
                             Text(step, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
                           ],
@@ -76,7 +77,7 @@ class SolutionDialog extends StatelessWidget {
                 height: 48,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF6C5CE7),
+                    backgroundColor: AppColors.primaryAlt,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   ),
                   onPressed: onNext,

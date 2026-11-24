@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../widgets/game_intro_dialog.dart'; // Bilgilendirme ve Geri Sayım Pop-up'ı
 import 'game_screen.dart'; // Oyun Ekranı
+import '../theme/app_colors.dart';
 
 class SoloModeSelectScreen extends StatefulWidget {
   const SoloModeSelectScreen({super.key});
@@ -17,7 +18,7 @@ class _SoloModeSelectScreenState extends State<SoloModeSelectScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF131127),
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -93,7 +94,7 @@ class _SoloModeSelectScreenState extends State<SoloModeSelectScreen> {
                                 ? 'Harflerle kelime türet, doğru kelimelerle ek saniye kazan ve serini sürdür!'
                                 : 'Süre kısıtı olmadan en uzun Türkçe kelimeleri türet.',
                             icon: Icons.text_fields_rounded,
-                            iconBgColor: const Color(0xFF6C5CE7),
+                            iconBgColor: AppColors.primaryAlt,
                             onTap: () => _navigateToGame(context, subMode: 'word'),
                           ),
                           _buildSubModeCard(
@@ -102,7 +103,7 @@ class _SoloModeSelectScreenState extends State<SoloModeSelectScreen> {
                                 ? 'Hedefi tam bul (+5s) ve artan sayılarla dev süre bonusu kap!'
                                 : 'Rastgele sayılarla işlem yap, pratik matematik zekanı geliştir.',
                             icon: Icons.calculate_outlined,
-                            iconBgColor: const Color(0xFF00CEC9),
+                            iconBgColor: AppColors.accent,
                             onTap: () => _navigateToGame(context, subMode: 'math'),
                           ),
                           _buildSubModeCard(
@@ -111,7 +112,7 @@ class _SoloModeSelectScreenState extends State<SoloModeSelectScreen> {
                                 ? 'Klasik Karma! Doğru cevaplarla süreni uzat ve 40 saniyeyle sınırları zorla.'
                                 : 'Hem sözel hem sayısal turlarla kesintisiz antrenman yap.',
                             icon: Icons.sports_esports_outlined,
-                            iconBgColor: const Color(0xFFFD79A8),
+                            iconBgColor: AppColors.rose,
                             onTap: () => _navigateToGame(context, subMode: 'mix'),
                           ),
                         ],
@@ -126,7 +127,7 @@ class _SoloModeSelectScreenState extends State<SoloModeSelectScreen> {
                                 ? 'Harflerle kelime türet, doğru kelimelerle ek saniye kazan ve serini sürdür!'
                                 : 'Süre kısıtı olmadan en uzun Türkçe kelimeleri türet.',
                             icon: Icons.text_fields_rounded,
-                            iconBgColor: const Color(0xFF6C5CE7),
+                            iconBgColor: AppColors.primaryAlt,
                             onTap: () => _navigateToGame(context, subMode: 'word'),
                           ),
                           const SizedBox(height: 12),
@@ -136,7 +137,7 @@ class _SoloModeSelectScreenState extends State<SoloModeSelectScreen> {
                                 ? 'Hedefi tam bul (+5s) ve artan sayılarla dev süre bonusu kap!'
                                 : 'Rastgele sayılarla işlem yap, pratik matematik zekanı geliştir.',
                             icon: Icons.calculate_outlined,
-                            iconBgColor: const Color(0xFF00CEC9),
+                            iconBgColor: AppColors.accent,
                             onTap: () => _navigateToGame(context, subMode: 'math'),
                           ),
                           const SizedBox(height: 12),
@@ -146,7 +147,7 @@ class _SoloModeSelectScreenState extends State<SoloModeSelectScreen> {
                                 ? 'Klasik Karma! Doğru cevaplarla süreni uzat ve 40 saniyeyle sınırları zorla.'
                                 : 'Hem sözel hem sayısal turlarla kesintisiz antrenman yap.',
                             icon: Icons.sports_esports_outlined,
-                            iconBgColor: const Color(0xFFFD79A8),
+                            iconBgColor: AppColors.rose,
                             onTap: () => _navigateToGame(context, subMode: 'mix'),
                           ),
                         ],
@@ -169,10 +170,10 @@ class _SoloModeSelectScreenState extends State<SoloModeSelectScreen> {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF5A4FCF) : const Color(0xFF232042),
+          color: isSelected ? AppColors.primaryDeep : AppColors.surfaceHigh,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: isSelected ? const Color(0xFF8C7CFF) : Colors.transparent, width: 2),
-          boxShadow: isSelected ? [BoxShadow(color: const Color(0xFF5A4FCF).withValues(alpha: 0.4), blurRadius: 12, offset: const Offset(0, 4))] : [],
+          border: Border.all(color: isSelected ? AppColors.primaryBright : Colors.transparent, width: 2),
+          boxShadow: isSelected ? [BoxShadow(color: AppColors.primaryDeep.withValues(alpha: 0.4), blurRadius: 12, offset: const Offset(0, 4))] : [],
         ),
         child: Column(
           children: [
@@ -194,7 +195,7 @@ class _SoloModeSelectScreenState extends State<SoloModeSelectScreen> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF232042),
+          color: AppColors.surfaceHigh,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: Colors.white.withValues(alpha: 0.05), width: 1),
         ),

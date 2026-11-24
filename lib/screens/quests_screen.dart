@@ -3,6 +3,7 @@ import 'package:confetti/confetti.dart';
 import '../models/user_profile.dart';
 import '../services/user_service.dart';
 import '../services/audio_service.dart';
+import '../theme/app_colors.dart';
 
 class QuestsScreen extends StatefulWidget {
   const QuestsScreen({super.key});
@@ -17,26 +18,26 @@ class _QuestsScreenState extends State<QuestsScreen> {
   bool _isClaiming = false;
 
   final List<Map<String, dynamic>> _dailyQuests = [
-    {'id': 'dq_play_3', 'title': 'Antrenman Şart', 'desc': '3 Oyun Oyna', 'goal': 3, 'reward': 15, 'icon': Icons.sports_gymnastics_rounded, 'color': const Color(0xFF00CEC9)},
-    {'id': 'dq_score_200', 'title': 'Günün Skoru', 'desc': '200 Puan Topla', 'goal': 200, 'reward': 25, 'icon': Icons.local_fire_department_rounded, 'color': const Color(0xFFFF9F43)},
-    {'id': 'dq_math_exact_1', 'title': 'Zihin Açıcı', 'desc': 'Sayısalda 1 Kez Tam İsabet Yap', 'goal': 1, 'reward': 20, 'icon': Icons.calculate_rounded, 'color': const Color(0xFFFD79A8)},
-    {'id': 'dq_word_see_10', 'title': 'Kelime Avcısı', 'desc': '10 Adet Sözel Soru Gör', 'goal': 10, 'reward': 15, 'icon': Icons.text_fields_rounded, 'color': const Color(0xFF7C5CFC)},
+    {'id': 'dq_play_3', 'title': 'Antrenman Şart', 'desc': '3 Oyun Oyna', 'goal': 3, 'reward': 15, 'icon': Icons.sports_gymnastics_rounded, 'color': AppColors.accent},
+    {'id': 'dq_score_200', 'title': 'Günün Skoru', 'desc': '200 Puan Topla', 'goal': 200, 'reward': 25, 'icon': Icons.local_fire_department_rounded, 'color': AppColors.joker},
+    {'id': 'dq_math_exact_1', 'title': 'Zihin Açıcı', 'desc': 'Sayısalda 1 Kez Tam İsabet Yap', 'goal': 1, 'reward': 20, 'icon': Icons.calculate_rounded, 'color': AppColors.rose},
+    {'id': 'dq_word_see_10', 'title': 'Kelime Avcısı', 'desc': '10 Adet Sözel Soru Gör', 'goal': 10, 'reward': 15, 'icon': Icons.text_fields_rounded, 'color': AppColors.primary},
   ];
 
   final List<Map<String, dynamic>> _achievements = [
-    {'id': 'q_play_50', 'title': 'Müdavim I', 'desc': 'Toplam 50 Oyun Oyna', 'goal': 50, 'reward': 100, 'icon': Icons.all_inclusive_rounded, 'color': const Color(0xFF00CEC9)},
-    {'id': 'q_play_250', 'title': 'Müdavim II', 'desc': 'Toplam 250 Oyun Oyna', 'goal': 250, 'reward': 500, 'icon': Icons.all_inclusive_rounded, 'color': const Color(0xFF00CEC9)},
-    {'id': 'q_play_1000', 'title': 'Efsanevi Müdavim', 'desc': 'Toplam 1000 Oyun Oyna', 'goal': 1000, 'reward': 2000, 'icon': Icons.all_inclusive_rounded, 'color': const Color(0xFF00CEC9)},
+    {'id': 'q_play_50', 'title': 'Müdavim I', 'desc': 'Toplam 50 Oyun Oyna', 'goal': 50, 'reward': 100, 'icon': Icons.all_inclusive_rounded, 'color': AppColors.accent},
+    {'id': 'q_play_250', 'title': 'Müdavim II', 'desc': 'Toplam 250 Oyun Oyna', 'goal': 250, 'reward': 500, 'icon': Icons.all_inclusive_rounded, 'color': AppColors.accent},
+    {'id': 'q_play_1000', 'title': 'Efsanevi Müdavim', 'desc': 'Toplam 1000 Oyun Oyna', 'goal': 1000, 'reward': 2000, 'icon': Icons.all_inclusive_rounded, 'color': AppColors.accent},
     {'id': 'q_score_3000', 'title': 'Puan Avcısı I', 'desc': 'Toplam 3000 Puana Ulaş', 'goal': 3000, 'reward': 200, 'icon': Icons.military_tech_rounded, 'color': Colors.amber},
     {'id': 'q_score_10000', 'title': 'Puan Avcısı II', 'desc': 'Toplam 10.000 Puana Ulaş', 'goal': 10000, 'reward': 1000, 'icon': Icons.military_tech_rounded, 'color': Colors.amber},
     {'id': 'q_score_50000', 'title': 'Yenilmez Puan', 'desc': 'Toplam 50.000 Puana Ulaş', 'goal': 50000, 'reward': 5000, 'icon': Icons.military_tech_rounded, 'color': Colors.amber},
-    {'id': 'q_word_len_7', 'title': 'Sözlük Yazarı I', 'desc': '7 Harfli Kelime Bul', 'goal': 7, 'reward': 150, 'icon': Icons.menu_book_rounded, 'color': const Color(0xFF7C5CFC)},
-    {'id': 'q_word_len_8', 'title': 'Edebiyatçı', 'desc': '8 Harfli Kelime Bul', 'goal': 8, 'reward': 500, 'icon': Icons.menu_book_rounded, 'color': const Color(0xFF7C5CFC)},
-    {'id': 'q_word_correct_100', 'title': 'Kelime Uzmanı', 'desc': '100 Doğru Kelime Bul', 'goal': 100, 'reward': 300, 'icon': Icons.spellcheck_rounded, 'color': const Color(0xFF7C5CFC)},
-    {'id': 'q_math_exact_25', 'title': 'Hesap Makinesi I', 'desc': '25 Kez Tam İsabet Yap', 'goal': 25, 'reward': 250, 'icon': Icons.functions_rounded, 'color': const Color(0xFFFD79A8)},
-    {'id': 'q_math_exact_100', 'title': 'Hesap Makinesi II', 'desc': '100 Kez Tam İsabet Yap', 'goal': 100, 'reward': 1000, 'icon': Icons.functions_rounded, 'color': const Color(0xFFFD79A8)},
-    {'id': 'q_math_correct_100', 'title': 'Sayısal Zeka', 'desc': '100 Doğru İşlem Çöz', 'goal': 100, 'reward': 300, 'icon': Icons.onetwothree_rounded, 'color': const Color(0xFFFD79A8)},
-    {'id': 'q_rank_5', 'title': 'Akademi Birincisi', 'desc': 'Deha Rütbesine Ulaş (12.000 Puan)', 'goal': 12000, 'reward': 1000, 'icon': Icons.psychology_alt_rounded, 'color': const Color(0xFF55EFC4)},
+    {'id': 'q_word_len_7', 'title': 'Sözlük Yazarı I', 'desc': '7 Harfli Kelime Bul', 'goal': 7, 'reward': 150, 'icon': Icons.menu_book_rounded, 'color': AppColors.primary},
+    {'id': 'q_word_len_8', 'title': 'Edebiyatçı', 'desc': '8 Harfli Kelime Bul', 'goal': 8, 'reward': 500, 'icon': Icons.menu_book_rounded, 'color': AppColors.primary},
+    {'id': 'q_word_correct_100', 'title': 'Kelime Uzmanı', 'desc': '100 Doğru Kelime Bul', 'goal': 100, 'reward': 300, 'icon': Icons.spellcheck_rounded, 'color': AppColors.primary},
+    {'id': 'q_math_exact_25', 'title': 'Hesap Makinesi I', 'desc': '25 Kez Tam İsabet Yap', 'goal': 25, 'reward': 250, 'icon': Icons.functions_rounded, 'color': AppColors.rose},
+    {'id': 'q_math_exact_100', 'title': 'Hesap Makinesi II', 'desc': '100 Kez Tam İsabet Yap', 'goal': 100, 'reward': 1000, 'icon': Icons.functions_rounded, 'color': AppColors.rose},
+    {'id': 'q_math_correct_100', 'title': 'Sayısal Zeka', 'desc': '100 Doğru İşlem Çöz', 'goal': 100, 'reward': 300, 'icon': Icons.onetwothree_rounded, 'color': AppColors.rose},
+    {'id': 'q_rank_5', 'title': 'Akademi Birincisi', 'desc': 'Deha Rütbesine Ulaş (12.000 Puan)', 'goal': 12000, 'reward': 1000, 'icon': Icons.psychology_alt_rounded, 'color': AppColors.mint},
   ];
 
   @override
@@ -89,7 +90,7 @@ class _QuestsScreenState extends State<QuestsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Tebrikler! $rewardAmount Cevher kazandın.'),
-            backgroundColor: const Color(0xFF00CEC9),
+            backgroundColor: AppColors.accent,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -113,7 +114,7 @@ class _QuestsScreenState extends State<QuestsScreen> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: const Color(0xFF131127),
+        backgroundColor: AppColors.background,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -124,9 +125,9 @@ class _QuestsScreenState extends State<QuestsScreen> {
           title: const Text('Görevler', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
           centerTitle: true,
           bottom: const TabBar(
-            indicatorColor: Color(0xFF00CEC9),
+            indicatorColor: AppColors.accent,
             indicatorWeight: 3,
-            labelColor: Color(0xFF00CEC9),
+            labelColor: AppColors.accent,
             unselectedLabelColor: Colors.white54,
             labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             tabs: [
@@ -136,7 +137,7 @@ class _QuestsScreenState extends State<QuestsScreen> {
           ),
         ),
         body: _profile == null
-            ? const Center(child: CircularProgressIndicator(color: Color(0xFF7C5CFC)))
+            ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
             : Stack(
                 children: [
                   TabBarView(
@@ -185,7 +186,7 @@ class _QuestsScreenState extends State<QuestsScreen> {
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFF1D1B36),
+            color: AppColors.surface,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: isCompleted && !isClaimed ? color : Colors.white.withValues(alpha: 0.05)),
           ),
@@ -212,12 +213,12 @@ class _QuestsScreenState extends State<QuestsScreen> {
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(color: const Color(0xFF131127), borderRadius: BorderRadius.circular(10)),
+                    decoration: BoxDecoration(color: AppColors.background, borderRadius: BorderRadius.circular(10)),
                     child: Row(
                       children: [
-                        Text('+$reward', style: const TextStyle(color: Color(0xFF00CEC9), fontWeight: FontWeight.bold, fontSize: 14)),
+                        Text('+$reward', style: const TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold, fontSize: 14)),
                         const SizedBox(width: 4),
-                        const Icon(Icons.diamond_rounded, color: Color(0xFF00CEC9), size: 16),
+                        const Icon(Icons.diamond_rounded, color: AppColors.accent, size: 16),
                       ],
                     ),
                   ),
@@ -236,7 +237,7 @@ class _QuestsScreenState extends State<QuestsScreen> {
                           borderRadius: BorderRadius.circular(6),
                           child: LinearProgressIndicator(
                             value: currentProgress / goal,
-                            backgroundColor: const Color(0xFF131127),
+                            backgroundColor: AppColors.background,
                             valueColor: AlwaysStoppedAnimation<Color>(color),
                             minHeight: 8,
                           ),
@@ -246,7 +247,7 @@ class _QuestsScreenState extends State<QuestsScreen> {
                   ),
                   const SizedBox(width: 16),
                   if (isClaimed)
-                    const Icon(Icons.check_circle_rounded, color: Color(0xFF00CEC9), size: 32)
+                    const Icon(Icons.check_circle_rounded, color: AppColors.accent, size: 32)
                   else if (isCompleted)
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(

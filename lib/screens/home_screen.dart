@@ -19,6 +19,7 @@ import 'leaderboard_screen.dart';
 import 'matchmaking_screen.dart';
 import 'friends_screen.dart';
 import 'private_room_screen.dart';
+import '../theme/app_colors.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -78,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context) => PopScope(
         canPop: false,
         child: Dialog(
-          backgroundColor: const Color(0xFF1D1B36),
+          backgroundColor: AppColors.surface,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
           child: Column(
@@ -86,12 +87,12 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: const BoxDecoration(
-                  color: Color(0xFF131127),
+                  color: AppColors.background,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 ),
                 child: const Row(
                   children: [
-                    Icon(Icons.gavel_rounded, color: Color(0xFF00CEC9), size: 28),
+                    Icon(Icons.gavel_rounded, color: AppColors.accent, size: 28),
                     SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -127,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: const BoxDecoration(
-                  color: Color(0xFF131127),
+                  color: AppColors.background,
                   borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
                 ),
                 child: Row(
@@ -150,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       flex: 2,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF00CEC9),
+                          backgroundColor: AppColors.accent,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
@@ -250,7 +251,7 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1D1B36),
+        backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Row(
           children: [
@@ -274,7 +275,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF00CEC9),
+              backgroundColor: AppColors.accent,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
             onPressed: () {
@@ -361,7 +362,7 @@ class _HomeScreenState extends State<HomeScreen> {
         height: MediaQuery.of(context).size.height * 0.85,
         padding: const EdgeInsets.only(top: 24, left: 24, right: 24),
         decoration: const BoxDecoration(
-          color: Color(0xFF131127),
+          color: AppColors.background,
           borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
         ),
         child: Column(
@@ -383,7 +384,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 8),
             const Center(
-              child: Text('Kurallar ve Zeka Puanı Sistemi', style: TextStyle(color: Color(0xFF00CEC9), fontSize: 13, fontWeight: FontWeight.bold)),
+              child: Text('Kurallar ve Zeka Puanı Sistemi', style: TextStyle(color: AppColors.accent, fontSize: 13, fontWeight: FontWeight.bold)),
             ),
             const SizedBox(height: 24),
             Expanded(
@@ -410,14 +411,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     content: 'Baskın Zeka Türü rastgele verilmez. Arkasında acımasız bir paradigma vardır:\n\n'
                              '**Ham Güç = (Başarı % x 0.65) - (Pas % x 0.35) + Hız Bonusu**\n\n'
                              'Çözüm süren 25 saniyenin ne kadar altındaysa hız bonusun o kadar artar.',
-                    color: const Color(0xFF7C5CFC),
+                    color: AppColors.primary,
                   ),
                   const SizedBox(height: 16),
                   _buildRuleCard(
                     icon: Icons.verified_user_rounded,
                     title: 'Güvenilirlik Katsayısı (Baraj)',
                     content: 'Sistemi 1-2 soru çözerek kandıramazsın. Gerçek Zeka Puanının görünmesi için en az 25 soru çözmüş olmalısın.',
-                    color: const Color(0xFF00CEC9),
+                    color: AppColors.accent,
                   ),
                   const SizedBox(height: 40),
                 ],
@@ -433,7 +434,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1D1B36),
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
@@ -459,16 +460,16 @@ class _HomeScreenState extends State<HomeScreen> {
     bool isMultiplayerUnlocked = _profile != null && _profile!.totalScore >= 500;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF312E81), 
+      backgroundColor: AppColors.gradientBottom, 
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFF0F172A),
-              Color(0xFF1E1B4B),
-              Color(0xFF312E81),
+              AppColors.gradientTop,
+              AppColors.gradientMid,
+              AppColors.gradientBottom,
             ],
           ),
         ),
@@ -487,7 +488,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: 110,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1D1B36).withValues(alpha: 0.6),
+                          color: AppColors.surface.withValues(alpha: 0.6),
                           borderRadius: BorderRadius.circular(24),
                         ),
                         child: const Center(
@@ -496,7 +497,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             height: 24,
                             child: CircularProgressIndicator(
                               strokeWidth: 2.5,
-                              color: Color(0xFF00CEC9),
+                              color: AppColors.accent,
                             ),
                           ),
                         ),
@@ -631,7 +632,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           decoration: BoxDecoration(
                             color: Colors.redAccent, 
                             shape: BoxShape.circle, 
-                            border: Border.all(color: const Color(0xFF131127), width: 2),
+                            border: Border.all(color: AppColors.background, width: 2),
                           ),
                         ),
                       ),
@@ -670,7 +671,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           decoration: BoxDecoration(
                             color: Colors.redAccent, 
                             shape: BoxShape.circle, 
-                            border: Border.all(color: const Color(0xFF131127), width: 2),
+                            border: Border.all(color: AppColors.background, width: 2),
                           ),
                         ),
                       ),
@@ -680,13 +681,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1D1B36),
+                    color: AppColors.surface,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFF00CEC9).withValues(alpha: 0.3)),
+                    border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.diamond_rounded, color: Color(0xFF00CEC9), size: 16),
+                      const Icon(Icons.diamond_rounded, color: AppColors.accent, size: 16),
                       const SizedBox(width: 4),
                       Text(
                         '${_profile?.gems ?? 0}', 
