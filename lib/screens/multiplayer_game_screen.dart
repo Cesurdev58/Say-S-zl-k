@@ -13,6 +13,8 @@ import '../services/user_service.dart';
 import '../services/ad_service.dart';
 import '../services/match_service.dart';
 import '../widgets/joker_picker_dialog.dart';
+import '../widgets/match_ranking_list.dart';
+import '../widgets/missed_solution_tile.dart';
 import '../widgets/timer_chip.dart';
 import 'private_room_screen.dart';
 import 'matchmaking_screen.dart';
@@ -570,61 +572,16 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                   const SizedBox(height: 16),
                   Expanded(
                     flex: 3,
-                    child: Container(
-                      decoration: BoxDecoration(color: const Color(0xFF131127), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.white12)),
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(12),
-                        itemCount: sortedPlayers.length,
-                        itemBuilder: (context, index) {
-                          var p = sortedPlayers[index];
-                          bool isMe = p.key == myUid;
-
-                          bool isFriend = _friendUids.contains(p.key);
-                          bool isPending = _pendingRequestUids.contains(p.key);
-
-                          Color rankColor = index == 0
-                              ? Colors.amber
-                              : (index == 1 ? Colors.grey[400]! : (index == 2 ? Colors.brown[300]! : Colors.white54));
-
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                                color: isMe ? const Color(0xFF7C5CFC).withValues(alpha: 0.3) : Colors.transparent,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: isMe ? const Color(0xFF7C5CFC) : Colors.transparent)),
-                            child: Row(
-                              children: [
-                                Text('${index + 1}.', style: TextStyle(color: rankColor, fontSize: 20, fontWeight: FontWeight.bold)),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                    child: Text(p.value['name'].toString(),
-                                        style: TextStyle(color: isMe ? Colors.white : Colors.white70, fontWeight: FontWeight.bold, fontSize: 16))),
-                                Text('${p.value['score']} P', style: TextStyle(color: rankColor, fontWeight: FontWeight.bold, fontSize: 18)),
-                                if (!isMe && !isFriend) ...[
-                                  const SizedBox(width: 8),
-                                  IconButton(
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(),
-                                    onPressed: isPending
-                                        ? null
-                                        : () async {
-                                            AudioService.instance.playClick();
-                                            await _sendFriendRequest(p.key, p.value['name'].toString());
-                                            setDialogState(() {});
-                                          },
-                                    icon: Icon(
-                                      isPending ? Icons.check_circle_rounded : Icons.person_add_alt_1_rounded,
-                                      color: isPending ? Colors.greenAccent : const Color(0xFF00CEC9),
-                                      size: 24,
-                                    ),
-                                  )
-                                ]
-                              ],
-                            ),
-                          );
-                        },
-                      ),
+                    child: MatchRankingList(
+                      sortedPlayers: sortedPlayers,
+                      myUid: myUid,
+                      friendUids: _friendUids,
+                      pendingRequestUids: _pendingRequestUids,
+                      onAddFriend: (uid, name) async {
+                        AudioService.instance.playClick();
+                        await _sendFriendRequest(uid, name);
+                        setDialogState(() {});
+                      },
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -635,27 +592,7 @@ class _MultiplayerGameScreenState extends State<MultiplayerGameScreen> with Tick
                       flex: 2,
                       child: ListView.builder(
                         itemCount: missedSolutions.length,
-                        itemBuilder: (context, index) {
-                          var sol = missedSolutions[index];
-                          bool isWord = sol['type'] == 'word';
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                                color: const Color(0xFF131127), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.white12)),
-                            child: isWord
-                                ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                    Text('Harfler: ${sol['letters']}', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12)),
-                                    Text('${sol['bestWord']} (${sol['bestWord'].length} Harf)',
-                                        style: const TextStyle(color: Color(0xFF00CEC9), fontSize: 14, fontWeight: FontWeight.bold))
-                                  ])
-                                : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                    Text('Hedef: ${sol['target']}', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12)),
-                                    ...(sol['mathSteps'] as List<String>).map((step) =>
-                                        Text(step, style: const TextStyle(color: Color(0xFF00CEC9), fontSize: 12, fontWeight: FontWeight.bold)))
-                                  ]),
-                          );
-                        },
+                        itemBuilder: (context, index) => MissedSolutionTile(solution: missedSolutions[index]),
                       ),
                     ),
                   ],
